@@ -1,0 +1,208 @@
+<%- include('../layout/head', { title: title || 'Checkout | EZPay2Attend' }) %>
+<style>
+    body {
+        background: var(--bg-base);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem 1rem;
+    }
+    .checkout-container {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        max-width: 600px;
+        width: 100%;
+        padding: 2.5rem;
+    }
+    .header-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.5rem;
+    }
+    .header-section h2 { color: #fff; margin: 0 0 0.5rem 0; }
+    .header-section p { color: var(--text-secondary); margin: 0; }
+    
+    .summary-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+    }
+    .summary-row:last-child {
+        margin-bottom: 0;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--border-color);
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .payment-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .pay-btn {
+        flex: 1;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    .btn-deposit {
+        background: var(--surface-light);
+        border: 1px solid var(--border-color);
+        color: #fff;
+    }
+    .btn-deposit:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: #fff;
+    }
+    .btn-full {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+    }
+    .btn-full:hover {
+        background: var(--primary-hover);
+    }
+    
+    .secure-badge {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="header-section">
+        <h2>Complete Your Registration</h2>
+        <p><strong><%= attendee.event.title %></strong></p>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-row">
+            <span>Attendee Name</span>
+            <span><%= attendee.fullName %></span>
+        </div>
+        <div class="summary-row">
+            <span>Email</span>
+            <span><%= attendee.email %></span>
+        </div>
+        
+        <% 
+            const total = attendee.event.costPerAttendee;
+            const depositPercentage = attendee.event.depositPercentage || 0;
+            const depositAmount = (total * depositPercentage) / 100;
+        %>
+        
+        <div class="summary-row">
+            <span>Ticket Cost</span>
+            <span>$<%= total.toFixed(2) %></span>
+        </div>
+        
+        <% if (depositPercentage > 0 && attendee.status === 'INCOMPLETE') { %>
+            <div class="summary-row" style="color: var(--warning);">
+                <span>Minimum Deposit (<%= depositPercentage %>%)</span>
+                <span>$<%= depositAmount.toFixed(2) %></span>
+            </div>
+        <% } %>
+        
+        <div class="summary-row">
+            <span>Total Due</span>
+            <span>$<%= total.toFixed(2) %></span>
+        </div>
+    </div>
+
+    <% if (total > 0 && attendee.status !== 'CONFIRMED') { %>
+        <div class="payment-options">
+            <% if (depositPercentage > 0 && attendee.status === 'INCOMPLETE') { %>
+                <button class="pay-btn btn-deposit" onclick="initiatePayment('DEPOSIT', '<%= depositAmount %>')">
+                    Pay Deposit ($<%= depositAmount.toFixed(2) %>)
+                </button>
+            <% } %>
+            
+            <% 
+                const balance = attendee.status === 'BALANCE_PENDING' || attendee.status === 'BALANCE_OVERDUE' 
+                    ? total - depositAmount 
+                    : total;
+            %>
+            <button class="pay-btn btn-full" onclick="initiatePayment('FULL', '<%= balance %>')">
+                Pay Full Amount ($<%= balance.toFixed(2) %>)
+            </button>
+        </div>
+        
+        <div class="secure-badge">
+            <i class="fa-solid fa-lock"></i> Secure SSL Encrypted Checkout (Mock)
+        </div>
+    <% } else { %>
+        <div style="text-align: center; color: var(--success); font-size: 1.2rem; margin-bottom: 2rem;">
+            <i class="fa-solid fa-circle-check" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+            Registration Complete! No payment due.
+        </div>
+        <a href="/" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return Home</a>
+    <% } %>
+</div>
+
+<script>
+    async function initiatePayment(type, amount) {
+        const btn = document.activeElement;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
+        try {
+            // 1. Create Payment Intent (Paystack)
+            const intentRes = await fetch('/api/payments/intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    attendeeId: '<%= attendee.id %>',
+                    type: type,
+                    amount: amount
+                })
+            });
+            const intentResult = await intentRes.json();
+            
+            if (!intentResult.success) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return showToast(intentResult.message || 'Error creating payment intent', 'error');
+            }
+
+            const authUrl = intentResult.data.authorization_url;
+            showToast('Redirecting to secure gateway...', 'info');
+
+            // 2. Redirect to Paystack
+            window.location.href = authUrl;
+            
+        } catch (err) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            showToast('Network error while connecting to payment gateway.', 'error');
+        }
+    }
+</script>
+</body>
+</html>
