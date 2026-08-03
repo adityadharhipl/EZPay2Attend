@@ -174,7 +174,9 @@
             <a href="/admin/events" class="nav-link active"><i class="fa-solid fa-calendar-alt"></i> Events</a>
             <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
             <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-            <a href="/api/auth/logout" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+            <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+            <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </nav>
     </aside>
 
@@ -207,7 +209,7 @@
                         </div>
                         <div class="dropdown-divider"></div>
                         <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                        <a href="/api/auth/logout" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                     </div>
                 </div>
             </div>
@@ -221,8 +223,8 @@
                     <a href="/register" target="_blank" class="btn" style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                         <i class="fa-solid fa-external-link-alt"></i> Public Registration
                     </a>
-                    <button class="btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="openModal()">
-                        <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Create Event
+                    <button class="btn" style="background: var(--primary); color: #fff; width: auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none;" onclick="openModal()">
+                        <i class="fa-solid fa-plus"></i> Create Event
                     </button>
                 </div>
             </div>

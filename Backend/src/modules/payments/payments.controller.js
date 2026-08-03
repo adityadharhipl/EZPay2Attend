@@ -21,7 +21,19 @@ exports.paystackWebhook = async (req, res) => {
         // Respond 200 immediately to acknowledge receipt to Paystack
         res.status(200).send('Webhook Received');
     } catch (error) {
-        console.error("Webhook error:", error.message);
-        res.status(400).send(error.message);
+        console.error("Webhook processing error:", err);
+        res.status(500).send("Webhook processing error");
+    }
+};
+
+exports.getPayments = async (req, res) => {
+    try {
+        const payments = await require('../../config/db').payment.findMany({
+            include: { attendee: { include: { event: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.status(200).json({ success: true, data: payments });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 };

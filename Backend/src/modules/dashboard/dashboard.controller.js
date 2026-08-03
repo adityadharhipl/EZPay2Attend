@@ -77,6 +77,90 @@ exports.getAttendees = async (req, res) => {
     }
 };
 
+exports.getPayments = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        let whereClause = {};
+        if (search) {
+            whereClause = {
+                OR: [
+                    { referenceNumber: { contains: search } },
+                    { attendee: { fullName: { contains: search } } },
+                    { attendee: { email: { contains: search } } }
+                ]
+            };
+        }
+
+        const payments = await db.payment.findMany({
+            where: whereClause,
+            include: { attendee: { include: { event: true } } },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
+        });
+
+        const total = await db.payment.count({ where: whereClause });
+        const totalPages = Math.ceil(total / limit);
+
+        res.render('dashboard/payments', {
+            user: req.user,
+            title: 'Payments | EZPay2Attend',
+            payments,
+            pagination: { page, limit, total, totalPages },
+            search
+        });
+    } catch (err) {
+        console.error("Error loading payments dashboard:", err);
+        res.status(500).send("Server Error");
+    }
+};
+
+exports.getRefunds = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        // Refund queue: Attendees who requested refunds, or are replaced, or overdue
+        let whereClause = {
+            status: { in: ['REFUNDED', 'BALANCE_OVERDUE', 'REPLACED'] }
+        };
+        if (search) {
+            whereClause.OR = [
+                { fullName: { contains: search } },
+                { email: { contains: search } }
+            ];
+        }
+
+        const attendees = await db.attendee.findMany({
+            where: whereClause,
+            include: { event: true, payments: true },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
+        });
+
+        const total = await db.attendee.count({ where: whereClause });
+        const totalPages = Math.ceil(total / limit);
+
+        res.render('dashboard/refunds', {
+            user: req.user,
+            title: 'Refunds & Replacements | EZPay2Attend',
+            attendees,
+            pagination: { page, limit, total, totalPages },
+            search
+        });
+    } catch (err) {
+        console.error("Error loading refunds dashboard:", err);
+        res.status(500).send("Server Error");
+    }
+};
+
 exports.handleUpdateProfile = async (req, res) => {
     try {
         const { error, value } = updateProfileSchema.validate(req.body);
@@ -91,5 +175,35 @@ exports.handleUpdateProfile = async (req, res) => {
         res.render('dashboard/profile', { user: updatedUser, error: null, success: 'Profile updated successfully' });
     } catch (error) {
         res.render('dashboard/profile', { user: req.user, error: error.message || 'An error occurred', success: null });
+    }
+};
+
+exports.exportAttendeesCSV = async (req, res) => {
+    try {
+        const attendees = await db.attendee.findMany({ include: { event: true } });
+        let csv = 'Name,Email,Contact,Event,Status,Date\n';
+        attendees.forEach(a => {
+            csv += `"${a.fullName}","${a.email}","${a.contactNumber}","${a.event.title}","${a.status}","${a.createdAt.toISOString()}"\n`;
+        });
+        res.header('Content-Type', 'text/csv');
+        res.attachment('attendees_export.csv');
+        return res.send(csv);
+    } catch (err) {
+        res.status(500).send('Error generating CSV');
+    }
+};
+
+exports.exportPaymentsCSV = async (req, res) => {
+    try {
+        const payments = await db.payment.findMany({ include: { attendee: { include: { event: true } } } });
+        let csv = 'Reference,Name,Event,Amount,Type,Status,Date\n';
+        payments.forEach(p => {
+            csv += `"${p.referenceNumber}","${p.attendee.fullName}","${p.attendee.event.title}","${p.amount}","${p.type}","${p.status}","${p.createdAt.toISOString()}"\n`;
+        });
+        res.header('Content-Type', 'text/csv');
+        res.attachment('payments_export.csv');
+        return res.send(csv);
+    } catch (err) {
+        res.status(500).send('Error generating CSV');
     }
 };

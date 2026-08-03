@@ -64,7 +64,9 @@
             <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
             <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
             <a href="/admin/attendees" class="nav-link active"><i class="fa-solid fa-users"></i> Attendees</a>
-            <a href="/api/auth/logout" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+            <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+            <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </nav>
     </aside>
 
@@ -91,7 +93,7 @@
                         </div>
                         <div class="dropdown-divider"></div>
                         <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                        <a href="/api/auth/logout" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                     </div>
                 </div>
             </div>
@@ -101,7 +103,10 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h3 style="margin: 0;"><i class="fa-solid fa-users"></i> All Attendees</h3>
                 <div style="display: flex; gap: 1rem; align-items: center;">
-                    <a href="/register" target="_blank" class="btn" style="background: var(--primary); color: #fff; text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <a href="/admin/export/attendees" class="btn" style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                        <i class="fa-solid fa-download"></i> Export CSV
+                    </a>
+                    <a href="/register" target="_blank" class="btn" style="background: var(--primary); color: #fff; text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
                         <i class="fa-solid fa-external-link-alt"></i> Public Registration
                     </a>
                     <form class="search-container" method="GET" action="/admin/attendees" style="margin: 0;">

@@ -11,5 +11,10 @@ router.post('/profile', authenticate, dashboardController.handleUpdateProfile);
 router.get('/events', authenticate, dashboardController.getEvents);
 router.get('/schools', authenticate, dashboardController.getSchools);
 router.get('/attendees', authenticate, dashboardController.getAttendees);
+router.get('/payments', authenticate, dashboardController.getPayments);
+router.get('/refunds', authenticate, dashboardController.getRefunds);
+
+router.get('/export/attendees', authenticate, dashboardController.exportAttendeesCSV);
+router.get('/export/payments', authenticate, dashboardController.exportPaymentsCSV);
 
 module.exports = router;

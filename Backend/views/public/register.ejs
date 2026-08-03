@@ -91,7 +91,8 @@
                     <option value="<%= e.id %>" 
                             data-school="<%= e.school.name %>" 
                             data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
-                            data-cost="<%= e.costPerAttendee %>">
+                            data-cost="<%= e.costPerAttendee %>"
+                            <%= preSelectedEvent === e.id ? 'selected' : '' %>>
                         <%= e.title %> (<%= e.school.name %>)
                     </option>
                 <% }) %>
@@ -145,6 +146,13 @@
             box.style.display = 'none';
         }
     }
+
+    // Run on load to show details if an event was pre-selected from the URL
+    window.onload = function() {
+        if (document.getElementById('eventSelect').value) {
+            updateEventDetails();
+        }
+    };
 
     async function submitRegistration() {
         const form = document.getElementById('publicRegisterForm');

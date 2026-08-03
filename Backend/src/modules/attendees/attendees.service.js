@@ -24,7 +24,7 @@ exports.createAttendee = async (data) => {
     if (existing) throw new Error("This email is already registered for this event");
 
     // Create attendee
-    return await db.attendee.create({
+    const newAttendee = await db.attendee.create({
         data: {
             eventId: data.eventId,
             fullName: data.fullName,
@@ -34,6 +34,11 @@ exports.createAttendee = async (data) => {
             status: event.costPerAttendee === 0 ? "CONFIRMED" : "BALANCE_PENDING"
         }
     });
+
+    const mailer = require('../../utils/mailer');
+    mailer.sendRegistrationEmail(newAttendee, event).catch(e => console.error("Email Error:", e));
+
+    return newAttendee;
 };
 
 exports.getAllAttendees = async (page = 1, limit = 10, search = '') => {
@@ -66,10 +71,18 @@ exports.getAllAttendees = async (page = 1, limit = 10, search = '') => {
 };
 
 exports.updateAttendeeStatus = async (id, status) => {
-    return await db.attendee.update({
+    const attendee = await db.attendee.update({
         where: { id },
-        data: { status }
+        data: { status },
+        include: { event: true }
     });
+
+    if (status === 'REFUNDED') {
+        const mailer = require('../../utils/mailer');
+        mailer.sendRefundUpdate(attendee, attendee.event).catch(e => console.error("Email Error:", e));
+    }
+
+    return attendee;
 };
 
 exports.deleteAttendee = async (id) => {

@@ -55,6 +55,27 @@
                         "header": [{"key": "Content-Type", "value": "application/json"}],
                         "url": {"raw": "http://localhost:5000/api/attendees/register", "host": ["http://localhost:5000"], "path": ["api", "attendees", "register"]}
                     }
+                },
+                {
+                    "name": "Get All Attendees",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:5000/api/attendees", "host": ["http://localhost:5000"], "path": ["api", "attendees"]}
+                    }
+                },
+                {
+                    "name": "Get Refund Queue",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {
+                            "raw": "http://localhost:5000/api/attendees?status=REFUNDED",
+                            "host": ["http://localhost:5000"],
+                            "path": ["api", "attendees"],
+                            "query": [{"key": "status", "value": "REFUNDED"}]
+                        }
+                    }
                 }
             ]
         },
@@ -67,6 +88,14 @@
                         "method": "POST",
                         "header": [{"key": "Content-Type", "value": "application/json"}],
                         "url": {"raw": "http://localhost:5000/api/payments/webhook", "host": ["http://localhost:5000"], "path": ["api", "payments", "webhook"]}
+                    }
+                },
+                {
+                    "name": "Payment History",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:5000/api/payments", "host": ["http://localhost:5000"], "path": ["api", "payments"]}
                     }
                 }
             ]

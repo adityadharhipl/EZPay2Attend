@@ -94,12 +94,18 @@ exports.processWebhook = async (reqBody, signature) => {
                 where: { id: payment.attendeeId },
                 data: { status: 'BALANCE_PENDING' }
             });
+            attendee.status = 'BALANCE_PENDING';
         } else if (payment.type === 'BALANCE' || payment.type === 'FULL') {
             await db.attendee.update({
                 where: { id: payment.attendeeId },
                 data: { status: 'CONFIRMED' }
             });
+            attendee.status = 'CONFIRMED';
         }
+
+        const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
+        const mailer = require('../../utils/mailer');
+        mailer.sendPaymentReceipt(attendee, payment, eventData).catch(e => console.error("Email Error:", e));
     }
 
     return { success: true };

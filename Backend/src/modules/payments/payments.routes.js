@@ -8,4 +8,7 @@ router.post('/intent', paymentsController.createIntent);
 // Paystack Webhook endpoint
 router.post('/webhook', paymentsController.paystackWebhook);
 
+// Get Payment History
+router.get('/', paymentsController.getPayments);
+
 module.exports = router;
