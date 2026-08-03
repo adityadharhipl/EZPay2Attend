@@ -1,0 +1,75 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+
+const app = express();
+
+// Middleware
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// EJS View Engine Setup
+// Adjust path since app.js is in src/
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Basic route to check if server is running
+app.get('/', (req, res) => {
+    res.render('index', { title: 'EZPay2Attend' });
+});
+
+// Swagger Setup
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('../swagger.json');
+
+const swaggerOptions = {
+    customCss: `
+      .swagger-ui .topbar .dark-mode-toggle {
+        cursor: pointer;
+        margin-left: 1200px;
+        opacity: .8;
+        transition: all .2s;
+      }
+      body.dark-mode { filter: invert(1) hue-rotate(180deg); background: rgb(17, 17, 17); }
+    `,
+    customJsStr: `
+        window.addEventListener('load', function() {
+            var topbar = document.querySelector('.swagger-ui .topbar .wrapper');
+            if(topbar) {
+                var btn = document.createElement("div");
+                btn.innerHTML = '💡';
+                btn.className = "dark-mode-toggle";
+                btn.title = "Toggle Dark Mode";
+                btn.onclick = function() {
+                    document.body.classList.toggle("dark-mode");
+                };
+                topbar.appendChild(btn);
+            }
+        });
+    `
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+
+// Import Routes
+app.use('/api/auth', require('./modules/auth/auth.routes'));
+app.use('/admin', require('./modules/dashboard/dashboard.routes'));
+// app.use('/api/schools', require('./modules/schools/schools.routes'));
+app.use('/api/events', require('./modules/events/events.routes'));
+// app.use('/api/attendees', require('./modules/attendees/attendees.routes'));
+// app.use('/api/payments', require('./modules/payments/payments.routes'));
+// app.use('/api/refunds', require('./modules/refunds/refunds.routes'));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+});
+
+module.exports = app;

@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin Users for Dashboard
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  name             String
+  role             String    @default("ADMIN") // ADMIN, COMMITTEE
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model School {
+  id            String   @id @default(uuid())
+  name          String
+  contactPerson String?
+  email         String?  @unique
+  phone         String?
+  address       String?
+  events        Event[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Event {
+  id                String   @id @default(uuid())
+  schoolId          String
+  school            School   @relation(fields: [schoolId], references: [id])
+  title             String
+  description       String?
+  status            String   @default("OPEN") // OPEN, CLOSED, COMPLETED, CANCELLED
+  capacity          Int
+  depositPercentage Float    @default(0)
+  balanceDueDate    DateTime?
+  costPerAttendee   Float    @default(0)
+  venue             String?
+  type              String?
+  date              DateTime?
+  attendees         Attendee[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Attendee {
+  id             String    @id @default(uuid())
+  eventId        String
+  event          Event     @relation(fields: [eventId], references: [id])
+  fullName       String
+  guardianName   String?
+  contactNumber  String
+  email          String
+  status         String    @default("INCOMPLETE") // INCOMPLETE, CONFIRMED, BALANCE_PENDING, BALANCE_OVERDUE, REFUNDED, REPLACED
+  payments       Payment[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([eventId, email]) // Prevent duplicate registration for same event
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  attendeeId        String
+  attendee          Attendee @relation(fields: [attendeeId], references: [id])
+  type              String   // DEPOSIT, BALANCE, REFUND
+  amount            Float
+  status            String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  referenceNumber   String?  // PayFast or internal reference
+  gatewayReference  String?  // External Gateway Reference
+  paymentDate       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

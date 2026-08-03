@@ -1,0 +1,205 @@
+<%- include('../layout/head', { title: 'Dashboard | EZPay2Attend' }) %>
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">EZPay2Attend</div>
+        <nav>
+            <a href="/admin" class="nav-link active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+
+            <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+            <a href="/api/auth/logout" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+    </aside>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <div class="header-left">
+            </div>
+            
+            <div class="header-right">
+                <div class="header-icon"><i class="fa-regular fa-bell"></i><div class="badge-dot"></div></div>
+                <div class="header-icon"><i class="fa-regular fa-message"></i><div class="badge-dot"></div></div>
+                
+                <!-- Profile Dropdown -->
+                <div class="profile-menu">
+                    <div class="profile-icon" onclick="toggleDropdown()" style="border: none; background: transparent; padding: 0;">
+                        <div style="text-align: right; margin-right: 0.5rem;">
+                            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;"><%= user.name %></div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= user.role || 'Admin' %></div>
+                        </div>
+                        <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <strong><%= user.name %></strong>
+                            <p><%= user.email %></p>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                        <a href="/api/auth/logout" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert error"><%= error %></div>
+        <% } %>
+
+        <% if (metrics) { %>
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Total Events <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.totalEvents %></div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Total Registrations <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.totalRegistrations %></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Confirmed Attendees <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.confirmedAttendees %></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Capacity Utilization <i class="fa-solid fa-percent"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.capacityUtilization %>%</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Total Revenue <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <div class="metric-card-value">$<%= metrics.totalRevenue.toLocaleString() %></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Outstanding Balance <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div class="metric-card-value" style="color: var(--warning);">$<%= metrics.outstandingBalance.toLocaleString() %></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Pending Payments <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.outstandingPayments %></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-header">
+                    Pending Refunds <i class="fa-solid fa-arrow-rotate-left"></i>
+                </div>
+                <div class="metric-card-value"><%= metrics.pendingRefunds %></div>
+            </div>
+        </div>
+
+        <!-- Event Dashboard Summary -->
+        <div class="dashboard-section">
+            <h3><i class="fa-solid fa-list-check"></i> Event Summary</h3>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Event Title</th>
+                            <th>Date</th>
+                            <th>Attendees</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (metrics.recentEvents.length === 0) { %>
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No events found.</td></tr>
+                        <% } else { %>
+                            <% metrics.recentEvents.forEach(event => { %>
+                            <tr>
+                                <td><strong><%= event.title %></strong></td>
+                                <td><%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %></td>
+                                <td><%= event._count.attendees %></td>
+                                <td><%= event.capacity %></td>
+                                <td>
+                                    <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                        <%= event.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Financial Dashboard Summary -->
+        <div class="dashboard-section">
+            <h3><i class="fa-solid fa-wallet"></i> Recent Payments</h3>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Attendee</th>
+                            <th>Event</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (metrics.recentPayments.length === 0) { %>
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No payments found.</td></tr>
+                        <% } else { %>
+                            <% metrics.recentPayments.forEach(payment => { %>
+                            <tr>
+                                <td><%= payment.attendee.fullName %></td>
+                                <td><%= payment.attendee.event.title %></td>
+                                <td><span class="badge info"><%= payment.type %></span></td>
+                                <td>$<%= payment.amount.toLocaleString() %></td>
+                                <td>
+                                    <span class="badge <%= payment.status === 'SUCCESS' ? 'success' : (payment.status === 'PENDING' ? 'warning' : 'danger') %>">
+                                        <%= payment.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% } %>
+    </main>
+</div>
+<script>
+    function toggleDropdown() {
+        document.getElementById("profileDropdown").classList.toggle("show");
+    }
+    
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.closest('.profile-menu')) {
+            var dropdowns = document.getElementsByClassName("profile-dropdown");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>
