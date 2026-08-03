@@ -2,19 +2,19 @@ const nodemailer = require('nodemailer');
 const env = require('../config/env');
 
 const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465, 
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_PORT === 587,
     auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
     },
 });
 
 exports.sendEmail = async (to, subject, htmlContent) => {
     try {
         const info = await transporter.sendMail({
-            from: `"EZPay2Attend" <${env.EMAIL_FROM}>`,
+            from: `"EZPay2Attend" <${process.env.EMAIL_FROM || 'noreply@ezpay2attend.com'}>`,
             to,
             subject,
             html: htmlContent,

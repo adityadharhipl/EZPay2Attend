@@ -17,11 +17,11 @@ exports.paystackWebhook = async (req, res) => {
             return res.status(400).send('No signature found');
         }
 
-        await paymentsService.processWebhook(req.body, signature);
+        await paymentsService.processWebhook(req.body, req.rawBody, signature);
         // Respond 200 immediately to acknowledge receipt to Paystack
         res.status(200).send('Webhook Received');
     } catch (error) {
-        console.error("Webhook processing error:", err);
+        console.error("Webhook processing error:", error);
         res.status(500).send("Webhook processing error");
     }
 };

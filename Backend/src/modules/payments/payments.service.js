@@ -18,7 +18,7 @@ exports.createPaymentIntent = async (attendeeId, type, amount) => {
         data: {
             attendeeId,
             type, // DEPOSIT or BALANCE
-            amount,
+            amount: parseFloat(amount),
             status: "PENDING",
             referenceNumber
         }
@@ -60,9 +60,9 @@ exports.createPaymentIntent = async (attendeeId, type, amount) => {
     }
 };
 
-exports.processWebhook = async (reqBody, signature) => {
+exports.processWebhook = async (reqBody, rawBody, signature) => {
     // 1. Verify Paystack Signature
-    const hash = crypto.createHmac('sha512', PAYSTACK_SECRET).update(JSON.stringify(reqBody)).digest('hex');
+    const hash = crypto.createHmac('sha512', PAYSTACK_SECRET).update(rawBody).digest('hex');
     if (hash !== signature) {
         throw new Error("Invalid Paystack Signature");
     }
