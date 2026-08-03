@@ -1,68 +1,128 @@
 <%- include('../layout/head', { title: school.name + ' Dashboard' }) %>
 <style>
-    body { background: var(--bg-base); margin: 0; padding: 2rem; color: #fff; }
-    .school-header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-    .school-header h1 { margin: 0; color: var(--primary); }
-    .school-header p { color: var(--text-secondary); margin-top: 0.5rem; }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--surface-light); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
-    .stat-card h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; }
-    .stat-card .value { font-size: 2rem; font-weight: 700; color: #fff; }
-    
-    .events-list { margin-top: 2rem; }
-    .event-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
-    .event-card h4 { margin: 0 0 1rem 0; color: var(--primary); font-size: 1.2rem; }
-    
-    .metrics-row { display: flex; gap: 2rem; }
-    .metric { flex: 1; }
-    .metric-label { font-size: 0.85rem; color: var(--text-secondary); }
-    .metric-val { font-size: 1.2rem; font-weight: 600; }
-    .status-open { color: #28a745; }
-    .status-other { color: #ffc107; }
+    body {
+        background-color: var(--bg-base);
+    }
+    .school-dashboard-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+    }
+    .school-header {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+    .school-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+    .school-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+    .event-progress {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+    .event-progress-fill {
+        height: 100%;
+        background: var(--primary);
+        border-radius: 3px;
+    }
+    .event-progress-full {
+        background: var(--danger) !important;
+    }
 </style>
 
-<div class="school-header">
-    <h1><%= school.name %></h1>
-    <p>Read-only Event Dashboard</p>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <h3>Total Events</h3>
-        <div class="value"><%= events.length %></div>
+<div class="school-dashboard-container">
+    <div class="school-header">
+        <h1><%= school.name %></h1>
+        <p><i class="fa-solid fa-shield-halved"></i> Secure Read-only Event Dashboard</p>
     </div>
-    <div class="stat-card">
-        <h3>Total Attendees</h3>
-        <div class="value"><%= events.reduce((sum, e) => sum + e._count.attendees, 0) %></div>
-    </div>
-</div>
 
-<div class="events-list">
-    <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Your Events</h3>
-    <% if (events.length === 0) { %>
-        <p style="color: var(--text-secondary);">No events found for this school.</p>
-    <% } else { %>
-        <% events.forEach(event => { %>
-            <div class="event-card">
-                <h4><%= event.title %></h4>
-                <div class="metrics-row">
-                    <div class="metric">
-                        <div class="metric-label">Status</div>
-                        <div class="metric-val <%= event.status === 'OPEN' ? 'status-open' : 'status-other' %>"><%= event.status %></div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Capacity Filled</div>
-                        <div class="metric-val"><%= event._count.attendees %> / <%= event.capacity %></div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Date</div>
-                        <div class="metric-val"><%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %></div>
-                    </div>
-                </div>
+    <% 
+        let totalEvents = events.length;
+        let totalAttendees = events.reduce((sum, e) => sum + e._count.attendees, 0);
+        let totalCapacity = events.reduce((sum, e) => sum + e.capacity, 0);
+        let utilization = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
+    %>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-card-header">
+                Total Events <i class="fa-solid fa-calendar-days"></i>
             </div>
-        <% }) %>
-    <% } %>
+            <div class="metric-card-value"><%= totalEvents %></div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-card-header">
+                Total Attendees <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="metric-card-value"><%= totalAttendees %></div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-card-header">
+                Capacity Utilization <i class="fa-solid fa-percent"></i>
+            </div>
+            <div class="metric-card-value"><%= utilization %>%</div>
+        </div>
+    </div>
+
+    <div class="dashboard-section" style="margin-top: 2rem;">
+        <h3><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Event Title</th>
+                        <th>Date</th>
+                        <th>Capacity Filled</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (events.length === 0) { %>
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
+                    <% } else { %>
+                        <% events.forEach(event => { %>
+                            <tr>
+                                <td><strong><%= event.title %></strong></td>
+                                <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
+                                <td>
+                                    <div style="font-weight: 500;"><%= event._count.attendees %> / <%= event.capacity %></div>
+                                    <% const pct = Math.min(100, (event._count.attendees / event.capacity) * 100); %>
+                                    <div class="event-progress">
+                                        <div class="event-progress-fill <%= pct >= 100 ? 'event-progress-full' : '' %>" data-width="<%= pct %>"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                        <%= event.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+<script>
+    document.querySelectorAll('.event-progress-fill').forEach(el => {
+        if(el.dataset.width) {
+            el.style.width = el.dataset.width + '%';
+        }
+    });
+</script>
 </body>
 </html>

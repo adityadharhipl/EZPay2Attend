@@ -4,7 +4,17 @@ exports.createAttendee = async (data) => {
     // Check event capacity
     const event = await db.event.findUnique({
         where: { id: data.eventId },
-        include: { _count: { select: { attendees: true } } }
+        include: { 
+            _count: { 
+                select: { 
+                    attendees: {
+                        where: {
+                            status: { notIn: ['REFUNDED', 'REPLACED'] }
+                        }
+                    } 
+                } 
+            } 
+        }
     });
 
     if (!event) throw new Error("Event not found");
@@ -31,7 +41,7 @@ exports.createAttendee = async (data) => {
             guardianName: data.guardianName,
             contactNumber: data.contactNumber,
             email: data.email,
-            status: event.costPerAttendee === 0 ? "CONFIRMED" : "BALANCE_PENDING"
+            status: event.costPerAttendee === 0 ? "CONFIRMED" : "INCOMPLETE"
         }
     });
 
@@ -71,22 +81,32 @@ exports.getAllAttendees = async (page = 1, limit = 10, search = '') => {
 };
 
 exports.updateAttendeeStatus = async (id, status) => {
-    const attendee = await db.attendee.update({
-        where: { id },
-        data: { status },
-        include: { event: true }
-    });
+    try {
+        const attendee = await db.attendee.update({
+            where: { id },
+            data: { status },
+            include: { event: true }
+        });
 
-    if (status === 'REFUNDED') {
-        const mailer = require('../../utils/mailer');
-        mailer.sendRefundUpdate(attendee, attendee.event).catch(e => console.error("Email Error:", e));
+        if (status === 'REFUNDED') {
+            const mailer = require('../../utils/mailer');
+            mailer.sendRefundUpdate(attendee, attendee.event).catch(e => console.error("Email Error:", e));
+        }
+
+        return attendee;
+    } catch (error) {
+        if (error.code === 'P2025') throw new Error("Attendee not found or invalid ID.");
+        throw error;
     }
-
-    return attendee;
 };
 
 exports.deleteAttendee = async (id) => {
-    return await db.attendee.delete({
-        where: { id }
-    });
+    try {
+        return await db.attendee.delete({
+            where: { id }
+        });
+    } catch (error) {
+        if (error.code === 'P2025') throw new Error("Attendee not found or invalid ID.");
+        throw error;
+    }
 };

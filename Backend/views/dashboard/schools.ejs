@@ -112,6 +112,7 @@
                             <th>Contact Person</th>
                             <th>Email</th>
                             <th>Phone</th>
+                            <th>Total Events</th>
                             <th>Created At</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -124,8 +125,10 @@
                             <td><%= school.contactPerson || 'N/A' %></td>
                             <td><%= school.email || 'N/A' %></td>
                             <td><%= school.phone || 'N/A' %></td>
+                            <td><span class="badge" style="background: var(--primary); padding: 5px 10px; border-radius: 20px;"><%= school._count ? school._count.events : 0 %> Events</span></td>
                             <td><%= new Date(school.createdAt).toLocaleDateString() %></td>
                             <td class="text-end">
+                                <button class="action-btn" title="Copy Committee Dashboard Link" onclick="copySchoolLink('<%= school.id %>')"><i class="fa-solid fa-link"></i></button>
                                 <button class="action-btn" title="Edit" onclick="editSchool('<%= school.id %>')"><i class="fa-solid fa-pen"></i></button>
                                 <button class="action-btn delete" title="Delete" data-id="<%= school.id %>" data-name="<%= school.name %>" onclick="deleteSchool(this.dataset.id, this.dataset.name)"><i class="fa-solid fa-trash"></i></button>
                             </td>
@@ -298,6 +301,13 @@
     function closeDeleteModal() {
         schoolToDelete = null;
         document.getElementById('deleteSchoolModal').classList.remove('show');
+    }
+
+    function copySchoolLink(id) {
+        const link = window.location.origin + '/school/' + id + '/dashboard';
+        navigator.clipboard.writeText(link).then(() => {
+            showToast('School Dashboard link copied to clipboard!', 'success');
+        });
     }
 
     async function confirmDeleteSchool() {

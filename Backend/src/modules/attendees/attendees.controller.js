@@ -16,7 +16,16 @@ exports.getAllAttendees = async (req, res) => {
         const search = req.query.search || '';
         
         const result = await attendeesService.getAllAttendees(page, limit, search);
-        res.status(200).json({ success: true, ...result });
+        res.status(200).json({ 
+            success: true, 
+            data: result.data,
+            pagination: {
+                total: result.total,
+                page,
+                limit,
+                totalPages: Math.ceil(result.total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

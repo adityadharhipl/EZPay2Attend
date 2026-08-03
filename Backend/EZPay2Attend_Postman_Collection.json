@@ -53,7 +53,11 @@
                     "request": {
                         "method": "POST",
                         "header": [{"key": "Content-Type", "value": "application/json"}],
-                        "url": {"raw": "http://localhost:5000/api/attendees/register", "host": ["http://localhost:5000"], "path": ["api", "attendees", "register"]}
+                        "url": {"raw": "http://localhost:5000/api/attendees/register", "host": ["http://localhost:5000"], "path": ["api", "attendees", "register"]},
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"eventId\": \"REPLACE_WITH_EVENT_ID\",\n  \"fullName\": \"Jane Doe\",\n  \"guardianName\": \"John Doe\",\n  \"contactNumber\": \"+1 555-0199\",\n  \"email\": \"jane.doe@example.com\"\n}"
+                        }
                     }
                 },
                 {
@@ -62,6 +66,26 @@
                         "method": "GET",
                         "header": [{"key": "Content-Type", "value": "application/json"}],
                         "url": {"raw": "http://localhost:5000/api/attendees", "host": ["http://localhost:5000"], "path": ["api", "attendees"]}
+                    }
+                },
+                {
+                    "name": "Update Attendee Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:5000/api/attendees/REPLACE_WITH_ATTENDEE_ID/status", "host": ["http://localhost:5000"], "path": ["api", "attendees", "REPLACE_WITH_ATTENDEE_ID", "status"]},
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Attendee",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:5000/api/attendees/REPLACE_WITH_ATTENDEE_ID", "host": ["http://localhost:5000"], "path": ["api", "attendees", "REPLACE_WITH_ATTENDEE_ID"]}
                     }
                 },
                 {

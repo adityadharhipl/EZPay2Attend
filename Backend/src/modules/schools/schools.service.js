@@ -7,7 +7,12 @@ exports.getAllSchools = async (page = 1, limit = 10) => {
         prisma.school.findMany({
             skip,
             take: limit,
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            include: {
+                _count: {
+                    select: { events: true }
+                }
+            }
         }),
         prisma.school.count()
     ]);
