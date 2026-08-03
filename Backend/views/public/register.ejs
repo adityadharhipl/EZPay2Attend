@@ -1,0 +1,188 @@
+<%- include('../layout/head', { title: title || 'Register | EZPay2Attend' }) %>
+<style>
+    body {
+        background: var(--bg-base);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem 1rem;
+    }
+    .register-container {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        max-width: 600px;
+        width: 100%;
+        padding: 2.5rem;
+    }
+    .logo-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .logo-container h1 {
+        color: var(--primary);
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+    .logo-container p {
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+    .form-control, .form-select {
+        background: var(--surface-light);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        transition: border-color 0.3s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+    .form-select option {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+    }
+    .event-details {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: none;
+    }
+    .event-details h4 { margin: 0 0 0.5rem 0; color: #fff; }
+    .event-details p { margin: 0; font-size: 0.9rem; color: var(--text-secondary); }
+</style>
+
+<div class="register-container">
+    <div class="logo-container">
+        <h1>EZPay2Attend</h1>
+        <p>Event Registration</p>
+    </div>
+
+    <form id="publicRegisterForm">
+        <div class="form-group">
+            <label class="form-label">Select Event</label>
+            <select class="form-select" name="eventId" id="eventSelect" required onchange="updateEventDetails()">
+                <option value="">-- Choose an Event --</option>
+                <% events.forEach(e => { %>
+                    <option value="<%= e.id %>" 
+                            data-school="<%= e.school.name %>" 
+                            data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
+                            data-cost="<%= e.costPerAttendee %>">
+                        <%= e.title %> (<%= e.school.name %>)
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="event-details" id="eventDetailsBox">
+            <h4 id="detailTitle"></h4>
+            <p><strong>School:</strong> <span id="detailSchool"></span></p>
+            <p><strong>Date:</strong> <span id="detailDate"></span></p>
+            <p><strong>Cost:</strong> $<span id="detailCost"></span></p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Full Name of Attendee</label>
+            <input type="text" class="form-control" name="fullName" required placeholder="John Doe">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" name="email" required placeholder="john@example.com">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Contact Number</label>
+            <input type="text" class="form-control" name="contactNumber" required placeholder="+1 234 567 8900">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Guardian Name (Optional)</label>
+            <input type="text" class="form-control" name="guardianName" placeholder="Jane Doe">
+        </div>
+
+        <button type="button" class="btn submit-btn" id="submitBtn" onclick="submitRegistration()">Register Now</button>
+    </form>
+</div>
+
+<script>
+    function updateEventDetails() {
+        const select = document.getElementById('eventSelect');
+        const box = document.getElementById('eventDetailsBox');
+        
+        if (select.value) {
+            const option = select.options[select.selectedIndex];
+            document.getElementById('detailTitle').textContent = option.text.split(' (')[0];
+            document.getElementById('detailSchool').textContent = option.dataset.school;
+            document.getElementById('detailDate').textContent = option.dataset.date;
+            document.getElementById('detailCost').textContent = option.dataset.cost;
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    async function submitRegistration() {
+        const form = document.getElementById('publicRegisterForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/api/attendees/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToast('Registration successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/checkout?attendeeId=' + result.data.id;
+                }, 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (err) {
+            showToast('Network error occurred.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Register Now';
+        }
+    }
+</script>
+</body>
+</html>
