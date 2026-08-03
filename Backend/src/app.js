@@ -58,12 +58,13 @@ const swaggerOptions = {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
 // Import Routes
+app.use('/', require('./modules/public/public.routes'));
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/admin', require('./modules/dashboard/dashboard.routes'));
-// app.use('/api/schools', require('./modules/schools/schools.routes'));
+app.use('/api/schools', require('./modules/schools/schools.routes'));
 app.use('/api/events', require('./modules/events/events.routes'));
-// app.use('/api/attendees', require('./modules/attendees/attendees.routes'));
-// app.use('/api/payments', require('./modules/payments/payments.routes'));
+app.use('/api/attendees', require('./modules/attendees/attendees.routes'));
+app.use('/api/payments', require('./modules/payments/payments.routes'));
 // app.use('/api/refunds', require('./modules/refunds/refunds.routes'));
 
 // Global Error Handler

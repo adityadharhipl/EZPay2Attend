@@ -19,11 +19,61 @@ exports.renderProfile = (req, res) => {
 
 exports.getEvents = async (req, res) => {
     try {
-        const events = await eventsService.getAllEvents();
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const { data: events, total } = await eventsService.getAllEvents(page, limit);
+        const totalPages = Math.ceil(total / limit);
         const schools = await db.school.findMany(); // Needed for the Create Event dropdown
-        res.render('dashboard/events', { user: req.user, title: 'Event Management', events, schools });
+        res.render('dashboard/events', { 
+            user: req.user, 
+            title: 'Event Management', 
+            events, 
+            schools,
+            pagination: { page, limit, total, totalPages }
+        });
     } catch (err) {
         res.status(500).send('Error loading events');
+    }
+};
+
+exports.getSchools = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const schoolsService = require('../schools/schools.service');
+        const { data: schools, total } = await schoolsService.getAllSchools(page, limit);
+        const totalPages = Math.ceil(total / limit);
+        
+        res.render('dashboard/schools', { 
+            user: req.user, 
+            title: 'School Management', 
+            schools,
+            pagination: { page, limit, total, totalPages }
+        });
+    } catch (err) {
+        res.status(500).send('Error loading schools');
+    }
+};
+
+exports.getAttendees = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const search = req.query.search || '';
+        
+        const attendeesService = require('../attendees/attendees.service');
+        const { data: attendees, total } = await attendeesService.getAllAttendees(page, limit, search);
+        const totalPages = Math.ceil(total / limit);
+        
+        res.render('dashboard/attendees', { 
+            user: req.user, 
+            title: 'Attendee Management', 
+            attendees,
+            search,
+            pagination: { page, limit, total, totalPages }
+        });
+    } catch (err) {
+        res.status(500).send('Error loading attendees');
     }
 };
 

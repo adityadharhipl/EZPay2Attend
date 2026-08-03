@@ -22,7 +22,7 @@ async function main() {
 
     // 2. Create a default School
     const defaultSchool = await prisma.school.upsert({
-        where: { email: 'contact@demohigh.edu' }, 
+        where: { email: 'contact@demohigh.edu' },
         update: {},
         create: {
             name: 'Demo High School',

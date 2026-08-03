@@ -1,4 +1,53 @@
 <%- include('../layout/head', { title: 'Dashboard | EZPay2Attend' }) %>
+<style>
+    .accordion-header {
+        cursor: pointer;
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .accordion-header:hover {
+        background: rgba(255,255,255,0.02);
+    }
+    .accordion-header h3 { margin: 0; }
+    .accordion-header .toggle-icon { transition: transform 0.3s ease; }
+    .accordion-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .accordion-content {
+        transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease;
+        overflow: hidden;
+        max-height: 800px; /* arbitrary large value */
+        opacity: 1;
+        margin-top: 1rem;
+    }
+    .accordion-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+        margin-top: 0;
+    }
+    .accordion-scroll {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+    
+    /* Scrollbar styling */
+    .accordion-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+    .accordion-scroll::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05); 
+        border-radius: 4px;
+    }
+    .accordion-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2); 
+        border-radius: 4px;
+    }
+    .accordion-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3); 
+    }
+</style>
 
 <div class="dashboard-layout">
     <aside class="sidebar">
@@ -7,6 +56,8 @@
             <a href="/admin" class="nav-link active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
 
             <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+            <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+            <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
             <a href="/api/auth/logout" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </nav>
     </aside>
@@ -109,75 +160,85 @@
 
         <!-- Event Dashboard Summary -->
         <div class="dashboard-section">
-            <h3><i class="fa-solid fa-list-check"></i> Event Summary</h3>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Event Title</th>
-                            <th>Date</th>
-                            <th>Attendees</th>
-                            <th>Capacity</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (metrics.recentEvents.length === 0) { %>
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No events found.</td></tr>
-                        <% } else { %>
-                            <% metrics.recentEvents.forEach(event => { %>
+            <div class="accordion-header" onclick="toggleAccordion('eventSummary')">
+                <h3><i class="fa-solid fa-list-check"></i> Event Summary</h3>
+                <i class="fa-solid fa-chevron-down toggle-icon" id="eventSummaryIcon"></i>
+            </div>
+            <div class="accordion-content" id="eventSummaryContent">
+                <div class="table-responsive accordion-scroll">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td><strong><%= event.title %></strong></td>
-                                <td><%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %></td>
-                                <td><%= event._count.attendees %></td>
-                                <td><%= event.capacity %></td>
-                                <td>
-                                    <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
-                                        <%= event.status %>
-                                    </span>
-                                </td>
+                                <th>Event Title</th>
+                                <th>Date</th>
+                                <th>Attendees</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
                             </tr>
-                            <% }) %>
-                        <% } %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% if (metrics.recentEvents.length === 0) { %>
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No events found.</td></tr>
+                            <% } else { %>
+                                <% metrics.recentEvents.forEach(event => { %>
+                                <tr>
+                                    <td><strong><%= event.title %></strong></td>
+                                    <td><%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %></td>
+                                    <td><%= event._count.attendees %></td>
+                                    <td><%= event.capacity %></td>
+                                    <td>
+                                        <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                            <%= event.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Financial Dashboard Summary -->
         <div class="dashboard-section">
-            <h3><i class="fa-solid fa-wallet"></i> Recent Payments</h3>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Attendee</th>
-                            <th>Event</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (metrics.recentPayments.length === 0) { %>
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No payments found.</td></tr>
-                        <% } else { %>
-                            <% metrics.recentPayments.forEach(payment => { %>
+            <div class="accordion-header" onclick="toggleAccordion('recentPayments')">
+                <h3><i class="fa-solid fa-wallet"></i> Recent Payments</h3>
+                <i class="fa-solid fa-chevron-down toggle-icon" id="recentPaymentsIcon"></i>
+            </div>
+            <div class="accordion-content" id="recentPaymentsContent">
+                <div class="table-responsive accordion-scroll">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td><%= payment.attendee.fullName %></td>
-                                <td><%= payment.attendee.event.title %></td>
-                                <td><span class="badge info"><%= payment.type %></span></td>
-                                <td>$<%= payment.amount.toLocaleString() %></td>
-                                <td>
-                                    <span class="badge <%= payment.status === 'SUCCESS' ? 'success' : (payment.status === 'PENDING' ? 'warning' : 'danger') %>">
-                                        <%= payment.status %>
-                                    </span>
-                                </td>
+                                <th>Attendee</th>
+                                <th>Event</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
                             </tr>
-                            <% }) %>
-                        <% } %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% if (metrics.recentPayments.length === 0) { %>
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No payments found.</td></tr>
+                            <% } else { %>
+                                <% metrics.recentPayments.forEach(payment => { %>
+                                <tr>
+                                    <td><%= payment.attendee.fullName %></td>
+                                    <td><%= payment.attendee.event.title %></td>
+                                    <td><span class="badge info"><%= payment.type %></span></td>
+                                    <td>$<%= payment.amount.toLocaleString() %></td>
+                                    <td>
+                                        <span class="badge <%= payment.status === 'SUCCESS' ? 'success' : (payment.status === 'PENDING' ? 'warning' : 'danger') %>">
+                                            <%= payment.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <% } %>
@@ -188,6 +249,13 @@
         document.getElementById("profileDropdown").classList.toggle("show");
     }
     
+    function toggleAccordion(id) {
+        const header = document.querySelector(`[onclick="toggleAccordion('${id}')"]`);
+        const content = document.getElementById(`${id}Content`);
+        header.classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+    }
+
     // Close the dropdown if the user clicks outside of it
     window.onclick = function(event) {
         if (!event.target.closest('.profile-menu')) {
