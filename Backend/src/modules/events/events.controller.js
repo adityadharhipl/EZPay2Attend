@@ -10,11 +10,25 @@ const wantsJson = (req) => {
 
 exports.getAllEvents = async (req, res) => {
     try {
-        const events = await eventsService.getAllEvents();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        
+        const { data, total } = await eventsService.getAllEvents(page, limit);
+        const totalPages = Math.ceil(total / limit);
+
         if (wantsJson(req)) {
-            return res.json({ success: true, data: events });
+            return res.json({ 
+                success: true, 
+                data,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPages
+                }
+            });
         }
-        res.render('events/index', { events, title: 'Events Management' });
+        res.render('events/index', { events: data, title: 'Events Management', pagination: { total, page, limit, totalPages } });
     } catch (error) {
         if (wantsJson(req)) return res.status(500).json({ success: false, message: error.message });
         res.status(500).send('Server Error');

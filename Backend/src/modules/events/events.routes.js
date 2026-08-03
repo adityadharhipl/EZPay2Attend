@@ -61,9 +61,22 @@ const router = express.Router();
  *     tags: [Events]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: List of events
+ *         description: List of events with pagination
  */
 router.get('/', authenticate, eventsController.getAllEvents);
 

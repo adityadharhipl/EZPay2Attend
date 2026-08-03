@@ -159,6 +159,10 @@
     .col-md-6 { width: 50%; padding: 0.5rem; }
     .col-md-4 { width: 33.33%; padding: 0.5rem; }
     .form-label { color: var(--text-secondary); font-size: 0.9rem; }
+    .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+    .page-link-btn { background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
+    .page-link-btn:hover { background: rgba(255,255,255,0.1); color: var(--primary-color); }
+    .page-link-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 </style>
 
 <div class="dashboard-layout">
@@ -168,6 +172,8 @@
         <nav>
             <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
             <a href="/admin/events" class="nav-link active"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+            <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+            <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
             <a href="/api/auth/logout" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </nav>
     </aside>
@@ -211,15 +217,21 @@
         <div class="dashboard-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h3 style="margin: 0;"><i class="fa-solid fa-calendar-alt"></i> All Events</h3>
-                <button class="btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="openModal()">
-                    <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Create Event
-                </button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <a href="/register" target="_blank" class="btn" style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-external-link-alt"></i> Public Registration
+                    </a>
+                    <button class="btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="openModal()">
+                        <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Create Event
+                    </button>
+                </div>
             </div>
             
             <div class="table-responsive">
                 <table id="eventsTable" class="table table-dark-custom table-hover w-100">
                     <thead>
                         <tr>
+                            <th>S.No.</th>
                             <th>Title</th>
                             <th>School</th>
                             <th>Type</th>
@@ -231,8 +243,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% events.forEach(event => { %>
+                        <% events.forEach((event, index) => { %>
                         <tr>
+                            <td><%= (pagination.page - 1) * pagination.limit + index + 1 %></td>
                             <td class="fw-bold"><%= event.title %></td>
                             <td><%= event.school.name %></td>
                             <td><span class="badge bg-secondary"><%= event.type || 'N/A' %></span></td>
@@ -257,6 +270,22 @@
                     </tbody>
                 </table>
             </div>
+            
+            <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="pagination-container">
+                <% if (pagination.page > 1) { %>
+                    <a href="?page=<%= pagination.page - 1 %>" class="page-link-btn">Previous</a>
+                <% } %>
+                
+                <% for(let i=1; i<=pagination.totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="page-link-btn <%= i === pagination.page ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                
+                <% if (pagination.page < pagination.totalPages) { %>
+                    <a href="?page=<%= pagination.page + 1 %>" class="page-link-btn">Next</a>
+                <% } %>
+            </div>
+            <% } %>
         </div>
     </main>
 </div>
@@ -443,7 +472,8 @@
             const result = await res.json();
             
             if(result.success) {
-                window.location.reload();
+                showToast(result.message, 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 alertBox.textContent = result.message;
                 alertBox.style.display = 'block';
@@ -478,13 +508,14 @@
             const res = await fetch('/api/events/' + eventToDelete, { method: 'DELETE' });
             const result = await res.json();
             if(result.success) {
-                window.location.reload();
+                showToast(result.message, 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                alert('Error: ' + result.message);
+                showToast('Error: ' + result.message, 'error');
                 closeDeleteModal();
             }
         } catch (err) {
-            alert('Network error occurred.');
+            showToast('Network error occurred.', 'error');
             closeDeleteModal();
         }
     }
