@@ -4,9 +4,22 @@
         background-color: var(--bg-base);
     }
     .school-dashboard-container {
-        max-width: 1300px;
-        margin: 0 auto;
-        padding: 4rem 2rem;
+        width: 100%;
+        max-width: 100%;
+        padding: 4rem 5%;
+    }
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: 1fr !important;
+        }
+        .school-dashboard-container {
+            padding: 2rem 1rem;
+        }
     }
     .school-header {
         margin-bottom: 3rem;
@@ -90,10 +103,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (events.length === 0) { %>
+                    <% if (paginatedEvents.length === 0) { %>
                         <tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
                     <% } else { %>
-                        <% events.forEach(event => { %>
+                        <% paginatedEvents.forEach(event => { %>
                             <tr>
                                 <td><strong><%= event.title %></strong></td>
                                 <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
@@ -115,6 +128,20 @@
                 </tbody>
             </table>
         </div>
+        
+        <% if (totalPages > 1) { %>
+            <div style="display: flex; justify-content: flex-end; align-items: center; padding: 1.5rem 0 0 0; gap: 0.5rem;">
+                <% if (page > 1) { %>
+                    <a href="?page=<%= page - 1 %>" class="btn" style="width: auto; padding: 0.5rem 1rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);"><i class="fa-solid fa-chevron-left"></i> Prev</a>
+                <% } %>
+                
+                <span style="padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.95rem;">Page <%= page %> of <%= totalPages %></span>
+                
+                <% if (page < totalPages) { %>
+                    <a href="?page=<%= page + 1 %>" class="btn" style="width: auto; padding: 0.5rem 1rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);">Next <i class="fa-solid fa-chevron-right"></i></a>
+                <% } %>
+            </div>
+        <% } %>
     </div>
 </div>
 <script>

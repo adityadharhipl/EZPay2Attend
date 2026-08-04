@@ -6,28 +6,32 @@ exports.authenticate = async (req, res, next) => {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
     
     // Function to handle unauthorized based on request type
-    const handleUnauthorized = () => {
+    const handleUnauthorized = (msg = 'Unauthorized') => {
+        // If the route is an API route (not the login page itself), always return JSON 401
+        if (req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/auth/login')) {
+            return res.status(401).json({ success: false, message: msg });
+        }
+        
+        // For frontend dashboard/admin routes, redirect to login page
         if (req.accepts('html') && !req.xhr) {
+            res.clearCookie('token');
             return res.redirect('/api/auth/login');
         }
-        return res.status(401).json({ message: 'Unauthorized' });
+        
+        return res.status(401).json({ success: false, message: msg });
     };
 
-    if (!token) return handleUnauthorized();
+    if (!token) return handleUnauthorized('No token provided, authorization denied');
 
     try {
         const decoded = jwt.verify(token, env.JWT_SECRET);
         const user = await db.user.findUnique({ where: { id: decoded.id } });
-        if (!user) return handleUnauthorized();
+        if (!user) return handleUnauthorized('Invalid or expired token');
         
         req.user = user;
         res.locals.user = user; // for EJS
         next();
     } catch (err) {
-        if (req.accepts('html') && !req.xhr) {
-            res.clearCookie('token');
-            return res.redirect('/api/auth/login');
-        }
-        return res.status(401).json({ message: 'Invalid token' });
+        return handleUnauthorized('Invalid token signature');
     }
 };

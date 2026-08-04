@@ -46,16 +46,38 @@ exports.renderCheckoutPage = async (req, res) => {
 exports.renderSchoolDashboard = async (req, res) => {
     try {
         const schoolId = req.params.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
         const school = await db.school.findUnique({ where: { id: schoolId } });
         if (!school) return res.status(404).send('School not found');
 
-        const events = await db.event.findMany({
+        // All events for calculating accurate top-level metrics
+        const allEvents = await db.event.findMany({
             where: { schoolId },
-            include: { _count: { select: { attendees: true } } },
-            orderBy: { createdAt: 'desc' }
+            include: { _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } }
         });
 
-        res.render('public/school_dashboard', { school, events });
+        // Paginated events for the table display
+        const paginatedEvents = await db.event.findMany({
+            where: { schoolId },
+            include: { _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
+        });
+
+        const totalItems = allEvents.length;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.render('public/school_dashboard', { 
+            school, 
+            events: allEvents, // For top cards
+            paginatedEvents, // For table
+            page, 
+            totalPages 
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading school dashboard');
