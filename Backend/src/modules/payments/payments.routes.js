@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentsController = require('./payments.controller');
+const { authenticate } = require('../../middlewares/authenticate');
 
 /**
  * @swagger
@@ -62,5 +63,29 @@ router.post('/webhook', paymentsController.paystackWebhook);
  */
 // Get Payment History
 router.get('/', paymentsController.getPayments);
+
+/**
+ * @swagger
+ * /api/payments/refund:
+ *   post:
+ *     summary: Process a refund
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               attendeeId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Refund processed successfully
+ */
+// Process Refund
+router.post('/refund', authenticate, paymentsController.processRefund);
 
 module.exports = router;

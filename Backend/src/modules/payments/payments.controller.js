@@ -28,12 +28,47 @@ exports.paystackWebhook = async (req, res) => {
 
 exports.getPayments = async (req, res) => {
     try {
-        const payments = await require('../../config/db').payment.findMany({
-            include: { attendee: { include: { event: true } } },
-            orderBy: { createdAt: 'desc' }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const db = require('../../config/db');
+        const [payments, total] = await Promise.all([
+            db.payment.findMany({
+                include: { attendee: { include: { event: true } } },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit
+            }),
+            db.payment.count()
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        res.status(200).json({ 
+            success: true, 
+            data: payments,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
         });
-        res.status(200).json({ success: true, data: payments });
     } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.processRefund = async (req, res) => {
+    try {
+        const { attendeeId } = req.body;
+        if (!attendeeId) return res.status(400).json({ success: false, message: "Attendee ID is required" });
+
+        const result = await paymentsService.processRefund(attendeeId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error("Refund Error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };

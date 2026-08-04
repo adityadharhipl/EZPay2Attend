@@ -110,3 +110,56 @@ exports.processWebhook = async (reqBody, rawBody, signature) => {
 
     return { success: true };
 };
+
+exports.processRefund = async (attendeeId) => {
+    // 1. Get attendee and their successful payments
+    const attendee = await db.attendee.findUnique({ 
+        where: { id: attendeeId },
+        include: { payments: { where: { status: 'SUCCESS' } } }
+    });
+    
+    if (!attendee) throw new Error("Attendee not found");
+    if (attendee.payments.length === 0) throw new Error("No successful payments found to refund");
+
+    // 2. Call Paystack Refund API for each payment (simplified for MVP)
+    // Normally we'd do a loop or sum the amounts, but here we refund all successful payments
+    for (const payment of attendee.payments) {
+        try {
+            await axios.post('https://api.paystack.co/refund', {
+                transaction: payment.referenceNumber
+            }, {
+                headers: {
+                    Authorization: `Bearer ${PAYSTACK_SECRET}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // Record the refund in DB
+            await db.payment.create({
+                data: {
+                    attendeeId,
+                    type: 'REFUND',
+                    amount: payment.amount,
+                    status: 'SUCCESS',
+                    referenceNumber: `REF-${Date.now()}`
+                }
+            });
+        } catch (error) {
+            console.error(`Refund failed for payment ${payment.referenceNumber}:`, error.response?.data || error.message);
+            throw new Error("Failed to process refund with Paystack");
+        }
+    }
+
+    // 3. Update Attendee status
+    await db.attendee.update({
+        where: { id: attendeeId },
+        data: { status: 'REFUNDED' }
+    });
+
+    // 4. Send Email
+    const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
+    const mailer = require('../../utils/mailer');
+    mailer.sendRefundUpdate(attendee, eventData).catch(e => console.error("Email Error:", e));
+
+    return { success: true, message: "Refund processed successfully" };
+};
