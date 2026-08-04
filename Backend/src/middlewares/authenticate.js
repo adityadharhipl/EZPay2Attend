@@ -30,6 +30,10 @@ exports.authenticate = async (req, res, next) => {
         
         req.user = user;
         res.locals.user = user; // for EJS
+        
+        // Prevent browser caching for protected routes (disables back button after logout)
+        res.setHeader('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+        
         next();
     } catch (err) {
         return handleUnauthorized('Invalid token signature');
