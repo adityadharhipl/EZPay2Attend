@@ -68,4 +68,12 @@
     function confirmLogout() {
         window.location.href = '/api/auth/logout';
     }
+
+    // Handle BFCache (Back-Forward Cache) to prevent showing protected pages
+    // after logout when using browser back button
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
 </script>
