@@ -28,6 +28,14 @@ const options = {
                 bearerAuth: []
             }
         ],
+        tags: [
+            { name: 'Auth', description: 'Authentication APIs' },
+            { name: 'Dashboard', description: 'Admin Dashboard APIs' },
+            { name: 'Events', description: 'Event Management APIs' },
+            { name: 'Schools', description: 'School Management APIs' },
+            { name: 'Attendees', description: 'Attendee Management APIs' },
+            { name: 'Payments', description: 'Payment gateway APIs' },
+        ],
     },
     apis: ['./src/modules/**/*.routes.js'], // Load annotations from all route files
 };
@@ -35,6 +43,9 @@ const options = {
 const specs = swaggerJsDoc(options);
 
 const uiOptions = {
+    swaggerOptions: {
+        defaultModelsExpandDepth: -1
+    },
     customCss: `
         .swagger-ui .topbar { display: none; }
         .theme-toggle { 

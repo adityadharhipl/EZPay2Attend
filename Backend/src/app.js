@@ -30,36 +30,9 @@ app.get('/', (req, res) => {
 
 // Swagger Setup
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../swagger.json');
+const { specs, uiOptions } = require('./config/swagger');
 
-const swaggerOptions = {
-    customCss: `
-      .swagger-ui .topbar .dark-mode-toggle {
-        cursor: pointer;
-        margin-left: 1200px;
-        opacity: .8;
-        transition: all .2s;
-      }
-      body.dark-mode { filter: invert(1) hue-rotate(180deg); background: rgb(17, 17, 17); }
-    `,
-    customJsStr: `
-        window.addEventListener('load', function() {
-            var topbar = document.querySelector('.swagger-ui .topbar .wrapper');
-            if(topbar) {
-                var btn = document.createElement("div");
-                btn.innerHTML = '💡';
-                btn.className = "dark-mode-toggle";
-                btn.title = "Toggle Dark Mode";
-                btn.onclick = function() {
-                    document.body.classList.toggle("dark-mode");
-                };
-                topbar.appendChild(btn);
-            }
-        });
-    `
-};
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, uiOptions));
 
 // Import Routes
 app.use('/', require('./modules/public/public.routes'));
