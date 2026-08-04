@@ -1,542 +1,674 @@
 <%- include('../layout/head', { title: title || 'Events | EZPay2Attend' }) %>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<style>
-    .events-container {
-        padding: 2rem;
-    }
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-    .status-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-    .status-open { background: rgba(40, 167, 69, 0.15); color: #28a745; }
-    .status-closed { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
-    .status-completed { background: rgba(0, 123, 255, 0.15); color: #007bff; }
-    .status-cancelled { background: rgba(108, 117, 125, 0.15); color: #6c757d; }
-    
-    .table-dark-custom {
-        background: var(--surface-light);
-        color: var(--text-primary);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    .table-dark-custom th {
-        background: rgba(255,255,255,0.05);
-        color: var(--text-secondary);
-        font-weight: 500;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .table-dark-custom td {
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: middle;
-    }
-    .action-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
-        padding: 0.4rem;
-        transition: all 0.2s;
-        border-radius: 6px;
-    }
-    .action-btn:hover {
-        background: rgba(255,255,255,0.1);
-        color: var(--primary-color);
-    }
-    .action-btn.delete:hover {
-        color: var(--danger);
-    }
-    /* Custom Modal Styling */
-    .custom-modal {
-        display: none;
-        position: fixed;
-        z-index: 10000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.6);
-        align-items: center;
-        justify-content: center;
-    }
-    .custom-modal.show {
-        display: flex;
-    }
-    .custom-modal-content {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        width: 90%;
-        max-width: 700px;
-        max-height: 90vh;
-        overflow-y: auto;
-        padding: 1.5rem;
-    }
-    .custom-modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
-    }
-    .custom-modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        border-top: 1px solid var(--border);
-        padding-top: 1rem;
-        margin-top: 1.5rem;
-    }
-    .delete-modal-content {
-        background: #fff;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 400px;
-        padding: 2.5rem 2rem;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .delete-modal-content h3 {
-        color: #1E293B;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    .delete-modal-content p {
-        color: #475569;
-        margin-bottom: 2rem;
-        font-size: 0.95rem;
-    }
-    .delete-modal-actions {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-    }
-    .delete-btn-cancel {
-        background: #fff;
-        color: #1E293B;
-        border: 1px solid #CBD5E1;
-        padding: 0.6rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-    .delete-btn-confirm {
-        background: #1E293B;
-        color: #fff;
-        border: none;
-        padding: 0.6rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-    .close-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-    .form-control, .form-select {
-        background: var(--bg-base);
-        border: 1px solid var(--border);
-        color: var(--text-primary);
-        width: 100%;
-        padding: 0.5rem;
-        border-radius: 6px;
-        margin-top: 0.25rem;
-        margin-bottom: 1rem;
-    }
-    .row { display: flex; flex-wrap: wrap; margin: -0.5rem; }
-    .col-md-12 { width: 100%; padding: 0.5rem; }
-    .col-md-6 { width: 50%; padding: 0.5rem; }
-    .col-md-4 { width: 33.33%; padding: 0.5rem; }
-    .form-label { color: var(--text-secondary); font-size: 0.9rem; }
-    .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-top: 1rem; }
-    .page-link-btn { background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
-    .page-link-btn:hover { background: rgba(255,255,255,0.1); color: var(--primary-color); }
-    .page-link-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-</style>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <style>
+        .events-container {
+            padding: 2rem;
+        }
 
-<div class="dashboard-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">EZPay2Attend</div>
-        <nav>
-            <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-            <a href="/admin/events" class="nav-link active"><i class="fa-solid fa-calendar-alt"></i> Events</a>
-            <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-            <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-            <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
-            <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-            <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-        </nav>
-    </aside>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Standard Page Header -->
-        <div class="page-header" style="margin-bottom: 2rem;">
-            <div class="header-left">
-                <h3 style="margin: 0; color: #fff;">Events Management</h3>
-            </div>
-            
-            <div class="header-right">
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .status-closed {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        .status-completed {
+            background: rgba(0, 123, 255, 0.15);
+            color: #007bff;
+        }
+
+        .status-cancelled {
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+        }
+
+        .table-dark-custom {
+            background: var(--surface-light);
+            color: var(--text-primary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-dark-custom th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-dark-custom td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.4rem;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .action-btn.delete:hover {
+            color: var(--danger);
+        }
+
+        /* Custom Modal Styling */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-modal.show {
+            display: flex;
+        }
+
+        .custom-modal-content {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .custom-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .delete-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .delete-modal-content h3 {
+            color: #1E293B;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .delete-modal-content p {
+            color: #475569;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .delete-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .delete-btn-cancel {
+            background: #fff;
+            color: #1E293B;
+            border: 1px solid #CBD5E1;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .delete-btn-confirm {
+            background: #1E293B;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -0.5rem;
+        }
+
+        .col-md-12 {
+            width: 100%;
+            padding: 0.5rem;
+        }
+
+        .col-md-6 {
+            width: 50%;
+            padding: 0.5rem;
+        }
+
+        .col-md-4 {
+            width: 33.33%;
+            padding: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .page-link-btn {
+            background: var(--surface-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .page-link-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .page-link-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+    </style>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">EZPay2Attend</div>
+            <nav>
+                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/events" class="nav-link active"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
+                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+                <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link"
+                    style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i>
+                    Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Standard Page Header -->
+            <div class="page-header" style="margin-bottom: 2rem;">
+                <div class="header-left">
+                    <h3 style="margin: 0; color: #fff;">Events Management</h3>
+                </div>
+
+                <div class="header-right">
 
 
-                
-                <!-- Profile Dropdown -->
-                <div class="profile-menu">
-                    <div class="profile-icon" onclick="toggleDropdown()" style="border: none; background: transparent; padding: 0;">
-                        <div style="text-align: right; margin-right: 0.5rem;">
-                            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;"><%= user.name %></div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= user.role || 'Admin' %></div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="profile-menu">
+                        <div class="profile-icon" onclick="toggleDropdown()"
+                            style="border: none; background: transparent; padding: 0;">
+                            <div style="text-align: right; margin-right: 0.5rem;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                    <%= user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    <%= user.role || 'Admin' %>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
                         </div>
-                        <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-header">
-                            <strong><%= user.name %></strong>
-                            <p><%= user.email %></p>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <strong>
+                                    <%= user.name %>
+                                </strong>
+                                <p>
+                                    <%= user.email %>
+                                </p>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit
+                                Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()"
+                                class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                                Logout</a>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                     </div>
                 </div>
+            </div>
+
+            <!-- Events List -->
+            <div class="dashboard-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-calendar-alt"></i> All Events</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <a href="/register" target="_blank" class="btn"
+                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-external-link-alt"></i> Public Registration
+                        </a>
+                        <button class="btn"
+                            style="background: var(--primary); color: #fff; width: auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none;"
+                            onclick="openModal()">
+                            <i class="fa-solid fa-plus"></i> Create Event
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="eventsTable" class="table table-dark-custom table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th>S.No.</th>
+                                <th>Title</th>
+                                <th>School</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Capacity</th>
+                                <th>Cost</th>
+                                <th>Date</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% events.forEach((event, index)=> { %>
+                                <tr>
+                                    <td>
+                                        <%= (pagination.page - 1) * pagination.limit + index + 1 %>
+                                    </td>
+                                    <td class="fw-bold">
+                                        <%= event.title %>
+                                    </td>
+                                    <td>
+                                        <%= event.school.name %>
+                                    </td>
+                                    <td><span class="badge bg-secondary">
+                                            <%= event.type || 'N/A' %>
+                                        </span></td>
+                                    <td>
+                                        <% let statusClass='status-open' ; if(event.status==='CLOSED' )
+                                            statusClass='status-closed' ; if(event.status==='COMPLETED' )
+                                            statusClass='status-completed' ; if(event.status==='CANCELLED' )
+                                            statusClass='status-cancelled' ; %>
+                                            <span class="status-badge <%= statusClass %>">
+                                                <%= event.status %>
+                                            </span>
+                                    </td>
+                                    <td>
+                                        <%= event._count.attendees %> / <%= event.capacity %>
+                                    </td>
+                                    <td>$<%= event.costPerAttendee.toFixed(2) %>
+                                    </td>
+                                    <td>
+                                        <%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="action-btn" title="Edit"
+                                            onclick="editEvent('<%= event.id %>')"><i
+                                                class="fa-solid fa-pen"></i></button>
+                                        <button class="action-btn delete" title="Delete" data-id="<%= event.id %>"
+                                            data-title="<%= event.title %>"
+                                            onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i
+                                                class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <% if (pagination && pagination.totalPages> 1) { %>
+                    <div class="pagination-container">
+                        <% if (pagination.page> 1) { %>
+                            <a href="?page=<%= pagination.page - 1 %>" class="page-link-btn">Previous</a>
+                            <% } %>
+
+                                <% for(let i=1; i<=pagination.totalPages; i++) { %>
+                                    <a href="?page=<%= i %>"
+                                        class="page-link-btn <%= i === pagination.page ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                    <% } %>
+
+                                        <% if (pagination.page < pagination.totalPages) { %>
+                                            <a href="?page=<%= pagination.page + 1 %>" class="page-link-btn">Next</a>
+                                            <% } %>
+                    </div>
+                    <% } %>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div class="custom-modal" id="createEventModal">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">Create New Event</h3>
+                <button type="button" class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="createEventForm">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Event Title</label>
+                        <input type="text" class="form-control" name="title" required
+                            placeholder="e.g. Annual Gala 2026">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">School</label>
+                        <select class="form-select" name="schoolId" required>
+                            <option value="">Select a school...</option>
+                            <% schools.forEach(s=> { %>
+                                <option value="<%= s.id %>">
+                                    <%= s.name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Event Type</label>
+                        <input type="text" class="form-control" name="type" placeholder="e.g. Conference">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="OPEN">Open</option>
+                            <option value="CLOSED">Closed</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-control" name="capacity" required min="1" value="100">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Cost Per Attendee ($)</label>
+                        <input type="number" class="form-control" name="costPerAttendee" required min="0" value="0.00"
+                            step="0.01">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Deposit %</label>
+                        <input type="number" class="form-control" name="depositPercentage" min="0" max="100" value="0">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Event Date</label>
+                        <input type="date" class="form-control" name="date">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Balance Due Date</label>
+                        <input type="date" class="form-control" name="balanceDueDate">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Venue</label>
+                        <input type="text" class="form-control" name="venue" placeholder="e.g. Main Auditorium">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"
+                            placeholder="Additional details..."></textarea>
+                    </div>
+                </div>
+
+                <div id="formAlert" style="color: var(--danger); margin-top: 1rem; display: none;"></div>
+
+                <div class="custom-modal-footer">
+                    <button type="button" class="btn"
+                        style="background: transparent; color: var(--text-secondary); width: auto;"
+                        onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn" style="width: auto;" id="saveEventBtn"
+                        onclick="saveEventData()">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="custom-modal" id="deleteEventModal">
+        <div class="delete-modal-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete <span id="deleteEventName"
+                    style="font-weight: 700; color: #1E293B;"></span>?</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="delete-btn-confirm" onclick="confirmDeleteEvent()">Delete</button>
             </div>
         </div>
-
-        <!-- Events List -->
-        <div class="dashboard-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h3 style="margin: 0;"><i class="fa-solid fa-calendar-alt"></i> All Events</h3>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <a href="/register" target="_blank" class="btn" style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-external-link-alt"></i> Public Registration
-                    </a>
-                    <button class="btn" style="background: var(--primary); color: #fff; width: auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none;" onclick="openModal()">
-                        <i class="fa-solid fa-plus"></i> Create Event
-                    </button>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table id="eventsTable" class="table table-dark-custom table-hover w-100">
-                    <thead>
-                        <tr>
-                            <th>S.No.</th>
-                            <th>Title</th>
-                            <th>School</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Capacity</th>
-                            <th>Cost</th>
-                            <th>Date</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% events.forEach((event, index) => { %>
-                        <tr>
-                            <td><%= (pagination.page - 1) * pagination.limit + index + 1 %></td>
-                            <td class="fw-bold"><%= event.title %></td>
-                            <td><%= event.school.name %></td>
-                            <td><span class="badge bg-secondary"><%= event.type || 'N/A' %></span></td>
-                            <td>
-                                <% 
-                                    let statusClass = 'status-open';
-                                    if(event.status === 'CLOSED') statusClass = 'status-closed';
-                                    if(event.status === 'COMPLETED') statusClass = 'status-completed';
-                                    if(event.status === 'CANCELLED') statusClass = 'status-cancelled';
-                                %>
-                                <span class="status-badge <%= statusClass %>"><%= event.status %></span>
-                            </td>
-                            <td><%= event._count.attendees %> / <%= event.capacity %></td>
-                            <td>$<%= event.costPerAttendee.toFixed(2) %></td>
-                            <td><%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %></td>
-                            <td class="text-end">
-                                <button class="action-btn" title="Edit" onclick="editEvent('<%= event.id %>')"><i class="fa-solid fa-pen"></i></button>
-                                <button class="action-btn delete" title="Delete" data-id="<%= event.id %>" data-title="<%= event.title %>" onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
-            
-            <% if (pagination && pagination.totalPages > 1) { %>
-            <div class="pagination-container">
-                <% if (pagination.page > 1) { %>
-                    <a href="?page=<%= pagination.page - 1 %>" class="page-link-btn">Previous</a>
-                <% } %>
-                
-                <% for(let i=1; i<=pagination.totalPages; i++) { %>
-                    <a href="?page=<%= i %>" class="page-link-btn <%= i === pagination.page ? 'active' : '' %>"><%= i %></a>
-                <% } %>
-                
-                <% if (pagination.page < pagination.totalPages) { %>
-                    <a href="?page=<%= pagination.page + 1 %>" class="page-link-btn">Next</a>
-                <% } %>
-            </div>
-            <% } %>
-        </div>
-    </main>
-</div>
-
-<!-- Create Event Modal -->
-<div class="custom-modal" id="createEventModal">
-  <div class="custom-modal-content">
-    <div class="custom-modal-header">
-      <h3 style="margin: 0; color: var(--text-primary);">Create New Event</h3>
-      <button type="button" class="close-btn" onclick="closeModal()">&times;</button>
     </div>
-    <form id="createEventForm">
-            <div class="row g-3">
-                <div class="col-md-12">
-                    <label class="form-label">Event Title</label>
-                    <input type="text" class="form-control" name="title" required placeholder="e.g. Annual Gala 2026">
-                </div>
-                
-                <div class="col-md-4">
-                    <label class="form-label">School</label>
-                    <select class="form-select" name="schoolId" required>
-                        <option value="">Select a school...</option>
-                        <% schools.forEach(s => { %>
-                            <option value="<%= s.id %>"><%= s.name %></option>
-                        <% }) %>
-                    </select>
-                </div>
 
-                <div class="col-md-4">
-                    <label class="form-label">Event Type</label>
-                    <input type="text" class="form-control" name="type" placeholder="e.g. Conference">
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="status">
-                        <option value="OPEN">Open</option>
-                        <option value="CLOSED">Closed</option>
-                        <option value="COMPLETED">Completed</option>
-                        <option value="CANCELLED">Cancelled</option>
-                    </select>
-                </div>
-                
-                <div class="col-md-4">
-                    <label class="form-label">Capacity</label>
-                    <input type="number" class="form-control" name="capacity" required min="1" value="100">
-                </div>
-                
-                <div class="col-md-4">
-                    <label class="form-label">Cost Per Attendee ($)</label>
-                    <input type="number" class="form-control" name="costPerAttendee" required min="0" value="0.00" step="0.01">
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Deposit %</label>
-                    <input type="number" class="form-control" name="depositPercentage" min="0" max="100" value="0">
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label">Event Date</label>
-                    <input type="date" class="form-control" name="date">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Balance Due Date</label>
-                    <input type="date" class="form-control" name="balanceDueDate">
-                </div>
-                
-                <div class="col-md-12">
-                    <label class="form-label">Venue</label>
-                    <input type="text" class="form-control" name="venue" placeholder="e.g. Main Auditorium">
-                </div>
-                
-                <div class="col-md-12">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" name="description" rows="3" placeholder="Additional details..."></textarea>
-                </div>
-            </div>
-            
-            <div id="formAlert" style="color: var(--danger); margin-top: 1rem; display: none;"></div>
-            
-            <div class="custom-modal-footer">
-                <button type="button" class="btn" style="background: transparent; color: var(--text-secondary); width: auto;" onclick="closeModal()">Cancel</button>
-                <button type="button" class="btn" style="width: auto;" id="saveEventBtn" onclick="saveEventData()">Save Event</button>
-            </div>
-        </form>
-  </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="custom-modal" id="deleteEventModal">
-  <div class="delete-modal-content">
-    <h3>Confirm Delete</h3>
-    <p>Are you sure you want to delete <span id="deleteEventName" style="font-weight: 700; color: #1E293B;"></span>?</p>
-    <div class="delete-modal-actions">
-        <button type="button" class="delete-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-        <button type="button" class="delete-btn-confirm" onclick="confirmDeleteEvent()">Delete</button>
-    </div>
-  </div>
-</div>
-
-<script id="eventsData" type="application/json">
+    <script id="eventsData" type="application/json">
     <%- JSON.stringify(events || []) %>
 </script>
 
-<script>
-    const allEvents = JSON.parse(document.getElementById('eventsData').textContent);
-    let editingEventId = null;
+    <script>
+        const allEvents = JSON.parse(document.getElementById('eventsData').textContent);
+        let editingEventId = null;
 
-    function openModal() {
-        editingEventId = null;
-        document.getElementById('createEventForm').reset();
-        document.querySelector('.custom-modal-header h3').textContent = 'Create New Event';
-        document.getElementById('createEventModal').classList.add('show');
-    }
-    
-    function editEvent(id) {
-        editingEventId = id;
-        const event = allEvents.find(e => e.id === id);
-        if (!event) return;
-        
-        const form = document.getElementById('createEventForm');
-        form.reset();
-        
-        // Populate fields
-        form.title.value = event.title || '';
-        form.schoolId.value = event.schoolId || '';
-        form.type.value = event.type || '';
-        form.status.value = event.status || 'OPEN';
-        form.capacity.value = event.capacity || 100;
-        form.costPerAttendee.value = event.costPerAttendee || 0.00;
-        form.depositPercentage.value = event.depositPercentage || 0;
-        form.venue.value = event.venue || '';
-        form.description.value = event.description || '';
-        
-        if (event.date) {
-            form.date.value = new Date(event.date).toISOString().split('T')[0];
+        function openModal() {
+            editingEventId = null;
+            document.getElementById('createEventForm').reset();
+            document.querySelector('.custom-modal-header h3').textContent = 'Create New Event';
+            document.getElementById('createEventModal').classList.add('show');
         }
-        if (event.balanceDueDate) {
-            form.balanceDueDate.value = new Date(event.balanceDueDate).toISOString().split('T')[0];
-        }
-        
-        document.querySelector('.custom-modal-header h3').textContent = 'Edit Event';
-        document.getElementById('createEventModal').classList.add('show');
-    }
 
-    function closeModal() {
-        document.getElementById('createEventModal').classList.remove('show');
-        editingEventId = null;
-    }
+        function editEvent(id) {
+            editingEventId = id;
+            const event = allEvents.find(e => e.id === id);
+            if (!event) return;
 
-    async function saveEventData() {
-        const form = document.getElementById('createEventForm');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
+            const form = document.getElementById('createEventForm');
+            form.reset();
+
+            // Populate fields
+            form.title.value = event.title || '';
+            form.schoolId.value = event.schoolId || '';
+            form.type.value = event.type || '';
+            form.status.value = event.status || 'OPEN';
+            form.capacity.value = event.capacity || 100;
+            form.costPerAttendee.value = event.costPerAttendee || 0.00;
+            form.depositPercentage.value = event.depositPercentage || 0;
+            form.venue.value = event.venue || '';
+            form.description.value = event.description || '';
+
+            if (event.date) {
+                form.date.value = new Date(event.date).toISOString().split('T')[0];
+            }
+            if (event.balanceDueDate) {
+                form.balanceDueDate.value = new Date(event.balanceDueDate).toISOString().split('T')[0];
+            }
+
+            document.querySelector('.custom-modal-header h3').textContent = 'Edit Event';
+            document.getElementById('createEventModal').classList.add('show');
         }
-        
-        const btn = document.getElementById('saveEventBtn');
-        const alertBox = document.getElementById('formAlert');
-        btn.disabled = true;
-        btn.innerHTML = 'Saving...';
-        alertBox.style.display = 'none';
-        
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        // Convert numbers
-        data.capacity = parseInt(data.capacity);
-        data.costPerAttendee = parseFloat(data.costPerAttendee);
-        data.depositPercentage = parseFloat(data.depositPercentage);
-        if(!data.date) delete data.date;
-        if(!data.balanceDueDate) delete data.balanceDueDate;
-        
-        try {
-            const url = editingEventId ? '/api/events/' + editingEventId : '/api/events';
-            const method = editingEventId ? 'PATCH' : 'POST';
-            
-            const res = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await res.json();
-            
-            if(result.success) {
-                showToast(result.message, 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                alertBox.textContent = result.message;
+
+        function closeModal() {
+            document.getElementById('createEventModal').classList.remove('show');
+            editingEventId = null;
+        }
+
+        async function saveEventData() {
+            const form = document.getElementById('createEventForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const btn = document.getElementById('saveEventBtn');
+            const alertBox = document.getElementById('formAlert');
+            btn.disabled = true;
+            btn.innerHTML = 'Saving...';
+            alertBox.style.display = 'none';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Convert numbers
+            data.capacity = parseInt(data.capacity);
+            data.costPerAttendee = parseFloat(data.costPerAttendee);
+            data.depositPercentage = parseFloat(data.depositPercentage);
+            if (!data.date) delete data.date;
+            if (!data.balanceDueDate) delete data.balanceDueDate;
+
+            try {
+                const url = editingEventId ? '/api/events/' + editingEventId : '/api/events';
+                const method = editingEventId ? 'PATCH' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    alertBox.textContent = result.message;
+                    alertBox.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Save Event';
+                }
+            } catch (err) {
+                alertBox.textContent = 'Network error occurred.';
                 alertBox.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = 'Save Event';
             }
-        } catch (err) {
-            alertBox.textContent = 'Network error occurred.';
-            alertBox.style.display = 'block';
-            btn.disabled = false;
-            btn.innerHTML = 'Save Event';
         }
-    }
 
-    let eventToDelete = null;
+        let eventToDelete = null;
 
-    function deleteEvent(id, title) {
-        eventToDelete = id;
-        document.getElementById('deleteEventName').textContent = title;
-        document.getElementById('deleteEventModal').classList.add('show');
-    }
+        function deleteEvent(id, title) {
+            eventToDelete = id;
+            document.getElementById('deleteEventName').textContent = title;
+            document.getElementById('deleteEventModal').classList.add('show');
+        }
 
-    function closeDeleteModal() {
-        eventToDelete = null;
-        document.getElementById('deleteEventModal').classList.remove('show');
-    }
+        function closeDeleteModal() {
+            eventToDelete = null;
+            document.getElementById('deleteEventModal').classList.remove('show');
+        }
 
-    async function confirmDeleteEvent() {
-        if(!eventToDelete) return;
-        
-        try {
-            const res = await fetch('/api/events/' + eventToDelete, { method: 'DELETE' });
-            const result = await res.json();
-            if(result.success) {
-                showToast(result.message, 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                showToast('Error: ' + result.message, 'error');
+        async function confirmDeleteEvent() {
+            if (!eventToDelete) return;
+
+            try {
+                const res = await fetch('/api/events/' + eventToDelete, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Error: ' + result.message, 'error');
+                    closeDeleteModal();
+                }
+            } catch (err) {
+                showToast('Network error occurred.', 'error');
                 closeDeleteModal();
             }
-        } catch (err) {
-            showToast('Network error occurred.', 'error');
-            closeDeleteModal();
         }
-    }
 
-    function toggleDropdown() {
-        document.getElementById("profileDropdown").classList.toggle("show");
-    }
-    
-    window.onclick = function(event) {
-        if (!event.target.closest('.profile-menu')) {
-            var dropdowns = document.getElementsByClassName("profile-dropdown");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
+        function toggleDropdown() {
+            document.getElementById("profileDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-menu')) {
+                var dropdowns = document.getElementsByClassName("profile-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
                 }
             }
         }
-    }
-</script>
-</body>
-</html>
+    </script>
+    </body>
+
+    </html>

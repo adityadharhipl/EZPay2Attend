@@ -26,7 +26,7 @@ exports.renderProfile = (req, res) => {
 exports.getEvents = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const { data: events, total } = await eventsService.getAllEvents(page, limit);
         const totalPages = Math.ceil(total / limit);
         const schools = await db.school.findMany(); // Needed for the Create Event dropdown
@@ -45,7 +45,7 @@ exports.getEvents = async (req, res) => {
 exports.getSchools = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const schoolsService = require('../schools/schools.service');
         const { data: schools, total } = await schoolsService.getAllSchools(page, limit);
         const totalPages = Math.ceil(total / limit);
@@ -64,7 +64,7 @@ exports.getSchools = async (req, res) => {
 exports.getAttendees = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const search = req.query.search || '';
         
         const attendeesService = require('../attendees/attendees.service');
@@ -87,7 +87,7 @@ exports.getPayments = async (req, res) => {
     try {
         const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const skip = (page - 1) * limit;
 
         let whereClause = {};
@@ -129,7 +129,7 @@ exports.getRefunds = async (req, res) => {
     try {
         const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const skip = (page - 1) * limit;
 
         // Refund queue: Attendees who requested refunds, or are replaced, or overdue

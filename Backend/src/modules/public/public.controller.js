@@ -47,7 +47,7 @@ exports.renderSchoolDashboard = async (req, res) => {
     try {
         const schoolId = req.params.id;
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const skip = (page - 1) * limit;
 
         const school = await db.school.findUnique({ where: { id: schoolId } });
@@ -56,7 +56,24 @@ exports.renderSchoolDashboard = async (req, res) => {
         // All events for calculating accurate top-level metrics
         const allEvents = await db.event.findMany({
             where: { schoolId },
-            include: { _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } }
+            include: { 
+                _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } },
+                attendees: {
+                    include: {
+                        payments: { where: { status: 'SUCCESS', type: { not: 'REFUND' } } }
+                    }
+                }
+            }
+        });
+
+        // Calculate Revenue for the school
+        let totalSchoolRevenue = 0;
+        allEvents.forEach(event => {
+            event.attendees.forEach(att => {
+                att.payments.forEach(pay => {
+                    totalSchoolRevenue += pay.amount;
+                });
+            });
         });
 
         // Paginated events for the table display
@@ -74,6 +91,7 @@ exports.renderSchoolDashboard = async (req, res) => {
         res.render('public/school_dashboard', { 
             school, 
             events: allEvents, // For top cards
+            totalSchoolRevenue, // Payment Status
             paginatedEvents, // For table
             page, 
             totalPages 

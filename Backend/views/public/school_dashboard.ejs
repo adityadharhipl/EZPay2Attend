@@ -66,7 +66,7 @@
         let utilization = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
     %>
 
-    <div class="metrics-grid">
+    <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr) !important;">
         <div class="metric-card">
             <div class="metric-card-header">
                 Total Events <i class="fa-solid fa-calendar-days"></i>
@@ -87,6 +87,13 @@
             </div>
             <div class="metric-card-value"><%= utilization %>%</div>
         </div>
+
+        <div class="metric-card">
+            <div class="metric-card-header">
+                Total Revenue <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <div class="metric-card-value">$<%= totalSchoolRevenue.toFixed(2) %></div>
+        </div>
     </div>
 
     <div class="dashboard-section" style="margin-top: 2rem;">
@@ -96,6 +103,7 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th>S.No.</th>
                         <th>Event Title</th>
                         <th>Date</th>
                         <th>Capacity Filled</th>
@@ -104,10 +112,11 @@
                 </thead>
                 <tbody>
                     <% if (paginatedEvents.length === 0) { %>
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
                     <% } else { %>
-                        <% paginatedEvents.forEach(event => { %>
+                        <% paginatedEvents.forEach((event, index) => { %>
                             <tr>
+                                <td><%= (page - 1) * 10 + index + 1 %></td>
                                 <td><strong><%= event.title %></strong></td>
                                 <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
                                 <td>

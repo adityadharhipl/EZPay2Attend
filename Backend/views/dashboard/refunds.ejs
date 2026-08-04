@@ -1,197 +1,307 @@
 <%- include('../layout/head', { title: title || 'Refunds & Replacements | EZPay2Attend' }) %>
-<style>
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .table-dark-custom {
-        background: var(--surface-light);
-        color: var(--text-primary);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    .table-dark-custom th {
-        background: rgba(255,255,255,0.05);
-        color: var(--text-secondary);
-        font-weight: 500;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .table-dark-custom td { border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-    
-    .status-badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-align: center; }
-    .status-refunded { background: rgba(23, 162, 184, 0.15); color: #17a2b8; }
-    .status-replaced { background: rgba(111, 66, 193, 0.15); color: #d3b4ff; }
-    .status-overdue { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
-    
-    /* Search Bar */
-    .search-container { display: flex; gap: 1rem; align-items: center; }
-    .search-input { background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 6px; min-width: 250px; }
-    
-    /* Pagination */
-    .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-top: 1rem; }
-    .page-link-btn { background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
-    .page-link-btn:hover { background: rgba(255,255,255,0.1); color: var(--primary-color); }
-    .page-link-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-</style>
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
 
-<div class="dashboard-layout">
-    <aside class="sidebar">
-        <div class="sidebar-logo">EZPay2Attend</div>
-        <nav>
-            <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-            <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
-            <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-            <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-            <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
-            <a href="/admin/refunds" class="nav-link active"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-            <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-        </nav>
-    </aside>
+        .table-dark-custom {
+            background: var(--surface-light);
+            color: var(--text-primary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-    <main class="main-content">
-        <div class="page-header">
-            <div class="header-left">
-                <h3 style="margin: 0; color: #fff;">Refunds & Replacements Queue</h3>
-            </div>
-            
-            <div class="header-right">
-                <div class="profile-menu">
-                    <div class="profile-icon" onclick="toggleDropdown()" style="border: none; background: transparent; padding: 0;">
-                        <div style="text-align: right; margin-right: 0.5rem;">
-                            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;"><%= user.name %></div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= user.role || 'Admin' %></div>
+        .table-dark-custom th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-dark-custom td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .status-refunded {
+            background: rgba(23, 162, 184, 0.15);
+            color: #17a2b8;
+        }
+
+        .status-replaced {
+            background: rgba(111, 66, 193, 0.15);
+            color: #d3b4ff;
+        }
+
+        .status-overdue {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-input {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            min-width: 250px;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .page-link-btn {
+            background: var(--surface-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .page-link-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .page-link-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+    </style>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">EZPay2Attend</div>
+            <nav>
+                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
+                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <a href="/admin/refunds" class="nav-link active"><i class="fa-solid fa-arrow-rotate-left"></i>
+                    Refunds</a>
+                <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link"
+                    style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i>
+                    Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="header-left">
+                    <h3 style="margin: 0; color: #fff;">Refunds & Replacements Queue</h3>
+                </div>
+
+                <div class="header-right">
+                    <div class="profile-menu">
+                        <div class="profile-icon" onclick="toggleDropdown()"
+                            style="border: none; background: transparent; padding: 0;">
+                            <div style="text-align: right; margin-right: 0.5rem;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                    <%= user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    <%= user.role || 'Admin' %>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
                         </div>
-                        <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-header">
-                            <strong><%= user.name %></strong>
-                            <p><%= user.email %></p>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <strong>
+                                    <%= user.name %>
+                                </strong>
+                                <p>
+                                    <%= user.email %>
+                                </p>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit
+                                Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()"
+                                class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                                Logout</a>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="dashboard-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h3 style="margin: 0;"><i class="fa-solid fa-arrow-rotate-left"></i> Attendees</h3>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <form class="search-container" method="GET" action="/admin/refunds" style="margin: 0;">
-                        <input type="text" class="search-input" name="search" placeholder="Search name or email..." value="<%= search %>">
-                        <button type="submit" class="btn" style="width: auto; padding: 0.5rem 1.5rem;">Search</button>
-                        <% if(search) { %>
-                            <a href="/admin/refunds" class="btn" style="background: transparent; border: 1px solid var(--border); width: auto;">Clear</a>
-                        <% } %>
-                    </form>
+            <div class="dashboard-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-arrow-rotate-left"></i> Attendees</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <form class="search-container" method="GET" action="/admin/refunds" style="margin: 0;">
+                            <input type="text" class="search-input" name="search" placeholder="Search name or email..."
+                                value="<%= search %>">
+                            <button type="submit" class="btn"
+                                style="width: auto; padding: 0.5rem 1.5rem;">Search</button>
+                            <% if(search) { %>
+                                <a href="/admin/refunds" class="btn"
+                                    style="background: transparent; border: 1px solid var(--border); width: auto;">Clear</a>
+                                <% } %>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-dark-custom table-hover w-100">
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Attendee Name</th>
-                            <th>Email</th>
-                            <th>Event</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if(attendees.length === 0) { %>
-                            <tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No refunds or replacements in queue.</td></tr>
-                        <% } else { %>
-                            <% attendees.forEach((attendee, index) => { %>
+
+                <div class="table-responsive">
+                    <table class="table table-dark-custom table-hover w-100">
+                        <thead>
                             <tr>
-                                <td style="color: var(--text-secondary);"><%= (typeof pagination !== 'undefined' && pagination.page && pagination.limit) ? ((pagination.page - 1) * pagination.limit + index + 1) : (index + 1) %></td>
-                                <td class="fw-bold"><%= attendee.fullName %></td>
-                                <td><%= attendee.email %></td>
-                                <td><%= attendee.event.title %></td>
-                                <td>
-                                    <% 
-                                        let statusClass = 'status-overdue';
-                                        if(attendee.status === 'REFUNDED') statusClass = 'status-refunded';
-                                        if(attendee.status === 'REPLACED') statusClass = 'status-replaced';
-                                    %>
-                                    <span class="status-badge <%= statusClass %>"><%= attendee.status.replace('_', ' ') %></span>
-                                </td>
-                                <td>
-                                    <% if (attendee.status !== 'REFUNDED' && attendee.status !== 'REPLACED') { %>
-                                        <button class="btn btn-sm" onclick="processRefund('<%= attendee.id %>')" style="background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-                                            Mark Refunded
-                                        </button>
-                                    <% } else { %>
-                                        <span style="color: var(--text-secondary); font-size: 0.85rem;"><i class="fa-solid fa-check"></i> Processed</span>
-                                    <% } %>
-                                </td>
+                                <th>S.No</th>
+                                <th>Attendee Name</th>
+                                <th>Email</th>
+                                <th>Event</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
-                            <% }) %>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
-            
-            <% if (pagination && pagination.totalPages > 1) { %>
-            <div class="pagination-container">
-                <% if (pagination.page > 1) { %>
-                    <a href="?page=<%= pagination.page - 1 %>&search=<%= search %>" class="page-link-btn">Previous</a>
-                <% } %>
-                
-                <% for(let i=1; i<=pagination.totalPages; i++) { %>
-                    <a href="?page=<%= i %>&search=<%= search %>" class="page-link-btn <%= i === pagination.page ? 'active' : '' %>"><%= i %></a>
-                <% } %>
-                
-                <% if (pagination.page < pagination.totalPages) { %>
-                    <a href="?page=<%= pagination.page + 1 %>&search=<%= search %>" class="page-link-btn">Next</a>
-                <% } %>
-            </div>
-            <% } %>
-        </div>
-    </main>
-</div>
+                        </thead>
+                        <tbody>
+                            <% if(attendees.length===0) { %>
+                                <tr>
+                                    <td colspan="6"
+                                        style="text-align: center; color: var(--text-secondary); padding: 2rem;">No
+                                        refunds or replacements in queue.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% attendees.forEach((attendee, index)=> { %>
+                                        <tr>
+                                            <td style="color: var(--text-secondary);">
+                                                <%= (typeof pagination !=='undefined' && pagination.page &&
+                                                    pagination.limit) ? ((pagination.page - 1) * pagination.limit +
+                                                    index + 1) : (index + 1) %>
+                                            </td>
+                                            <td class="fw-bold">
+                                                <%= attendee.fullName %>
+                                            </td>
+                                            <td>
+                                                <%= attendee.email %>
+                                            </td>
+                                            <td>
+                                                <%= attendee.event.title %>
+                                            </td>
+                                            <td>
+                                                <% let statusClass='status-overdue' ; if(attendee.status==='REFUNDED' )
+                                                    statusClass='status-refunded' ; if(attendee.status==='REPLACED' )
+                                                    statusClass='status-replaced' ; %>
+                                                    <span class="status-badge <%= statusClass %>">
+                                                        <%= attendee.status.replace('_', ' ' ) %>
+                                                    </span>
+                                            </td>
+                                            <td>
+                                                <% if (attendee.status !=='REFUNDED' && attendee.status !=='REPLACED' )
+                                                    { %>
+                                                    <button class="btn btn-sm"
+                                                        onclick="processRefund('<%= attendee.id %>')"
+                                                        style="background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                                        Mark Refunded
+                                                    </button>
+                                                    <% } else { %>
+                                                        <span
+                                                            style="color: var(--text-secondary); font-size: 0.85rem;"><i
+                                                                class="fa-solid fa-check"></i> Processed</span>
+                                                        <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
 
-<script>
-    function toggleDropdown() {
-        document.getElementById("profileDropdown").classList.toggle("show");
-    }
-    
-    window.onclick = function(event) {
-        if (!event.target.closest('.profile-menu')) {
-            var dropdowns = document.getElementsByClassName("profile-dropdown");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
+                <% if (pagination && pagination.totalPages> 1) { %>
+                    <div class="pagination-container">
+                        <% if (pagination.page> 1) { %>
+                            <a href="?page=<%= pagination.page - 1 %>&search=<%= search %>"
+                                class="page-link-btn">Previous</a>
+                            <% } %>
+
+                                <% for(let i=1; i<=pagination.totalPages; i++) { %>
+                                    <a href="?page=<%= i %>&search=<%= search %>"
+                                        class="page-link-btn <%= i === pagination.page ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                    <% } %>
+
+                                        <% if (pagination.page < pagination.totalPages) { %>
+                                            <a href="?page=<%= pagination.page + 1 %>&search=<%= search %>"
+                                                class="page-link-btn">Next</a>
+                                            <% } %>
+                    </div>
+                    <% } %>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("profileDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-menu')) {
+                var dropdowns = document.getElementsByClassName("profile-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
                 }
             }
         }
-    }
 
-    async function processRefund(attendeeId) {
-        if(confirm("Are you sure you want to mark this attendee as REFUNDED? This will free up a spot in the event capacity.")) {
-            try {
-                // In a full system, you would call the Payment Gateway API to actually refund the money here.
-                // For this phase, we simply update the status.
-                const res = await fetch(`/api/attendees/${attendeeId}/status`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'REFUNDED' })
-                });
-                
-                if(res.ok) {
-                    showToast('Refund processed successfully', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showToast('Failed to process refund', 'error');
+        async function processRefund(attendeeId) {
+            if (confirm("Are you sure you want to mark this attendee as REFUNDED? This will free up a spot in the event capacity.")) {
+                try {
+                    // In a full system, you would call the Payment Gateway API to actually refund the money here.
+                    // For this phase, we simply update the status.
+                    const res = await fetch(`/api/attendees/${attendeeId}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'REFUNDED' })
+                    });
+
+                    if (res.ok) {
+                        showToast('Refund processed successfully', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast('Failed to process refund', 'error');
+                    }
+                } catch (err) {
+                    showToast('Network error', 'error');
                 }
-            } catch (err) {
-                showToast('Network error', 'error');
             }
         }
-    }
-</script>
-</body>
-</html>
+    </script>
+    </body>
+
+    </html>

@@ -1,121 +1,147 @@
 <%- include('../layout/head', { title: 'Profile | EZPay2Attend' }) %>
 
-<div class="dashboard-layout">
-    <aside class="sidebar">
-        <div class="sidebar-logo">EZPay2Attend</div>
-        <nav>
-            <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-            <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
-            <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-            <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-            <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
-            <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-            <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link" style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-        </nav>
-    </aside>
-    
-    <main class="main-content">
-        <div class="page-header">
-            <div class="header-left">
-            </div>
-            
-            <div class="header-right">
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">EZPay2Attend</div>
+            <nav>
+                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i>Attendee/Registrations</a>
+                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+                <a href="javascript:void(0)" onclick="openLogoutModal()" class="nav-link"
+                    style="margin-top: 2rem; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i>
+                    Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="header-left">
+                </div>
+
+                <div class="header-right">
 
 
-                
-                <!-- Profile Dropdown -->
-                <div class="profile-menu">
-                    <div class="profile-icon" onclick="toggleDropdown()" style="border: none; background: transparent; padding: 0;">
-                        <div style="text-align: right; margin-right: 0.5rem;">
-                            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;"><%= user.name %></div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= user.role || 'Admin' %></div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="profile-menu">
+                        <div class="profile-icon" onclick="toggleDropdown()"
+                            style="border: none; background: transparent; padding: 0;">
+                            <div style="text-align: right; margin-right: 0.5rem;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                    <%= user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    <%= user.role || 'Admin' %>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
                         </div>
-                        <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-header">
-                            <strong><%= user.name %></strong>
-                            <p><%= user.email %></p>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <strong>
+                                    <%= user.name %>
+                                </strong>
+                                <p>
+                                    <%= user.email %>
+                                </p>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit
+                                Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()"
+                                class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                                Logout</a>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="auth-card profile-card">
-            <% if (typeof error !== 'undefined' && error) { %>
-                <div class="alert error"><%= error %></div>
-            <% } %>
-            <% if (typeof success !== 'undefined' && success) { %>
-                <div class="alert success"><%= success %></div>
-            <% } %>
 
-            <form action="/admin/profile" method="POST">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" name="name" class="form-control" value="<%= user.name %>" required>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<%= user.email %>" readonly style="opacity: 0.7; cursor: not-allowed;">
-                </div>
-                
-                <h4 style="margin: 2rem 0 1rem 0; color: var(--text-secondary);">Change Password (Optional)</h4>
-                
-                <div class="form-group">
-                    <label>New Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" name="password" id="newPassword" class="form-control" placeholder="Leave blank to keep current">
-                        <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('newPassword', this)"></i>
+            <div class="auth-card profile-card">
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert error">
+                        <%= error %>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" placeholder="Confirm new password">
-                        <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('confirmPassword', this)"></i>
-                    </div>
-                </div>
+                    <% } %>
+                        <% if (typeof success !=='undefined' && success) { %>
+                            <div class="alert success">
+                                <%= success %>
+                            </div>
+                            <% } %>
 
-                <button type="submit" class="btn" style="margin-top: 1rem;">Update Profile</button>
-            </form>
-        </div>
-    </main>
-</div>
-<script>
-    function toggleDropdown() {
-        document.getElementById("profileDropdown").classList.toggle("show");
-    }
-    
-    // Close the dropdown if the user clicks outside of it
-    window.onclick = function(event) {
-        if (!event.target.closest('.profile-menu')) {
-            var dropdowns = document.getElementsByClassName("profile-dropdown");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
+                                <form action="/admin/profile" method="POST">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="text" name="name" class="form-control" value="<%= user.name %>"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" name="email" class="form-control" value="<%= user.email %>"
+                                            readonly style="opacity: 0.7; cursor: not-allowed;">
+                                    </div>
+
+                                    <h4 style="margin: 2rem 0 1rem 0; color: var(--text-secondary);">Change Password
+                                        (Optional)</h4>
+
+                                    <div class="form-group">
+                                        <label>New Password</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" name="password" id="newPassword" class="form-control"
+                                                placeholder="Leave blank to keep current">
+                                            <i class="fa-solid fa-eye toggle-password"
+                                                onclick="togglePassword('newPassword', this)"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm Password</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" name="confirmPassword" id="confirmPassword"
+                                                class="form-control" placeholder="Confirm new password">
+                                            <i class="fa-solid fa-eye toggle-password"
+                                                onclick="togglePassword('confirmPassword', this)"></i>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn" style="margin-top: 1rem;">Update Profile</button>
+                                </form>
+            </div>
+        </main>
+    </div>
+    <script>
+        function toggleDropdown() {
+            document.getElementById("profileDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-menu')) {
+                var dropdowns = document.getElementsByClassName("profile-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
                 }
             }
         }
-    }
 
-    function togglePassword(inputId, icon) {
-        const input = document.getElementById(inputId);
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            input.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
         }
-    }
-</script>
-</body>
-</html>
+    </script>
+    </body>
+
+    </html>
