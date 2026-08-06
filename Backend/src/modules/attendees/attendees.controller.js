@@ -51,3 +51,22 @@ exports.deleteAttendee = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+exports.sendBalanceReminders = async (req, res) => {
+    try {
+        const count = await attendeesService.sendBalanceReminders();
+        res.status(200).json({ success: true, message: `Successfully sent ${count} reminders` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.requestRefund = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await attendeesService.requestRefund(id);
+        res.status(200).json({ success: true, message: 'Refund requested successfully' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};

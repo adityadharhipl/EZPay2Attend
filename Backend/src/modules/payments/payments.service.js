@@ -163,3 +163,25 @@ exports.processRefund = async (attendeeId) => {
 
     return { success: true, message: "Refund processed successfully" };
 };
+
+exports.rejectRefund = async (attendeeId) => {
+    const attendee = await db.attendee.findUnique({
+        where: { id: attendeeId },
+        include: { event: true }
+    });
+
+    if (!attendee) throw new Error("Attendee not found");
+    if (attendee.status !== 'REFUND_REQUESTED') throw new Error("No refund requested for this attendee");
+
+    // Revert status to CONFIRMED (since they must have paid something to request a refund)
+    await db.attendee.update({
+        where: { id: attendeeId },
+        data: { status: 'CONFIRMED' }
+    });
+
+    // Send Rejection Email
+    const mailer = require('../../utils/mailer');
+    mailer.sendRefundRejection(attendee, attendee.event).catch(e => console.error("Email Error:", e));
+
+    return { success: true, message: "Refund rejected successfully" };
+};

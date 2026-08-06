@@ -1,46 +1,52 @@
 <%- include('../layout/head', { title: 'Login | EZPay2Attend' }) %>
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Log in to manage EZPay2Attend</p>
-        
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert error"><%= error %></div>
-        <% } %>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Log in to manage EZPay2Attend</p>
 
-        <form action="/api/auth/login" method="POST">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" required placeholder="admin@ezpay2attend.com">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <div class="password-wrapper">
-                    <input type="password" name="password" id="password" class="form-control" required placeholder="Enter your password">
-                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+            <% if (typeof error !=='undefined' && error) { %>
+                <div class="alert error">
+                    <%= error %>
                 </div>
-            </div>
-            <button type="submit" class="btn">Sign In</button>
-        </form>
-        
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <a href="/api/auth/forgot-password" style="font-size: 0.875rem;">Forgot your password?</a>
+                <% } %>
+
+                    <form action="/api/auth/login" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" required
+                                placeholder="admin@ezpay2attend.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" id="password" class="form-control" required
+                                    placeholder="Enter your password">
+                                <i class="fa-solid fa-eye toggle-password"
+                                    onclick="togglePassword('password', this)"></i>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">Sign In</button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <a href="/api/auth/forgot-password" style="font-size: 0.875rem;">Forgot your password?</a>
+                    </div>
         </div>
-    </div>
-    <script>
-        function togglePassword(inputId, icon) {
-            const input = document.getElementById(inputId);
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
+        <script>
+            function togglePassword(inputId, icon) {
+                const input = document.getElementById(inputId);
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                } else {
+                    input.type = "password";
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
             }
-        }
-    </script>
-</div>
-</body>
-</html>
+        </script>
+    </div>
+    </body>
+
+    </html>

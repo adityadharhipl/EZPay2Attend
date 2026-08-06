@@ -226,18 +226,26 @@
                                                     </span>
                                             </td>
                                             <td>
-                                                <% if (attendee.status !=='REFUNDED' && attendee.status !=='REPLACED' )
-                                                    { %>
-                                                    <button class="btn btn-sm"
-                                                        onclick="processRefund('<%= attendee.id %>')"
-                                                        style="background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-                                                        Mark Refunded
-                                                    </button>
-                                                    <% } else { %>
-                                                        <span
-                                                            style="color: var(--text-secondary); font-size: 0.85rem;"><i
-                                                                class="fa-solid fa-check"></i> Processed</span>
+                                                <% if (attendee.status !=='REFUNDED' && attendee.status !=='REPLACED' ) { %>
+                                                    <div style="display: flex; gap: 0.5rem;">
+                                                        <button class="btn btn-sm"
+                                                            onclick="processRefund('<%= attendee.id %>')"
+                                                            style="background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                                            Mark Refunded
+                                                        </button>
+                                                        <% if (attendee.status === 'REFUND_REQUESTED') { %>
+                                                        <button class="btn btn-sm"
+                                                            onclick="rejectRefund('<%= attendee.id %>')"
+                                                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                                            Reject
+                                                        </button>
                                                         <% } %>
+                                                    </div>
+                                                <% } else { %>
+                                                    <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                                                        <i class="fa-solid fa-check"></i> Processed
+                                                    </span>
+                                                <% } %>
                                             </td>
                                         </tr>
                                         <% }) %>
@@ -303,6 +311,28 @@
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
                         showToast('Failed to process refund', 'error');
+                    }
+                } catch (err) {
+                    showToast('Network error', 'error');
+                }
+            }
+        }
+
+        async function rejectRefund(attendeeId) {
+            if (confirm("Are you sure you want to reject this refund request?")) {
+                try {
+                    const res = await fetch(`/api/payments/refund/reject`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ attendeeId })
+                    });
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        showToast(result.message, 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showToast(result.message || 'Failed to reject refund', 'error');
                     }
                 } catch (err) {
                     showToast('Network error', 'error');

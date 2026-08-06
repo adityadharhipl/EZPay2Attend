@@ -222,6 +222,7 @@ a:hover {
     transition: all 0.2s;
     font-weight: 500;
     gap: 1rem;
+    white-space: nowrap;
 }
 
 .nav-link i {

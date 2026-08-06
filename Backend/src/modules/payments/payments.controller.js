@@ -72,3 +72,16 @@ exports.processRefund = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+exports.rejectRefund = async (req, res) => {
+    try {
+        const { attendeeId } = req.body;
+        if (!attendeeId) return res.status(400).json({ success: false, message: "Attendee ID is required" });
+
+        const result = await paymentsService.rejectRefund(attendeeId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error("Reject Refund Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};

@@ -41,6 +41,12 @@ router.post('/register', attendeesController.createAttendee);
 // Protected routes for admin
 router.use(authenticate);
 
+// Route for simulating a refund request (secured)
+router.post('/:id/request-refund', attendeesController.requestRefund);
+
+// Trigger balance reminders
+router.post('/reminders/balance', attendeesController.sendBalanceReminders);
+
 /**
  * @swagger
  * /api/attendees:

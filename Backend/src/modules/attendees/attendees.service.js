@@ -110,3 +110,41 @@ exports.deleteAttendee = async (id) => {
         throw error;
     }
 };
+
+exports.sendBalanceReminders = async () => {
+    const pendingAttendees = await db.attendee.findMany({
+        where: { status: 'BALANCE_PENDING' },
+        include: { event: true }
+    });
+
+    if (!pendingAttendees.length) return 0;
+
+    const mailer = require('../../utils/mailer');
+    let count = 0;
+    
+    for (const attendee of pendingAttendees) {
+        try {
+            await mailer.sendBalanceReminder(attendee, attendee.event);
+            count++;
+        } catch (error) {
+            console.error(`Failed to send reminder to ${attendee.email}:`, error);
+        }
+    }
+    
+    return count;
+};
+
+exports.requestRefund = async (id) => {
+    try {
+        const attendee = await db.attendee.findUnique({ where: { id } });
+        if (!attendee) throw new Error("Attendee not found");
+        if (attendee.status !== 'CONFIRMED') throw new Error("Only confirmed attendees can request refunds");
+
+        return await db.attendee.update({
+            where: { id },
+            data: { status: 'REFUND_REQUESTED' }
+        });
+    } catch (error) {
+        throw error;
+    }
+};

@@ -88,4 +88,7 @@ router.get('/', paymentsController.getPayments);
 // Process Refund
 router.post('/refund', authenticate, paymentsController.processRefund);
 
+// Reject Refund
+router.post('/refund/reject', authenticate, paymentsController.rejectRefund);
+
 module.exports = router;

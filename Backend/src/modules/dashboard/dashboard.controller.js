@@ -135,7 +135,7 @@ exports.getRefunds = async (req, res) => {
 
         // Refund queue: Attendees who requested refunds, or are replaced, or overdue
         let whereClause = {
-            status: { in: ['REFUNDED', 'BALANCE_OVERDUE', 'REPLACED'] }
+            status: { in: ['REFUND_REQUESTED', 'REFUNDED', 'BALANCE_OVERDUE', 'REPLACED'] }
         };
         if (search) {
             whereClause.OR = [

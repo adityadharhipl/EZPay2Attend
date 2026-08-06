@@ -59,7 +59,7 @@ model Attendee {
   guardianName   String?
   contactNumber  String
   email          String
-  status         String    @default("INCOMPLETE") // INCOMPLETE, CONFIRMED, BALANCE_PENDING, BALANCE_OVERDUE, REFUNDED, REPLACED
+  status         String    @default("INCOMPLETE") // INCOMPLETE, CONFIRMED, BALANCE_PENDING, BALANCE_OVERDUE, REFUNDED, REPLACED, REFUND_REQUESTED
   payments       Payment[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
