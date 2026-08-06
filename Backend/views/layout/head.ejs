@@ -76,4 +76,31 @@
             window.location.reload();
         }
     });
+
+    function changeEntriesLimit(limit) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('limit', limit);
+        urlParams.set('page', 1);
+        window.location.search = urlParams.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentLimit = urlParams.get('limit');
+        const currentSearch = urlParams.get('search');
+        
+        if (currentLimit || currentSearch) {
+            document.querySelectorAll('.page-link-btn').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('?page=')) {
+                    const pageNum = href.split('=')[1];
+                    const newUrl = new URLSearchParams();
+                    newUrl.set('page', pageNum);
+                    if (currentLimit) newUrl.set('limit', currentLimit);
+                    if (currentSearch) newUrl.set('search', currentSearch);
+                    link.setAttribute('href', '?' + newUrl.toString());
+                }
+            });
+        }
+    });
 </script>
