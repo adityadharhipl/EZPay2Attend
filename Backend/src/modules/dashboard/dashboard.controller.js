@@ -29,11 +29,11 @@ exports.getEvents = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const { data: events, total } = await eventsService.getAllEvents(page, limit);
         const totalPages = Math.ceil(total / limit);
-        const schools = await db.school.findMany(); // Needed for the Create Event dropdown
-        res.render('dashboard/events', { 
-            user: req.user, 
-            title: 'Event Management', 
-            events, 
+        const schools = await db.school.findMany();
+        res.render('dashboard/events', {
+            user: req.user,
+            title: 'Event Management',
+            events,
             schools,
             pagination: { page, limit, total, totalPages }
         });
@@ -49,10 +49,10 @@ exports.getSchools = async (req, res) => {
         const schoolsService = require('../schools/schools.service');
         const { data: schools, total } = await schoolsService.getAllSchools(page, limit);
         const totalPages = Math.ceil(total / limit);
-        
-        res.render('dashboard/schools', { 
-            user: req.user, 
-            title: 'School Management', 
+
+        res.render('dashboard/schools', {
+            user: req.user,
+            title: 'School Management',
             schools,
             pagination: { page, limit, total, totalPages }
         });
@@ -66,14 +66,14 @@ exports.getAttendees = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || '';
-        
+
         const attendeesService = require('../attendees/attendees.service');
         const { data: attendees, total } = await attendeesService.getAllAttendees(page, limit, search);
         const totalPages = Math.ceil(total / limit);
-        
-        res.render('dashboard/attendees', { 
-            user: req.user, 
-            title: 'Attendee Management', 
+
+        res.render('dashboard/attendees', {
+            user: req.user,
+            title: 'Attendee Management',
             attendees,
             search,
             pagination: { page, limit, total, totalPages }
@@ -96,7 +96,8 @@ exports.getPayments = async (req, res) => {
                 OR: [
                     { referenceNumber: { contains: search } },
                     { attendee: { fullName: { contains: search } } },
-                    { attendee: { email: { contains: search } } }
+                    { attendee: { email: { contains: search } } },
+                    { attendee: { event: { title: { contains: search } } } }
                 ]
             };
         }
@@ -175,7 +176,7 @@ exports.handleUpdateProfile = async (req, res) => {
         }
 
         await dashboardService.updateAdminProfile(req.user.id, value);
-        
+
         // Fetch updated user to reflect changes
         const updatedUser = { ...req.user, name: value.name, email: value.email };
         res.render('dashboard/profile', { user: updatedUser, error: null, success: 'Profile updated successfully' });

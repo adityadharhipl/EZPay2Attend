@@ -230,9 +230,10 @@ a:hover {
     font-size: 1.1rem;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     background-color: rgba(79, 70, 229, 0.15);
-    color: var(--primary);
+    color: #c0bfce;
 }
 
 .main-content {
@@ -315,7 +316,8 @@ a:hover {
     font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.5px;
-    display: none; /* Hidden in favor of new header layout */
+    display: none;
+    /* Hidden in favor of new header layout */
 }
 
 /* Profile Dropdown */
@@ -473,7 +475,8 @@ a:hover {
     border-collapse: collapse;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
@@ -504,10 +507,25 @@ a:hover {
     display: inline-block;
 }
 
-.badge.success { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-.badge.warning { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-.badge.danger { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
-.badge.info { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+.badge.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+}
+
+.badge.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+}
+
+.badge.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+}
+
+.badge.info {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3B82F6;
+}
 
 /* Animations */
 @keyframes fadeUp {
@@ -515,6 +533,7 @@ a:hover {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
