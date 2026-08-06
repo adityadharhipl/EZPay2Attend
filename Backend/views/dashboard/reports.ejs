@@ -1,0 +1,187 @@
+<%- include('../layout/head', { title: 'Reports | EZPay2Attend' }) %>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">EZPay2Attend</div>
+            <nav>
+                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
+                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+                <a href="/admin/reports" class="nav-link active"><i class="fa-solid fa-file-csv"></i> Reports</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="header-left">
+                    <h3 style="margin: 0; color: #fff;">Generate Reports</h3>
+                </div>
+
+                <div class="header-right">
+                    <div class="profile-menu">
+                        <div class="profile-icon" onclick="toggleDropdown()"
+                            style="border: none; background: transparent; padding: 0;">
+                            <div style="text-align: right; margin-right: 0.5rem;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                    <%= user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    <%= user.role || 'Admin' %>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <strong>
+                                    <%= user.name %>
+                                </strong>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                    <%= user.email %>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-card profile-card" style="max-width: 800px; margin: 2rem auto;">
+                <h4 style="margin-top: 0; color: #fff; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">Report Configuration</h4>
+                
+                <form id="reportForm" action="/admin/export/custom" method="GET" target="_blank">
+                    <div class="form-group mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Report Type</label>
+                        <select class="form-control" name="type" id="reportType" required onchange="toggleFilters()">
+                            <option value="attendee">Attendee Report</option>
+                            <option value="payment">Payment Report</option>
+                            <option value="event">Event Report</option>
+                            <option value="financial">Financial Report</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select Event (Optional)</label>
+                        <select class="form-control" name="eventId">
+                            <option value="">All Events</option>
+                            <% events.forEach(e => { %>
+                                <option value="<%= e.id %>"><%= e.title %> (<%= e.school.name %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Start Date (Optional)</label>
+                            <input type="date" class="form-control" name="startDate">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">End Date (Optional)</label>
+                            <input type="date" class="form-control" name="endDate">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;" id="statusFilters">
+                        <div class="form-group" id="regStatusContainer" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Registration Status (Optional)</label>
+                            <select class="form-control" name="registrationStatus">
+                                <option value="">All Statuses</option>
+                                <option value="CONFIRMED">Confirmed</option>
+                                <option value="INCOMPLETE">Incomplete</option>
+                                <option value="BALANCE_PENDING">Balance Pending</option>
+                                <option value="BALANCE_OVERDUE">Balance Overdue</option>
+                                <option value="REFUNDED">Refunded</option>
+                                <option value="REPLACED">Replaced</option>
+                                <option value="REFUND_REQUESTED">Refund Requested</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="payStatusContainer" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Payment Status (Optional)</label>
+                            <select class="form-control" name="paymentStatus">
+                                <option value="">All Statuses</option>
+                                <option value="SUCCESS">Success</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="background: var(--primary); color: #fff; width: 100%; padding: 0.8rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.3s ease;">
+                        <i class="fa-solid fa-download"></i> Generate & Download Report
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Logout</h3>
+                <button class="close-btn" onclick="closeLogoutModal()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to log out of your account?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeLogoutModal()">Cancel</button>
+                <a href="/api/auth/logout" class="btn btn-danger text-white text-decoration-none"
+                    style="background: var(--danger);">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("profileDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-menu')) {
+                var dropdowns = document.getElementsByClassName("profile-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function toggleFilters() {
+            const type = document.getElementById('reportType').value;
+            const regStatus = document.getElementById('regStatusContainer');
+            const payStatus = document.getElementById('payStatusContainer');
+            
+            if (type === 'attendee') {
+                regStatus.style.display = 'block';
+                payStatus.style.display = 'none';
+            } else if (type === 'payment') {
+                regStatus.style.display = 'none';
+                payStatus.style.display = 'block';
+            } else {
+                regStatus.style.display = 'none';
+                payStatus.style.display = 'none';
+            }
+        }
+
+        // Initialize display
+        toggleFilters();
+
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.add('show');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('show');
+        }
+    </script>
+    </body>
+</html>
