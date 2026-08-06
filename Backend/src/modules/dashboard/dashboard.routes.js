@@ -36,5 +36,7 @@ router.get('/refunds', authenticate, dashboardController.getRefunds);
 
 router.get('/reports', authenticate, dashboardController.renderReports);
 router.get('/export/custom', authenticate, dashboardController.exportCustomReport);
+router.get('/export/attendees', authenticate, dashboardController.exportAttendeesCSV);
+router.get('/export/payments', authenticate, dashboardController.exportPaymentsCSV);
 
 module.exports = router;

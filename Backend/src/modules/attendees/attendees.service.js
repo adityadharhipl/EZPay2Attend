@@ -134,6 +134,27 @@ exports.sendBalanceReminders = async () => {
     return count;
 };
 
+exports.sendIndividualReminder = async (id) => {
+    const attendee = await db.attendee.findUnique({
+        where: { id },
+        include: { event: true }
+    });
+
+    if (!attendee) throw new Error("Attendee not found");
+    if (attendee.status !== 'BALANCE_PENDING' && attendee.status !== 'INCOMPLETE') {
+        throw new Error("Reminder can only be sent to pending/incomplete attendees");
+    }
+
+    const mailer = require('../../utils/mailer');
+    try {
+        await mailer.sendBalanceReminder(attendee, attendee.event);
+        return 1;
+    } catch (error) {
+        console.error(`Failed to send reminder to ${attendee.email}:`, error);
+        throw new Error("Failed to send email");
+    }
+};
+
 exports.requestRefund = async (id) => {
     try {
         const attendee = await db.attendee.findUnique({ where: { id } });

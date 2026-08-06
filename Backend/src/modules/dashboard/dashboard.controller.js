@@ -2,6 +2,7 @@ const dashboardService = require('./dashboard.service');
 const { updateProfileSchema } = require('./dashboard.validation');
 const eventsService = require('../events/events.service');
 const db = require('../../config/db');
+const ExcelJS = require('exceljs');
 
 exports.renderDashboard = async (req, res) => {
     try {
@@ -195,6 +196,38 @@ exports.renderReports = async (req, res) => {
     }
 };
 
+exports.exportAttendeesCSV = async (req, res) => {
+    try {
+        const attendees = await db.attendee.findMany({ include: { event: true }, orderBy: { createdAt: 'desc' } });
+        let csv = 'Name,Email,Contact,Event,Status,Registration Date\n';
+        attendees.forEach(a => {
+            csv += `"${a.fullName}","${a.email}","${a.contactNumber}","${a.event.title}","${a.status}","${a.createdAt.toISOString()}"\n`;
+        });
+        res.header('Content-Type', 'text/csv');
+        res.attachment('attendees.csv');
+        return res.send(csv);
+    } catch (err) {
+        console.error("Error exporting attendees:", err);
+        res.status(500).send("Server Error");
+    }
+};
+
+exports.exportPaymentsCSV = async (req, res) => {
+    try {
+        const payments = await db.payment.findMany({ include: { attendee: { include: { event: true } } }, orderBy: { createdAt: 'desc' } });
+        let csv = 'Reference,Gateway Ref,Name,Event,Amount,Type,Status,Payment Date\n';
+        payments.forEach(p => {
+            csv += `"${p.referenceNumber || ''}","${p.gatewayReference || ''}","${p.attendee.fullName}","${p.attendee.event.title}","${p.amount}","${p.type}","${p.status}","${p.createdAt.toISOString()}"\n`;
+        });
+        res.header('Content-Type', 'text/csv');
+        res.attachment('payments.csv');
+        return res.send(csv);
+    } catch (err) {
+        console.error("Error exporting payments:", err);
+        res.status(500).send("Server Error");
+    }
+};
+
 exports.exportCustomReport = async (req, res) => {
     try {
         const { type, eventId, startDate, endDate, registrationStatus, paymentStatus, format } = req.query;
@@ -211,8 +244,21 @@ exports.exportCustomReport = async (req, res) => {
             }
         }
 
-        let csv = '';
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Report');
+
         let jsonData = [];
+
+        // Helper function to format headers
+        const styleHeaders = (sheet) => {
+            sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            sheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF1E293B' }
+            };
+            sheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        };
 
         if (type === 'attendee') {
             let whereClause = { ...dateWhere };
@@ -220,33 +266,70 @@ exports.exportCustomReport = async (req, res) => {
             if (registrationStatus) whereClause.status = registrationStatus;
 
             const attendees = await db.attendee.findMany({ where: whereClause, include: { event: true } });
-            csv = 'Name,Email,Contact,Event,Status,Registration Date\n';
+            
+            worksheet.columns = [
+                { header: 'Name', key: 'name', width: 25 },
+                { header: 'Email', key: 'email', width: 30 },
+                { header: 'Contact', key: 'contact', width: 15 },
+                { header: 'Event', key: 'event', width: 30 },
+                { header: 'Status', key: 'status', width: 15 },
+                { header: 'Registration Date', key: 'registrationDate', width: 20 }
+            ];
+            
             attendees.forEach(a => {
-                csv += `"${a.fullName}","${a.email}","${a.contactNumber}","${a.event.title}","${a.status}","${a.createdAt.toISOString()}"\n`;
+                const regDate = a.createdAt.toISOString();
+                worksheet.addRow({
+                    name: a.fullName,
+                    email: a.email,
+                    contact: a.contactNumber,
+                    event: a.event.title,
+                    status: a.status,
+                    registrationDate: regDate.split('T')[0]
+                });
                 jsonData.push({
                     name: a.fullName,
                     email: a.email,
                     contact: a.contactNumber,
                     event: a.event.title,
                     status: a.status,
-                    registrationDate: a.createdAt.toISOString()
+                    registrationDate: regDate
                 });
             });
-            if (format !== 'json') res.attachment('attendee_report.csv');
+            styleHeaders(worksheet);
             
         } else if (type === 'payment') {
             let whereClause = { ...dateWhere };
             if (paymentStatus) whereClause.status = paymentStatus;
             
-            // To filter payments by event, we need to filter by the related attendee's eventId
             if (eventId) {
                 whereClause.attendee = { eventId: eventId };
             }
 
             const payments = await db.payment.findMany({ where: whereClause, include: { attendee: { include: { event: true } } } });
-            csv = 'Reference,Gateway Ref,Name,Event,Amount,Type,Status,Payment Date\n';
+            
+            worksheet.columns = [
+                { header: 'Reference', key: 'reference', width: 20 },
+                { header: 'Gateway Ref', key: 'gatewayRef', width: 20 },
+                { header: 'Name', key: 'name', width: 25 },
+                { header: 'Event', key: 'event', width: 30 },
+                { header: 'Amount', key: 'amount', width: 12 },
+                { header: 'Type', key: 'type', width: 12 },
+                { header: 'Status', key: 'status', width: 15 },
+                { header: 'Payment Date', key: 'paymentDate', width: 20 }
+            ];
+
             payments.forEach(p => {
-                csv += `"${p.referenceNumber || ''}","${p.gatewayReference || ''}","${p.attendee.fullName}","${p.attendee.event.title}","${p.amount}","${p.type}","${p.status}","${p.createdAt.toISOString()}"\n`;
+                const payDate = p.createdAt.toISOString();
+                worksheet.addRow({
+                    reference: p.referenceNumber || '-',
+                    gatewayRef: p.gatewayReference || '-',
+                    name: p.attendee.fullName,
+                    event: p.attendee.event.title,
+                    amount: p.amount,
+                    type: p.type,
+                    status: p.status,
+                    paymentDate: payDate.split('T')[0]
+                });
                 jsonData.push({
                     reference: p.referenceNumber,
                     gatewayRef: p.gatewayReference,
@@ -255,10 +338,10 @@ exports.exportCustomReport = async (req, res) => {
                     amount: p.amount,
                     type: p.type,
                     status: p.status,
-                    paymentDate: p.createdAt.toISOString()
+                    paymentDate: payDate
                 });
             });
-            if (format !== 'json') res.attachment('payment_report.csv');
+            styleHeaders(worksheet);
             
         } else if (type === 'event') {
             let whereClause = { ...dateWhere };
@@ -271,9 +354,28 @@ exports.exportCustomReport = async (req, res) => {
                     _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } 
                 } 
             });
-            csv = 'Event Title,School,Status,Capacity,Enrolled,Date,Cost Per Attendee\n';
+            
+            worksheet.columns = [
+                { header: 'Event Title', key: 'eventTitle', width: 30 },
+                { header: 'School', key: 'school', width: 30 },
+                { header: 'Status', key: 'status', width: 15 },
+                { header: 'Capacity', key: 'capacity', width: 12 },
+                { header: 'Enrolled', key: 'enrolled', width: 12 },
+                { header: 'Date', key: 'date', width: 15 },
+                { header: 'Cost Per Attendee', key: 'costPerAttendee', width: 20 }
+            ];
+
             events.forEach(e => {
-                csv += `"${e.title}","${e.school.name}","${e.status}","${e.capacity}","${e._count.attendees}","${e.date ? e.date.toISOString() : 'TBD'}","${e.costPerAttendee}"\n`;
+                const eventDate = e.date ? e.date.toISOString().split('T')[0] : 'TBD';
+                worksheet.addRow({
+                    eventTitle: e.title,
+                    school: e.school.name,
+                    status: e.status,
+                    capacity: e.capacity,
+                    enrolled: e._count.attendees,
+                    date: eventDate,
+                    costPerAttendee: e.costPerAttendee
+                });
                 jsonData.push({
                     eventTitle: e.title,
                     school: e.school.name,
@@ -284,7 +386,7 @@ exports.exportCustomReport = async (req, res) => {
                     costPerAttendee: e.costPerAttendee
                 });
             });
-            if (format !== 'json') res.attachment('event_report.csv');
+            styleHeaders(worksheet);
             
         } else if (type === 'financial') {
             let whereClause = { ...dateWhere };
@@ -292,7 +394,14 @@ exports.exportCustomReport = async (req, res) => {
 
             const events = await db.event.findMany({ where: whereClause, include: { attendees: { include: { payments: { where: { status: 'SUCCESS' } } } } } });
             
-            csv = 'Event Title,Total Registrations,Total Revenue Collected,Total Refunds Processed,Net Revenue\n';
+            worksheet.columns = [
+                { header: 'Event Title', key: 'eventTitle', width: 35 },
+                { header: 'Total Registrations', key: 'totalRegistrations', width: 20 },
+                { header: 'Total Revenue Collected', key: 'totalRevenue', width: 25 },
+                { header: 'Total Refunds Processed', key: 'totalRefunds', width: 25 },
+                { header: 'Net Revenue', key: 'netRevenue', width: 20 }
+            ];
+
             events.forEach(e => {
                 let totalRegistrations = e.attendees.length;
                 let totalRevenue = 0;
@@ -309,7 +418,13 @@ exports.exportCustomReport = async (req, res) => {
                 });
                 
                 const netRevenue = totalRevenue - totalRefunds;
-                csv += `"${e.title}","${totalRegistrations}","${totalRevenue.toFixed(2)}","${totalRefunds.toFixed(2)}","${netRevenue.toFixed(2)}"\n`;
+                worksheet.addRow({
+                    eventTitle: e.title,
+                    totalRegistrations,
+                    totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+                    totalRefunds: parseFloat(totalRefunds.toFixed(2)),
+                    netRevenue: parseFloat(netRevenue.toFixed(2))
+                });
                 jsonData.push({
                     eventTitle: e.title,
                     totalRegistrations,
@@ -318,15 +433,18 @@ exports.exportCustomReport = async (req, res) => {
                     netRevenue: netRevenue.toFixed(2)
                 });
             });
-            if (format !== 'json') res.attachment('financial_report.csv');
+            styleHeaders(worksheet);
         }
 
         if (format === 'json') {
             return res.json({ success: true, data: jsonData });
         }
 
-        res.header('Content-Type', 'text/csv');
-        return res.send(csv);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${type}_report.xlsx`);
+        
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         console.error("Error exporting report:", err);
         res.status(500).json({ success: false, message: 'Error generating report' });

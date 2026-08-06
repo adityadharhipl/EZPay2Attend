@@ -321,10 +321,7 @@
                             style="background: var(--primary); color: #fff; text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
                             <i class="fa-solid fa-external-link-alt"></i> Public Registration
                         </a>
-                        <button onclick="sendBalanceReminders()" class="btn" id="btn-reminders"
-                            style="background: #eab308; color: #000; text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
-                            <i class="fa-solid fa-bell"></i> Send Reminders
-                        </button>
+
                         <form class="search-container" method="GET" action="/admin/attendees" style="margin: 0;">
                             <input type="text" class="search-input" name="search" placeholder="Search name or email..."
                                 value="<%= search %>">
@@ -409,8 +406,13 @@
                                                         class="fa-solid fa-pen-to-square"></i></button>
                                                 <% if (attendee.status === 'CONFIRMED') { %>
                                                 <button class="action-btn" style="color: #eab308;" title="Simulate Refund Request"
-                                                    onclick="requestRefund('<%= attendee.id %>')"><i
+                                                    onclick="openRefundModal('<%= attendee.id %>')"><i
                                                         class="fa-solid fa-rotate-left"></i></button>
+                                                <% } %>
+                                                <% if (attendee.status === 'BALANCE_PENDING' || attendee.status === 'INCOMPLETE') { %>
+                                                <button class="action-btn" style="color: #3b82f6;" title="Send Reminder"
+                                                    onclick="sendIndividualReminder('<%= attendee.id %>', this)"><i
+                                                        class="fa-solid fa-paper-plane"></i></button>
                                                 <% } %>
                                                 <button class="action-btn delete" title="Delete"
                                                     data-id="<%= attendee.id %>" data-name="<%= attendee.fullName %>"
@@ -493,8 +495,21 @@
         </div>
     </div>
 
+    <!-- Refund Confirmation Modal -->
+    <div class="custom-modal" id="refundAttendeeModal">
+        <div class="delete-modal-content">
+            <h3>Simulate Refund</h3>
+            <p>Are you sure you want to simulate a refund request for this attendee?</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-btn-cancel" onclick="closeRefundModal()">Cancel</button>
+                <button type="button" class="delete-btn-confirm" style="background: #eab308;" onclick="confirmRefundAttendee()">Simulate</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let activeAttendeeId = null;
+        let refundAttendeeId = null;
 
         function openStatusModal(id, currentStatus, name) {
             activeAttendeeId = id;
@@ -586,13 +601,13 @@
             }
         }
 
-        async function sendBalanceReminders() {
-            const btn = document.getElementById('btn-reminders');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+        async function sendIndividualReminder(id, btn) {
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             btn.disabled = true;
 
             try {
-                const res = await fetch('/api/attendees/reminders/balance', { method: 'POST' });
+                const res = await fetch(`/api/attendees/${id}/reminders/balance`, { method: 'POST' });
                 const result = await res.json();
                 if (result.success) {
                     showToast(result.message, 'success');
@@ -600,26 +615,44 @@
                     showToast('Error: ' + result.message, 'error');
                 }
             } catch (err) {
-                showToast('Failed to send reminders.', 'error');
+                showToast('Failed to send reminder.', 'error');
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-bell"></i> Send Reminders';
+                btn.innerHTML = originalIcon;
                 btn.disabled = false;
             }
         }
+        function openRefundModal(id) {
+            refundAttendeeId = id;
+            document.getElementById('refundAttendeeModal').classList.add('show');
+        }
 
-        async function requestRefund(id) {
-            if (!confirm('Simulate a refund request for this attendee?')) return;
+        function closeRefundModal() {
+            refundAttendeeId = null;
+            document.getElementById('refundAttendeeModal').classList.remove('show');
+        }
+
+        async function confirmRefundAttendee() {
+            if (!refundAttendeeId) return;
+            const btn = document.querySelector('#refundAttendeeModal .delete-btn-confirm');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Wait...';
+            btn.disabled = true;
+
             try {
-                const res = await fetch('/api/attendees/' + id + '/request-refund', { method: 'POST' });
+                const res = await fetch('/api/attendees/' + refundAttendeeId + '/request-refund', { method: 'POST' });
                 const result = await res.json();
                 if (result.success) {
                     showToast(result.message, 'success');
+                    closeRefundModal();
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
                     showToast('Error: ' + result.message, 'error');
                 }
             } catch (err) {
                 showToast('Failed to request refund.', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
     </script>

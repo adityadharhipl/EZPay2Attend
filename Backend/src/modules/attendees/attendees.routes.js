@@ -44,8 +44,11 @@ router.use(authenticate);
 // Route for simulating a refund request (secured)
 router.post('/:id/request-refund', attendeesController.requestRefund);
 
-// Trigger balance reminders
+// Trigger balance reminders (bulk)
 router.post('/reminders/balance', attendeesController.sendBalanceReminders);
+
+// Trigger individual balance reminder
+router.post('/:id/reminders/balance', attendeesController.sendIndividualReminder);
 
 /**
  * @swagger

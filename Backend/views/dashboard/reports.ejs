@@ -55,7 +55,7 @@
             <div class="auth-card profile-card" style="max-width: 800px; margin: 2rem auto;">
                 <h4 style="margin-top: 0; color: #fff; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">Report Configuration</h4>
                 
-                <form id="reportForm" action="/admin/export/custom" method="GET" target="_blank">
+                <form id="reportForm" onsubmit="handleReportSubmit(event)">
                     <div class="form-group mb-3">
                         <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Report Type</label>
                         <select class="form-control" name="type" id="reportType" required onchange="toggleFilters()">
@@ -67,9 +67,9 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select Event (Optional)</label>
-                        <select class="form-control" name="eventId">
-                            <option value="">All Events</option>
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select Event</label>
+                        <select class="form-control" name="eventId" required>
+                            <option value="">-- Select an Event --</option>
                             <% events.forEach(e => { %>
                                 <option value="<%= e.id %>"><%= e.title %> (<%= e.school.name %>)</option>
                             <% }) %>
@@ -78,20 +78,20 @@
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Start Date (Optional)</label>
-                            <input type="date" class="form-control" name="startDate">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Start Date</label>
+                            <input type="date" class="form-control" name="startDate" required>
                         </div>
                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">End Date (Optional)</label>
-                            <input type="date" class="form-control" name="endDate">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">End Date</label>
+                            <input type="date" class="form-control" name="endDate" required>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 2rem;" id="statusFilters">
-                        <div class="form-group" id="regStatusContainer" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Registration Status (Optional)</label>
-                            <select class="form-control" name="registrationStatus">
-                                <option value="">All Statuses</option>
+                        <div class="form-group mb-4" id="regStatusContainer">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Registration Status</label>
+                            <select class="form-control" name="registrationStatus" required>
+                                <option value="">-- Select Status --</option>
                                 <option value="CONFIRMED">Confirmed</option>
                                 <option value="INCOMPLETE">Incomplete</option>
                                 <option value="BALANCE_PENDING">Balance Pending</option>
@@ -101,10 +101,10 @@
                                 <option value="REFUND_REQUESTED">Refund Requested</option>
                             </select>
                         </div>
-                        <div class="form-group" id="payStatusContainer" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Payment Status (Optional)</label>
-                            <select class="form-control" name="paymentStatus">
-                                <option value="">All Statuses</option>
+                        <div class="form-group mb-4" id="payStatusContainer" style="display: none;">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Payment Status</label>
+                            <select class="form-control" name="paymentStatus" required>
+                                <option value="">-- Select Status --</option>
                                 <option value="SUCCESS">Success</option>
                                 <option value="PENDING">Pending</option>
                                 <option value="FAILED">Failed</option>
@@ -120,23 +120,6 @@
         </main>
     </div>
 
-    <!-- Logout Modal -->
-    <div class="modal" id="logoutModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Confirm Logout</h3>
-                <button class="close-btn" onclick="closeLogoutModal()"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to log out of your account?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeLogoutModal()">Cancel</button>
-                <a href="/api/auth/logout" class="btn btn-danger text-white text-decoration-none"
-                    style="background: var(--danger);">Logout</a>
-            </div>
-        </div>
-    </div>
 
     <script>
         function toggleDropdown() {
@@ -160,27 +143,58 @@
             const regStatus = document.getElementById('regStatusContainer');
             const payStatus = document.getElementById('payStatusContainer');
             
+            const regSelect = document.querySelector('select[name="registrationStatus"]');
+            const paySelect = document.querySelector('select[name="paymentStatus"]');
+
             if (type === 'attendee') {
                 regStatus.style.display = 'block';
                 payStatus.style.display = 'none';
+                regSelect.required = true;
+                paySelect.required = false;
             } else if (type === 'payment') {
                 regStatus.style.display = 'none';
                 payStatus.style.display = 'block';
+                regSelect.required = false;
+                paySelect.required = true;
             } else {
                 regStatus.style.display = 'none';
                 payStatus.style.display = 'none';
+                regSelect.required = false;
+                paySelect.required = false;
             }
         }
 
         // Initialize display
         toggleFilters();
 
-        function openLogoutModal() {
-            document.getElementById('logoutModal').classList.add('show');
-        }
 
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.remove('show');
+        async function handleReportSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('reportForm');
+            const formData = new FormData(form);
+            const queryParams = new URLSearchParams(formData).toString();
+            
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Data...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/admin/export/custom?${queryParams}&format=json`);
+                const result = await res.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    window.location.href = `/admin/export/custom?${queryParams}`;
+                    showToast('Report generated successfully!', 'success');
+                } else {
+                    showToast('No data found for the selected filters!', 'error');
+                }
+            } catch (err) {
+                showToast('Network error while generating report.', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
     </body>

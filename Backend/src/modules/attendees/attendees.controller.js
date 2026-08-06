@@ -61,6 +61,16 @@ exports.sendBalanceReminders = async (req, res) => {
     }
 };
 
+exports.sendIndividualReminder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await attendeesService.sendIndividualReminder(id);
+        res.status(200).json({ success: true, message: `Successfully sent reminder` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 exports.requestRefund = async (req, res) => {
     try {
         const { id } = req.params;
