@@ -88,7 +88,27 @@ router.get('/', paymentsController.getPayments);
 // Process Refund
 router.post('/refund', authenticate, paymentsController.processRefund);
 
-// Reject Refund
+/**
+ * @swagger
+ * /api/payments/refund/reject:
+ *   post:
+ *     summary: Reject a refund request
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               attendeeId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Refund rejected
+ */
 router.post('/refund/reject', authenticate, paymentsController.rejectRefund);
 
 module.exports = router;

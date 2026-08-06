@@ -41,13 +41,60 @@ router.post('/register', attendeesController.createAttendee);
 // Protected routes for admin
 router.use(authenticate);
 
-// Route for simulating a refund request (secured)
+/**
+ * @swagger
+ * /api/attendees/{id}/request-refund:
+ *   post:
+ *     summary: Request a refund (simulate)
+ *     tags: [Attendees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Refund requested successfully
+ *       400:
+ *         description: Bad request
+ */
 router.post('/:id/request-refund', attendeesController.requestRefund);
 
-// Trigger balance reminders (bulk)
+/**
+ * @swagger
+ * /api/attendees/reminders/balance:
+ *   post:
+ *     summary: Send balance reminders to all pending attendees
+ *     tags: [Attendees]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reminders sent successfully
+ */
 router.post('/reminders/balance', attendeesController.sendBalanceReminders);
 
-// Trigger individual balance reminder
+/**
+ * @swagger
+ * /api/attendees/{id}/reminders/balance:
+ *   post:
+ *     summary: Send individual balance reminder
+ *     tags: [Attendees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reminder sent successfully
+ */
 router.post('/:id/reminders/balance', attendeesController.sendIndividualReminder);
 
 /**
