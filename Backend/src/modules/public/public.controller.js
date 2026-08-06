@@ -79,7 +79,12 @@ exports.renderSchoolDashboard = async (req, res) => {
         // Paginated events for the table display
         const paginatedEvents = await db.event.findMany({
             where: { schoolId },
-            include: { _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } },
+            include: { 
+                _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } },
+                attendees: {
+                    include: { payments: true }
+                }
+            },
             orderBy: { createdAt: 'desc' },
             skip,
             take: limit

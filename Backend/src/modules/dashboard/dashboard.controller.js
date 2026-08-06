@@ -199,13 +199,37 @@ exports.renderReports = async (req, res) => {
 exports.exportAttendeesCSV = async (req, res) => {
     try {
         const attendees = await db.attendee.findMany({ include: { event: true }, orderBy: { createdAt: 'desc' } });
-        let csv = 'Name,Email,Contact,Event,Status,Registration Date\n';
+        
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Attendees');
+
+        worksheet.columns = [
+            { header: 'Name', key: 'fullName', width: 25 },
+            { header: 'Email', key: 'email', width: 30 },
+            { header: 'Contact', key: 'contactNumber', width: 20 },
+            { header: 'Event', key: 'eventTitle', width: 30 },
+            { header: 'Status', key: 'status', width: 20 },
+            { header: 'Registration Date', key: 'date', width: 20 }
+        ];
+
+        worksheet.getRow(1).font = { bold: true };
+
         attendees.forEach(a => {
-            csv += `"${a.fullName}","${a.email}","${a.contactNumber}","${a.event.title}","${a.status}","${a.createdAt.toISOString()}"\n`;
+            worksheet.addRow({
+                fullName: a.fullName,
+                email: a.email,
+                contactNumber: a.contactNumber,
+                eventTitle: a.event.title,
+                status: a.status.replace('_', ' '),
+                date: a.createdAt.toLocaleDateString()
+            });
         });
-        res.header('Content-Type', 'text/csv');
-        res.attachment('attendees.csv');
-        return res.send(csv);
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="attendees.xlsx"');
+
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         console.error("Error exporting attendees:", err);
         res.status(500).send("Server Error");
@@ -215,13 +239,41 @@ exports.exportAttendeesCSV = async (req, res) => {
 exports.exportPaymentsCSV = async (req, res) => {
     try {
         const payments = await db.payment.findMany({ include: { attendee: { include: { event: true } } }, orderBy: { createdAt: 'desc' } });
-        let csv = 'Reference,Gateway Ref,Name,Event,Amount,Type,Status,Payment Date\n';
+        
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Payments');
+
+        worksheet.columns = [
+            { header: 'Reference', key: 'referenceNumber', width: 25 },
+            { header: 'Gateway Ref', key: 'gatewayReference', width: 25 },
+            { header: 'Attendee Name', key: 'fullName', width: 25 },
+            { header: 'Event Title', key: 'eventTitle', width: 30 },
+            { header: 'Amount', key: 'amount', width: 15 },
+            { header: 'Type', key: 'type', width: 15 },
+            { header: 'Status', key: 'status', width: 15 },
+            { header: 'Payment Date', key: 'date', width: 20 }
+        ];
+
+        worksheet.getRow(1).font = { bold: true };
+
         payments.forEach(p => {
-            csv += `"${p.referenceNumber || ''}","${p.gatewayReference || ''}","${p.attendee.fullName}","${p.attendee.event.title}","${p.amount}","${p.type}","${p.status}","${p.createdAt.toISOString()}"\n`;
+            worksheet.addRow({
+                referenceNumber: p.referenceNumber || '',
+                gatewayReference: p.gatewayReference || '',
+                fullName: p.attendee.fullName,
+                eventTitle: p.attendee.event.title,
+                amount: p.amount,
+                type: p.type,
+                status: p.status,
+                date: p.createdAt.toLocaleDateString()
+            });
         });
-        res.header('Content-Type', 'text/csv');
-        res.attachment('payments.csv');
-        return res.send(csv);
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="payments.xlsx"');
+
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         console.error("Error exporting payments:", err);
         res.status(500).send("Server Error");

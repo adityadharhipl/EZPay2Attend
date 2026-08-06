@@ -51,13 +51,58 @@
     .event-progress-full {
         background: var(--danger) !important;
     }
+    .accordion-row {
+        display: none;
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .accordion-row.show {
+        display: table-row;
+    }
+    .main-row {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .main-row:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .chevron {
+        transition: transform 0.3s;
+    }
+    .chevron.rotate {
+        transform: rotate(180deg);
+    }
+    .inner-table {
+        width: 100%;
+        margin-top: 1rem;
+        background: var(--bg-base);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .inner-table th {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+    }
+    .inner-table td {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
 </style>
 
-<div class="school-dashboard-container">
-    <div class="school-header">
-        <h1><%= school.name %></h1>
-        <p><i class="fa-solid fa-shield-halved"></i> Secure Read-only Event Dashboard</p>
+<div style="background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <div>
+        <h2 style="margin: 0; color: #fff;">EZPay2Attend</h2>
+        <div style="font-size: 0.85rem; color: var(--text-secondary);">School Committee Shared View</div>
     </div>
+    <div style="text-align: right;">
+        <div style="font-weight: 600; color: #fff;"><%= school.name %></div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary);">Read-Only Access</div>
+    </div>
+</div>
+
+<div class="school-dashboard-container" style="padding-top: 2rem;">
 
     <% 
         let totalEvents = events.length;
@@ -97,9 +142,13 @@
     </div>
 
     <div class="dashboard-section" style="margin-top: 2rem;">
-        <h3><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+        <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+            <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
+        </div>
         
-        <div class="table-responsive">
+        <div class="accordion-content show" id="liveReportsContent" style="display: block; margin-top: 1rem;">
+            <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
@@ -115,7 +164,7 @@
                         <tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
                     <% } else { %>
                         <% paginatedEvents.forEach((event, index) => { %>
-                            <tr>
+                            <tr class="main-row" onclick="toggleAccordion('<%= index %>')">
                                 <td><%= (page - 1) * 10 + index + 1 %></td>
                                 <td><strong><%= event.title %></strong></td>
                                 <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
@@ -127,9 +176,46 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
-                                        <%= event.status %>
-                                    </span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                            <%= event.status %>
+                                        </span>
+                                        <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="accordion-row" id="accordion-<%= index %>">
+                                <td colspan="5" style="padding: 1.5rem; border-top: none;">
+                                    <div style="color: var(--text-secondary); margin-bottom: 0.5rem;"><strong>Registrations & Payments</strong></div>
+                                    <% if (event.attendees && event.attendees.length > 0) { %>
+                                        <table class="inner-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Status</th>
+                                                    <th>Payment Amount</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% event.attendees.forEach(a => { 
+                                                    let totalPaid = 0;
+                                                    a.payments.forEach(p => {
+                                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                                    });
+                                                %>
+                                                    <tr>
+                                                        <td><%= a.fullName %></td>
+                                                        <td><%= a.status.replace('_', ' ') %></td>
+                                                        <td style="color: #4ade80;">$<%= totalPaid.toFixed(2) %></td>
+                                                        <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    <% } else { %>
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees registered yet.</div>
+                                    <% } %>
                                 </td>
                             </tr>
                         <% }) %>
@@ -141,24 +227,54 @@
         <% if (totalPages > 1) { %>
             <div style="display: flex; justify-content: flex-end; align-items: center; padding: 1.5rem 0 0 0; gap: 0.5rem;">
                 <% if (page > 1) { %>
-                    <a href="?page=<%= page - 1 %>" class="btn" style="width: auto; padding: 0.5rem 1rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);"><i class="fa-solid fa-chevron-left"></i> Prev</a>
+                    <a href="?page=<%= page - 1 %>" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Previous</a>
                 <% } %>
                 
-                <span style="padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.95rem;">Page <%= page %> of <%= totalPages %></span>
+                <% for(let i=1; i<=totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="btn <%= i == page ? 'btn-primary' : '' %>" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                        <%= i %>
+                    </a>
+                <% } %>
                 
                 <% if (page < totalPages) { %>
-                    <a href="?page=<%= page + 1 %>" class="btn" style="width: auto; padding: 0.5rem 1rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);">Next <i class="fa-solid fa-chevron-right"></i></a>
+                    <a href="?page=<%= page + 1 %>" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Next</a>
                 <% } %>
             </div>
         <% } %>
+        </div> <!-- End of accordion-content -->
     </div>
 </div>
 <script>
-    document.querySelectorAll('.event-progress-fill').forEach(el => {
-        if(el.dataset.width) {
-            el.style.width = el.dataset.width + '%';
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        const fills = document.querySelectorAll('.event-progress-fill');
+        fills.forEach(fill => {
+            const width = fill.getAttribute('data-width');
+            setTimeout(() => {
+                fill.style.width = width + '%';
+            }, 100);
+        });
     });
+
+    function toggleAccordion(index) {
+        const row = document.getElementById('accordion-' + index);
+        const chevron = document.getElementById('chevron-' + index);
+        
+        row.classList.toggle('show');
+        chevron.classList.toggle('rotate');
+    }
+
+    function toggleSectionAccordion(id) {
+        const content = document.getElementById(id + 'Content');
+        const icon = document.getElementById(id + 'Icon');
+        
+        if (content.style.display === 'none' || !content.style.display) {
+            content.style.display = 'block';
+            icon.classList.remove('rotate');
+        } else {
+            content.style.display = 'none';
+            icon.classList.add('rotate');
+        }
+    }
 </script>
 </body>
 </html>
