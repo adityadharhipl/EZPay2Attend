@@ -3,7 +3,22 @@ const env = require('../config/env');
 const db = require('../config/db');
 
 exports.authenticate = async (req, res, next) => {
-    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    let token;
+    
+    // 1. Check cookies first
+    if (req.cookies && req.cookies.token) {
+        token = req.cookies.token;
+    }
+    
+    // 2. Fallback to Authorization header (useful for Postman)
+    if (!token && req.headers.authorization) {
+        if (req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        } else {
+            // In case the token was passed directly without 'Bearer ' prefix
+            token = req.headers.authorization;
+        }
+    }
 
     // Function to handle unauthorized based on request type
     const handleUnauthorized = (msg = 'Unauthorized') => {

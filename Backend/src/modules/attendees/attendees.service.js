@@ -33,6 +33,14 @@ exports.createAttendee = async (data) => {
 
     if (existing) throw new Error("This email is already registered for this event");
 
+    // Basic validation for contact number
+    if (data.contactNumber) {
+        const contactStr = String(data.contactNumber).trim();
+        if (contactStr.length > 20) {
+            throw new Error("Contact number cannot exceed 20 characters");
+        }
+    }
+
     // Create attendee
     const newAttendee = await db.attendee.create({
         data: {
