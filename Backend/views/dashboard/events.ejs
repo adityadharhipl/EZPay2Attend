@@ -247,6 +247,42 @@
             color: #fff;
             border-color: var(--primary-color);
         }
+
+        .accordion-row {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .accordion-row.show {
+            display: table-row;
+        }
+
+        .chevron {
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .inner-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-base);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .inner-table th,
+        .inner-table td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .inner-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
     </style>
 
     <div class="dashboard-layout">
@@ -317,10 +353,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 style="margin: 0;"><i class="fa-solid fa-calendar-alt"></i> All Events</h3>
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <a href="/register" target="_blank" class="btn"
+                        <!-- <a href="/register" target="_blank" class="btn"
                             style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                             <i class="fa-solid fa-external-link-alt"></i> Public Registration
-                        </a>
+                        </a> -->
                         <button class="btn"
                             style="background: var(--primary); color: #fff; width: auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none;"
                             onclick="openModal()">
@@ -393,6 +429,15 @@
                                         <%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %>
                                     </td>
                                     <td class="text-end" style="white-space: nowrap;">
+                                        <button class="action-btn" title="View Attendees"
+                                            onclick="toggleAccordion('<%= index %>')">
+                                            <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>"></i>
+                                        </button>
+                                        <a href="/event/<%= event.slug %>/register" target="_blank"
+                                            class="action-btn text-success" title="Public Registration Link"
+                                            style="text-decoration: none;">
+                                            <i class="fa-solid fa-link"></i>
+                                        </a>
                                         <button class="action-btn" title="Edit"
                                             onclick="editEvent('<%= event.id %>')"><i
                                                 class="fa-solid fa-pen"></i></button>
@@ -403,7 +448,91 @@
                                             data-title="<%= event.title %>"
                                             onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i
                                                 class="fa-solid fa-trash"></i></button>
-
+                                    </td>
+                                </tr>
+                                <tr class="accordion-row" id="accordion-<%= index %>">
+                                    <td colspan="9" style="padding: 1.5rem; border-top: none;">
+                                        <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                            <strong>Registrations & Payments</strong>
+                                        </div>
+                                        <% if (event.attendees && event.attendees.length> 0) { %>
+                                            <table class="inner-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>S.NO.</th>
+                                                        <th>Name</th>
+                                                        <th>Status</th>
+                                                        <th>Paid</th>
+                                                        <th>Balance Due</th>
+                                                        <th>Date</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% event.attendees.forEach((a, attIndex)=> {
+                                                        let totalPaid = 0;
+                                                        let totalPending = 0;
+                                                        a.payments.forEach(p => {
+                                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid +=
+                                                        p.amount;
+                                                        if (p.status === 'PENDING') totalPending += p.amount;
+                                                        });
+                                                        let balanceDue = event.costPerAttendee - totalPaid;
+                                                        if(balanceDue < 0) balanceDue=0; %>
+                                                            <tr>
+                                                                <td>
+                                                                    <%= attIndex + 1 %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= a.fullName %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= a.status.replace('_', ' ' ) %>
+                                                                        <% if (a.status==='BALANCE_PENDING' ||
+                                                                            a.status==='INCOMPLETE' ) { %>
+                                                                            <span
+                                                                                style="display:inline-block; margin-left: 5px; color: var(--warning);"
+                                                                                title="Payment Incomplete">
+                                                                                <i
+                                                                                    class="fa-solid fa-circle-exclamation"></i>
+                                                                            </span>
+                                                                            <% } %>
+                                                                </td>
+                                                                <td style="color: #4ade80;">
+                                                                    $<%= totalPaid.toFixed(2) %>
+                                                                </td>
+                                                                <% if (balanceDue> 0) { %>
+                                                                    <td style="color: var(--warning);">
+                                                                        <% } else { %>
+                                                                    <td style="color: inherit;">
+                                                                        <% } %>
+                                                                            $<%= balanceDue.toFixed(2) %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <%= new Date(a.createdAt).toLocaleDateString()
+                                                                            %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <% if (balanceDue> 0 && a.status !== 'REFUNDED')
+                                                                            { %>
+                                                                            <button
+                                                                                onclick="sendReminder('<%= a.id %>', this)"
+                                                                                title="Send Reminder Email"
+                                                                                style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.1rem; padding: 5px;">
+                                                                                <i class="fa-solid fa-bell"></i>
+                                                                            </button>
+                                                                            <% } else { %>
+                                                                                -
+                                                                                <% } %>
+                                                                    </td>
+                                                            </tr>
+                                                            <% }) %>
+                                                </tbody>
+                                            </table>
+                                            <% } else { %>
+                                                <div style="color: var(--text-secondary); font-size: 0.9rem;">No
+                                                    attendees registered yet.</div>
+                                                <% } %>
                                     </td>
                                 </tr>
                                 <% }) %>
@@ -730,6 +859,51 @@
                         openDropdown.classList.remove('show');
                     }
                 }
+            }
+        }
+
+        function toggleAccordion(index) {
+            const row = document.getElementById('accordion-' + index);
+            const chevron = document.getElementById('chevron-' + index);
+            if (row.classList.contains('show')) {
+                row.classList.remove('show');
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            } else {
+                row.classList.add('show');
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+            }
+        }
+
+        async function sendReminder(attendeeId, btnElement) {
+            if (!confirm('Send a payment reminder email to this attendee?')) return;
+
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
+
+            try {
+                const token = localStorage.getItem('ezpay_token');
+                const res = await fetch(`/api/attendees/${attendeeId}/reminders/balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Reminder sent successfully!', 'success');
+                    btnElement.innerHTML = '<i class="fa-solid fa-check" style="color: var(--success);"></i>';
+                } else {
+                    showToast('Failed: ' + data.message, 'error');
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.disabled = false;
+                }
+            } catch (err) {
+                showToast('Error sending reminder', 'error');
+                btnElement.innerHTML = originalHtml;
+                btnElement.disabled = false;
             }
         }
     </script>

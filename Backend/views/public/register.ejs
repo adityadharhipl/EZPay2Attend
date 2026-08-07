@@ -83,28 +83,38 @@
     </div>
 
     <form id="publicRegisterForm">
-        <div class="form-group">
-            <label class="form-label">Select Event</label>
-            <select class="form-select" name="eventId" id="eventSelect" required onchange="updateEventDetails()">
-                <option value="">-- Choose an Event --</option>
-                <% events.forEach(e => { %>
-                    <option value="<%= e.id %>" 
-                            data-school="<%= e.school.name %>" 
-                            data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
-                            data-cost="<%= e.costPerAttendee %>"
-                            <%= preSelectedEvent === e.id ? 'selected' : '' %>>
-                        <%= e.title %> (<%= e.school.name %>)
-                    </option>
-                <% }) %>
-            </select>
-        </div>
+        <% if (typeof isSingleEvent !== 'undefined' && isSingleEvent && events.length === 1) { %>
+            <input type="hidden" name="eventId" id="eventSelect" value="<%= events[0].id %>">
+            <div class="event-details" style="display: block; margin-bottom: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);"><%= events[0].title %></h4>
+                <p><strong>School:</strong> <%= events[0].school.name %></p>
+                <p><strong>Date:</strong> <%= events[0].date ? new Date(events[0].date).toLocaleDateString() : 'TBD' %></p>
+                <p><strong>Cost:</strong> $<%= events[0].costPerAttendee.toFixed(2) %></p>
+            </div>
+        <% } else { %>
+            <div class="form-group">
+                <label class="form-label">Select Event</label>
+                <select class="form-select" name="eventId" id="eventSelect" required onchange="updateEventDetails()">
+                    <option value="">-- Choose an Event --</option>
+                    <% events.forEach(e => { %>
+                        <option value="<%= e.id %>" 
+                                data-school="<%= e.school.name %>" 
+                                data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
+                                data-cost="<%= e.costPerAttendee %>"
+                                <%= preSelectedEvent === e.id ? 'selected' : '' %>>
+                            <%= e.title %> (<%= e.school.name %>)
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
 
-        <div class="event-details" id="eventDetailsBox">
-            <h4 id="detailTitle"></h4>
-            <p><strong>School:</strong> <span id="detailSchool"></span></p>
-            <p><strong>Date:</strong> <span id="detailDate"></span></p>
-            <p><strong>Cost:</strong> $<span id="detailCost"></span></p>
-        </div>
+            <div class="event-details" id="eventDetailsBox">
+                <h4 id="detailTitle"></h4>
+                <p><strong>School:</strong> <span id="detailSchool"></span></p>
+                <p><strong>Date:</strong> <span id="detailDate"></span></p>
+                <p><strong>Cost:</strong> $<span id="detailCost"></span></p>
+            </div>
+        <% } %>
 
         <div class="form-group">
             <label class="form-label">Full Name of Attendee</label>
@@ -135,14 +145,15 @@
         const select = document.getElementById('eventSelect');
         const box = document.getElementById('eventDetailsBox');
         
-        if (select.value) {
+        // Only run this logic if it's actually a select element (not a hidden input for single events)
+        if (select.tagName === 'SELECT' && select.value) {
             const option = select.options[select.selectedIndex];
             document.getElementById('detailTitle').textContent = option.text.split(' (')[0];
             document.getElementById('detailSchool').textContent = option.dataset.school;
             document.getElementById('detailDate').textContent = option.dataset.date;
             document.getElementById('detailCost').textContent = option.dataset.cost;
             box.style.display = 'block';
-        } else {
+        } else if (select.tagName === 'SELECT') {
             box.style.display = 'none';
         }
     }

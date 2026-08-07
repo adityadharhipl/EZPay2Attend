@@ -115,6 +115,10 @@
             const total = attendee.event.costPerAttendee;
             const depositPercentage = attendee.event.depositPercentage || 0;
             const depositAmount = (total * depositPercentage) / 100;
+            const balance = (attendee.status === 'BALANCE_PENDING' || attendee.status === 'BALANCE_OVERDUE') 
+                ? total - depositAmount 
+                : total;
+            const redirectUrl = attendee.event.slug ? '/event/' + attendee.event.slug + '/register' : '/register';
         %>
         
         <div class="summary-row">
@@ -127,12 +131,25 @@
                 <span>Minimum Deposit (<%= depositPercentage %>%)</span>
                 <span>$<%= depositAmount.toFixed(2) %></span>
             </div>
+            <div class="summary-row">
+                <span>Total Due</span>
+                <span>$<%= total.toFixed(2) %></span>
+            </div>
+        <% } else if (attendee.status === 'BALANCE_PENDING' || attendee.status === 'BALANCE_OVERDUE') { %>
+            <div class="summary-row" style="color: var(--success);">
+                <span>Amount Paid (Deposit)</span>
+                <span>$<%= depositAmount.toFixed(2) %></span>
+            </div>
+            <div class="summary-row" style="color: var(--warning); font-size: 1.1rem; font-weight: bold;">
+                <span>Remaining Balance Due</span>
+                <span>$<%= balance.toFixed(2) %></span>
+            </div>
+        <% } else { %>
+            <div class="summary-row">
+                <span>Total Due</span>
+                <span>$<%= total.toFixed(2) %></span>
+            </div>
         <% } %>
-        
-        <div class="summary-row">
-            <span>Total Due</span>
-            <span>$<%= total.toFixed(2) %></span>
-        </div>
     </div>
 
     <% if (typeof reference !== 'undefined' && reference) { %>
@@ -141,28 +158,26 @@
             Payment Successful!
             <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">A receipt has been sent to your email.<br>Redirecting to registration page in 3 seconds...</div>
         </div>
-        <a href="/register" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return to Registration</a>
+        <a href="<%= redirectUrl %>" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border); display: inline-block; padding: 10px; text-decoration: none;">Return to Registration</a>
         <script>
             setTimeout(() => {
-                window.location.href = '/register';
+                window.location.href = '<%= redirectUrl %>';
             }, 3000);
         </script>
-    <% } else if (total > 0 && attendee.status !== 'CONFIRMED') { %>
+    <% } else if (balance > 0 && attendee.status !== 'CONFIRMED') { %>
         <div class="payment-options">
             <% if (depositPercentage > 0 && attendee.status === 'INCOMPLETE') { %>
                 <button class="pay-btn btn-deposit" onclick="initiatePayment('DEPOSIT', '<%= depositAmount %>')">
                     Pay Deposit ($<%= depositAmount.toFixed(2) %>)
                 </button>
+                <button class="pay-btn btn-full" onclick="initiatePayment('FULL', '<%= balance %>')">
+                    Pay Full Amount ($<%= balance.toFixed(2) %>)
+                </button>
+            <% } else { %>
+                <button class="pay-btn btn-full" onclick="initiatePayment('BALANCE', '<%= balance %>')">
+                    Pay Remaining Balance ($<%= balance.toFixed(2) %>)
+                </button>
             <% } %>
-            
-            <% 
-                const balance = attendee.status === 'BALANCE_PENDING' || attendee.status === 'BALANCE_OVERDUE' 
-                    ? total - depositAmount 
-                    : total;
-            %>
-            <button class="pay-btn btn-full" onclick="initiatePayment('FULL', '<%= balance %>')">
-                Pay Full Amount ($<%= balance.toFixed(2) %>)
-            </button>
         </div>
         
         <div class="secure-badge">
@@ -174,10 +189,10 @@
             Registration Complete! No payment due.
             <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">Redirecting to registration page in 2 seconds...</div>
         </div>
-        <a href="/register" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return to Registration</a>
+        <a href="<%= redirectUrl %>" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border); display: inline-block; padding: 10px; text-decoration: none;">Return to Registration</a>
         <script>
             setTimeout(() => {
-                window.location.href = '/register';
+                window.location.href = '<%= redirectUrl %>';
             }, 2000);
         </script>
     <% } %>

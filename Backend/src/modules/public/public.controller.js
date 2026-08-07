@@ -24,6 +24,32 @@ exports.renderRegisterPage = async (req, res) => {
     }
 };
 
+exports.renderSingleEventRegisterPage = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        const event = await db.event.findUnique({
+            where: { slug },
+            include: { school: true, _count: { select: { attendees: true } } }
+        });
+
+        if (!event) return res.status(404).send('Event not found');
+        if (event.status !== 'OPEN') return res.status(400).send('Event is closed for registration');
+        if (event._count.attendees >= event.capacity) return res.status(400).send('Event is fully booked');
+
+        res.render('public/register', { 
+            title: `Register for ${event.title}`, 
+            events: [event], 
+            preSelectedEvent: event.id,
+            isSingleEvent: true, // Used by the view to hide the dropdown
+            error: null, 
+            success: null 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading registration page');
+    }
+};
+
 exports.renderCheckoutPage = async (req, res) => {
     try {
         const attendeeId = req.query.attendeeId;

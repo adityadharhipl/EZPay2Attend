@@ -10,7 +10,12 @@ exports.getAllEvents = async (page = 1, limit = 10) => {
             take: limit,
             include: {
                 school: { select: { id: true, name: true } },
-                _count: { select: { attendees: true } }
+                _count: { select: { attendees: true } },
+                attendees: {
+                    include: {
+                        payments: true
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         }),
@@ -30,13 +35,34 @@ exports.getEventById = async (id) => {
     });
 };
 
+async function generateUniqueSlug(title, excludeId = null) {
+    let baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'event';
+    let uniqueSlug = baseSlug;
+    let counter = 1;
+    while (true) {
+        const existing = await prisma.event.findFirst({
+            where: { 
+                slug: uniqueSlug,
+                id: excludeId ? { not: excludeId } : undefined
+            }
+        });
+        if (!existing) return uniqueSlug;
+        uniqueSlug = `${baseSlug}-${counter}`;
+        counter++;
+    }
+}
+
 exports.createEvent = async (data) => {
+    data.slug = await generateUniqueSlug(data.title);
     return prisma.event.create({
         data
     });
 };
 
 exports.updateEvent = async (id, data) => {
+    if (data.title) {
+        data.slug = await generateUniqueSlug(data.title, id);
+    }
     return prisma.event.update({
         where: { id },
         data
