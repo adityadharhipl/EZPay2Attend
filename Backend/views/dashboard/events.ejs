@@ -329,13 +329,19 @@
                     </div>
                 </div>
 
-                <div class="entries-control" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                <div class="entries-control"
+                    style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
                     <span>Show</span>
-                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)" style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
-                        <option value="10" style="color: #000;" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
-                        <option value="20" style="color: #000;" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
-                        <option value="30" style="color: #000;" <%= pagination.limit === 30 ? 'selected' : '' %>>30</option>
-                        <option value="50" style="color: #000;" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)"
+                        style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
+                        <option value="10" style="color: #000;" <%=pagination.limit===10 ? 'selected' : '' %>>10
+                        </option>
+                        <option value="20" style="color: #000;" <%=pagination.limit===20 ? 'selected' : '' %>>20
+                        </option>
+                        <option value="30" style="color: #000;" <%=pagination.limit===30 ? 'selected' : '' %>>30
+                        </option>
+                        <option value="50" style="color: #000;" <%=pagination.limit===50 ? 'selected' : '' %>>50
+                        </option>
                     </select>
                     <span>entries</span>
                 </div>
@@ -386,7 +392,7 @@
                                     <td>
                                         <%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %>
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end" style="white-space: nowrap;">
                                         <button class="action-btn" title="Edit"
                                             onclick="editEvent('<%= event.id %>')"><i
                                                 class="fa-solid fa-pen"></i></button>
@@ -394,6 +400,9 @@
                                             data-title="<%= event.title %>"
                                             onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i
                                                 class="fa-solid fa-trash"></i></button>
+                                        <button class="action-btn text-info" title="View"
+                                            onclick="viewEvent('<%= event.id %>')"><i
+                                                class="fa-solid fa-eye"></i></button>
                                     </td>
                                 </tr>
                                 <% }) %>
@@ -529,6 +538,19 @@
         </div>
     </div>
 
+    <!-- View Event Modal -->
+    <div class="custom-modal" id="viewEventModal">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">Event Details</h3>
+                <button type="button" class="close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div id="viewEventDetails" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
     <script id="eventsData" type="application/json">
     <%- JSON.stringify(events || []) %>
 </script>
@@ -577,6 +599,38 @@
         function closeModal() {
             document.getElementById('createEventModal').classList.remove('show');
             editingEventId = null;
+        }
+
+        function viewEvent(id) {
+            const event = allEvents.find(e => e.id === id);
+            if (!event) return;
+
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${event.title}</h4>
+                        <span class="status-badge status-${event.status.toLowerCase()}">${event.status}</span>
+                    </div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>School:</strong> ${event.school.name}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Type:</strong> ${event.type || 'N/A'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Capacity:</strong> ${event.capacity}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Cost Per Attendee:</strong> $${(event.costPerAttendee || 0).toFixed(2)}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Deposit %:</strong> ${event.depositPercentage || 0}%</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Event Date:</strong> ${event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Balance Due Date:</strong> ${event.balanceDueDate ? new Date(event.balanceDueDate).toLocaleDateString() : 'N/A'}</div>
+                    <div class="col-md-12" style="margin-bottom: 0.8rem;"><strong>Venue:</strong> ${event.venue || 'N/A'}</div>
+                    <div class="col-md-12" style="margin-top: 0.5rem; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                        <strong>Description:</strong><br/> 
+                        <div style="margin-top: 0.5rem; white-space: pre-wrap;">${event.description || 'No description provided.'}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('viewEventDetails').innerHTML = detailsHtml;
+            document.getElementById('viewEventModal').classList.add('show');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewEventModal').classList.remove('show');
         }
 
         async function saveEventData() {

@@ -341,7 +341,7 @@
                                     <td>
                                         <%= new Date(school.createdAt).toLocaleDateString() %>
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end" style="white-space: nowrap;">
                                         <button class="action-btn" title="Copy Committee Dashboard Link"
                                             onclick="copySchoolLink('<%= school.id %>')"><i
                                                 class="fa-solid fa-link"></i></button>
@@ -352,6 +352,7 @@
                                             data-name="<%= school.name %>"
                                             onclick="deleteSchool(this.dataset.id, this.dataset.name)"><i
                                                 class="fa-solid fa-trash"></i></button>
+                                        <button class="action-btn text-info" title="View" onclick="viewSchool('<%= school.id %>')"><i class="fa-solid fa-eye"></i></button>
                                     </td>
                                 </tr>
                                 <% }) %>
@@ -441,6 +442,19 @@
         </div>
     </div>
 
+    <!-- View School Modal -->
+    <div class="custom-modal" id="viewSchoolModal">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">School Details</h3>
+                <button type="button" class="close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div id="viewSchoolDetails" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
     <script id="schoolsData" type="application/json">
     <%- JSON.stringify(schools || []) %>
     </script>
@@ -477,6 +491,43 @@
         function closeModal() {
             document.getElementById('createSchoolModal').classList.remove('show');
             editingSchoolId = null;
+        }
+
+        function viewSchool(id) {
+            const school = allSchools.find(s => s.id === id);
+            if (!school) return;
+
+            const eventNames = school.events && school.events.length > 0 
+                ? school.events.map(e => e.title).join(' • ') 
+                : 'No events assigned';
+
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${school.name}</h4>
+                        <div style="margin-bottom: 0.5rem;">
+                            <span class="badge" style="background: var(--primary); padding: 5px 10px; border-radius: 20px;">${school._count ? school._count.events : 0} Events</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                            ${eventNames}
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Contact Person:</strong> ${school.contactPerson || 'N/A'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Email:</strong> ${school.email || 'N/A'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Phone:</strong> ${school.phone || 'N/A'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Created At:</strong> ${new Date(school.createdAt).toLocaleDateString()}</div>
+                    <div class="col-md-12" style="margin-top: 0.5rem; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                        <strong>Address:</strong><br/> 
+                        <div style="margin-top: 0.5rem; white-space: pre-wrap;">${school.address || 'No address provided.'}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('viewSchoolDetails').innerHTML = detailsHtml;
+            document.getElementById('viewSchoolModal').classList.add('show');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewSchoolModal').classList.remove('show');
         }
 
         async function saveSchoolData() {

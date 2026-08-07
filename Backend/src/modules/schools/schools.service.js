@@ -11,6 +11,9 @@ exports.getAllSchools = async (page = 1, limit = 10) => {
             include: {
                 _count: {
                     select: { events: true }
+                },
+                events: {
+                    select: { title: true }
                 }
             }
         }),

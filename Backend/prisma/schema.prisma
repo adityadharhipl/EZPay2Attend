@@ -37,7 +37,7 @@ model Event {
   schoolId          String
   school            School   @relation(fields: [schoolId], references: [id])
   title             String
-  description       String?
+  description       String?   @db.Text
   status            String   @default("OPEN") // OPEN, CLOSED, COMPLETED, CANCELLED
   capacity          Int
   depositPercentage Float    @default(0)
