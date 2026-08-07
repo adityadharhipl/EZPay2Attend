@@ -3,7 +3,7 @@
   "info": {
     "title": "EZPay2Attend API",
     "version": "1.0.0",
-    "description": "API documentation for Authentication endpoints"
+    "description": "API Documentation for EZPay2Attend Backend"
   },
   "servers": [
     {
@@ -20,6 +20,37 @@
       }
     },
     "schemas": {
+      "School": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contactPerson": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "Event": {
         "type": "object",
         "properties": {
@@ -84,7 +115,385 @@
       "bearerAuth": []
     }
   ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication APIs"
+    },
+    {
+      "name": "Dashboard",
+      "description": "Admin Dashboard APIs"
+    },
+    {
+      "name": "Events",
+      "description": "Event Management APIs"
+    },
+    {
+      "name": "Schools",
+      "description": "School Management APIs"
+    },
+    {
+      "name": "Attendees",
+      "description": "Attendee Management APIs"
+    },
+    {
+      "name": "Payments",
+      "description": "Payment gateway APIs"
+    }
+  ],
   "paths": {
+    "/api/schools": {
+      "get": {
+        "summary": "Get all schools (Paginated)",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of schools with pagination"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new school",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "contactPerson": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "School created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/schools/dropdown": {
+      "get": {
+        "summary": "Get all schools for dropdown selection",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of schools (id and name only)"
+          }
+        }
+      }
+    },
+    "/api/schools/{id}": {
+      "get": {
+        "summary": "Get school by ID",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "School details"
+          },
+          "404": {
+            "description": "School not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a school",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "contactPerson": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "School updated successfully"
+          },
+          "404": {
+            "description": "School not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a school",
+        "tags": [
+          "Schools"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "School deleted successfully"
+          },
+          "404": {
+            "description": "School not found"
+          }
+        }
+      }
+    },
+    "/api/payments/intent": {
+      "post": {
+        "summary": "Create a payment intent (Paystack)",
+        "tags": [
+          "Payments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "attendeeId": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment intent created"
+          }
+        }
+      }
+    },
+    "/api/payments/webhook": {
+      "post": {
+        "summary": "Paystack Webhook",
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook received"
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "get": {
+        "summary": "Get Payment History",
+        "tags": [
+          "Payments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment list"
+          }
+        }
+      }
+    },
+    "/api/payments/refund": {
+      "post": {
+        "summary": "Process a refund",
+        "tags": [
+          "Payments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "attendeeId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund processed successfully"
+          }
+        }
+      }
+    },
+    "/api/payments/refund/reject": {
+      "post": {
+        "summary": "Reject a refund request",
+        "tags": [
+          "Payments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "attendeeId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund rejected"
+          }
+        }
+      }
+    },
     "/api/events": {
       "get": {
         "summary": "Get all events",
@@ -96,9 +505,29 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List of events"
+            "description": "List of events with pagination"
           }
         }
       },
@@ -209,7 +638,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "summary": "Update an event",
         "tags": [
           "Events"
@@ -311,6 +740,114 @@
           },
           "404": {
             "description": "Event not found"
+          }
+        }
+      }
+    },
+    "/admin": {
+      "get": {
+        "summary": "Render Dashboard (HTML)",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard page"
+          }
+        }
+      }
+    },
+    "/admin/reports": {
+      "get": {
+        "summary": "Render reports page",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reports page rendered"
+          }
+        }
+      }
+    },
+    "/admin/export/custom": {
+      "get": {
+        "summary": "Export custom report",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Type of report (e.g., payment, registration)"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Format (json, excel)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export file or JSON data"
+          }
+        }
+      }
+    },
+    "/admin/export/attendees": {
+      "get": {
+        "summary": "Export all attendees as Excel",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel file download"
+          }
+        }
+      }
+    },
+    "/admin/export/payments": {
+      "get": {
+        "summary": "Export all payments as Excel",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel file download"
           }
         }
       }
@@ -455,16 +992,220 @@
           }
         }
       }
-    }
-  },
-  "tags": [
-    {
-      "name": "Events",
-      "description": "Events management"
     },
-    {
-      "name": "Auth",
-      "description": "Authentication operations"
+    "/api/attendees/register": {
+      "post": {
+        "summary": "Register a new attendee",
+        "tags": [
+          "Attendees"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "eventId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Attendee registered successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/attendees/{id}/request-refund": {
+      "post": {
+        "summary": "Request a refund (simulate)",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refund requested successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/attendees/reminders/balance": {
+      "post": {
+        "summary": "Send balance reminders to all pending attendees",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reminders sent successfully"
+          }
+        }
+      }
+    },
+    "/api/attendees/{id}/reminders/balance": {
+      "post": {
+        "summary": "Send individual balance reminder",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reminder sent successfully"
+          }
+        }
+      }
+    },
+    "/api/attendees": {
+      "get": {
+        "summary": "Get all attendees",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "eventId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by event ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of attendees"
+          }
+        }
+      }
+    },
+    "/api/attendees/{id}/status": {
+      "patch": {
+        "summary": "Update attendee status",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Attendee ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated"
+          }
+        }
+      }
+    },
+    "/api/attendees/{id}": {
+      "delete": {
+        "summary": "Delete an attendee",
+        "tags": [
+          "Attendees"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attendee deleted"
+          }
+        }
+      }
     }
-  ]
+  }
 }

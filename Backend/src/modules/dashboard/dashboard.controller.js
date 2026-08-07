@@ -7,13 +7,15 @@ const ExcelJS = require('exceljs');
 exports.renderDashboard = async (req, res) => {
     try {
         const metrics = await dashboardService.getDashboardMetrics();
-        if (req.originalUrl.startsWith('/api/')) {
+        const wantsJson = req.originalUrl.startsWith('/api/') || (req.headers.accept && !req.headers.accept.includes('text/html'));
+        if (wantsJson) {
             return res.status(200).json({ success: true, data: metrics });
         }
         res.render('dashboard/index', { user: req.user, metrics });
     } catch (error) {
         console.error(error);
-        if (req.originalUrl.startsWith('/api/')) {
+        const wantsJson = req.originalUrl.startsWith('/api/') || (req.headers.accept && !req.headers.accept.includes('text/html'));
+        if (wantsJson) {
             return res.status(500).json({ success: false, message: 'Failed to load dashboard metrics' });
         }
         res.render('dashboard/index', { user: req.user, metrics: null, error: 'Failed to load dashboard metrics' });

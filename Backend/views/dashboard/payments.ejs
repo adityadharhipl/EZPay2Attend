@@ -120,10 +120,10 @@
                 <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                 <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
                 <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
+                <!-- <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
                 <a href="/admin/payments" class="nav-link active"><i class="fa-solid fa-credit-card"></i> Payments</a>
                 <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a> -->
 
             </nav>
         </aside>
@@ -173,7 +173,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 style="margin: 0;"><i class="fa-solid fa-wallet"></i> All Transactions</h3>
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <a href="/admin/export/payments" class="btn" style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                        <a href="/admin/export/payments" class="btn"
+                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
                             <i class="fa-solid fa-file-excel" style="color: #4ade80;"></i> Export Excel
                         </a>
                         <form class="search-container" method="GET" action="/admin/payments" style="margin: 0;">
@@ -189,13 +190,19 @@
                     </div>
                 </div>
 
-                <div class="entries-control" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                <div class="entries-control"
+                    style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
                     <span>Show</span>
-                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)" style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
-                        <option value="10" style="color: #000;" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
-                        <option value="20" style="color: #000;" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
-                        <option value="30" style="color: #000;" <%= pagination.limit === 30 ? 'selected' : '' %>>30</option>
-                        <option value="50" style="color: #000;" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)"
+                        style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
+                        <option value="10" style="color: #000;" <%=pagination.limit===10 ? 'selected' : '' %>>10
+                        </option>
+                        <option value="20" style="color: #000;" <%=pagination.limit===20 ? 'selected' : '' %>>20
+                        </option>
+                        <option value="30" style="color: #000;" <%=pagination.limit===30 ? 'selected' : '' %>>30
+                        </option>
+                        <option value="50" style="color: #000;" <%=pagination.limit===50 ? 'selected' : '' %>>50
+                        </option>
                     </select>
                     <span>entries</span>
                 </div>

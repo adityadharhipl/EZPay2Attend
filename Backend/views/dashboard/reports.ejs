@@ -8,9 +8,9 @@
                 <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
                 <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
                 <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
-                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <!-- <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
                 <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-                <a href="/admin/reports" class="nav-link active"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                <a href="/admin/reports" class="nav-link active"><i class="fa-solid fa-file-csv"></i> Reports</a> -->
             </nav>
         </aside>
 
@@ -45,19 +45,24 @@
                                 </div>
                             </div>
                             <div class="dropdown-divider"></div>
-                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                            <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit
+                                Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()"
+                                class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                                Logout</a>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="auth-card profile-card" style="max-width: 800px; margin: 2rem auto;">
-                <h4 style="margin-top: 0; color: #fff; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">Report Configuration</h4>
-                
+                <h4 style="margin-top: 0; color: #fff; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">
+                    Report Configuration</h4>
+
                 <form id="reportForm" onsubmit="handleReportSubmit(event)">
                     <div class="form-group mb-3">
-                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Report Type</label>
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Report
+                            Type</label>
                         <select class="form-control" name="type" id="reportType" required onchange="toggleFilters()">
                             <option value="attendee">Attendee Report</option>
                             <option value="payment">Payment Report</option>
@@ -67,29 +72,35 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select Event</label>
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select
+                            Event</label>
                         <select class="form-control" name="eventId" required>
                             <option value="">-- Select an Event --</option>
-                            <% events.forEach(e => { %>
-                                <option value="<%= e.id %>"><%= e.title %> (<%= e.school.name %>)</option>
-                            <% }) %>
+                            <% events.forEach(e=> { %>
+                                <option value="<%= e.id %>">
+                                    <%= e.title %> (<%= e.school.name %>)
+                                </option>
+                                <% }) %>
                         </select>
                     </div>
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Start Date</label>
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Start
+                                Date</label>
                             <input type="date" class="form-control" name="startDate" required>
                         </div>
                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">End Date</label>
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">End
+                                Date</label>
                             <input type="date" class="form-control" name="endDate" required>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 2rem;" id="statusFilters">
                         <div class="form-group mb-4" id="regStatusContainer">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Registration Status</label>
+                            <label class="form-label"
+                                style="color: var(--text-secondary); font-weight: 500;">Registration Status</label>
                             <select class="form-control" name="registrationStatus" required>
                                 <option value="">-- Select Status --</option>
                                 <option value="CONFIRMED">Confirmed</option>
@@ -102,7 +113,8 @@
                             </select>
                         </div>
                         <div class="form-group mb-4" id="payStatusContainer" style="display: none;">
-                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Payment Status</label>
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Payment
+                                Status</label>
                             <select class="form-control" name="paymentStatus" required>
                                 <option value="">-- Select Status --</option>
                                 <option value="SUCCESS">Success</option>
@@ -112,7 +124,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn" style="background: var(--primary); color: #fff; width: 100%; padding: 0.8rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.3s ease;">
+                    <button type="submit" class="btn"
+                        style="background: var(--primary); color: #fff; width: 100%; padding: 0.8rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.3s ease;">
                         <i class="fa-solid fa-download"></i> Generate & Download Report
                     </button>
                 </form>
@@ -142,7 +155,7 @@
             const type = document.getElementById('reportType').value;
             const regStatus = document.getElementById('regStatusContainer');
             const payStatus = document.getElementById('payStatusContainer');
-            
+
             const regSelect = document.querySelector('select[name="registrationStatus"]');
             const paySelect = document.querySelector('select[name="paymentStatus"]');
 
@@ -173,7 +186,7 @@
             const form = document.getElementById('reportForm');
             const formData = new FormData(form);
             const queryParams = new URLSearchParams(formData).toString();
-            
+
             const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Data...';
@@ -198,4 +211,5 @@
         }
     </script>
     </body>
-</html>
+
+    </html>

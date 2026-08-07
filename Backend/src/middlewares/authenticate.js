@@ -5,19 +5,20 @@ const db = require('../config/db');
 exports.authenticate = async (req, res, next) => {
     let token;
     
-    // 1. Check cookies first
-    if (req.cookies && req.cookies.token) {
-        token = req.cookies.token;
-    }
-    
-    // 2. Fallback to Authorization header (useful for Postman)
-    if (!token && req.headers.authorization) {
+    // 1. Check Authorization header first (useful for Swagger/Postman testing)
+    if (req.headers.authorization) {
         if (req.headers.authorization.startsWith('Bearer ')) {
             token = req.headers.authorization.split(' ')[1];
         } else {
-            // In case the token was passed directly without 'Bearer ' prefix
             token = req.headers.authorization;
         }
+    }
+    
+    // 2. Fallback to cookies (for browser sessions)
+    // Ignore cookies if the request is from Swagger UI so we can test 401s properly
+    const isSwagger = req.headers.referer && req.headers.referer.includes('/api-docs');
+    if (!token && req.cookies && req.cookies.token && !isSwagger) {
+        token = req.cookies.token;
     }
 
     // Function to handle unauthorized based on request type
@@ -27,12 +28,13 @@ exports.authenticate = async (req, res, next) => {
             return res.status(401).json({ success: false, message: msg });
         }
 
-        // For frontend dashboard/admin routes, redirect to login page
-        if (req.accepts('html') && !req.xhr) {
+        // For frontend dashboard/admin routes, redirect to login page only if it's a browser requesting HTML
+        if (req.headers.accept && req.headers.accept.includes('text/html') && !req.xhr) {
             res.clearCookie('token');
             return res.redirect('/api/auth/login');
         }
 
+        // Otherwise (like Swagger sending */*), return 401 JSON
         return res.status(401).json({ success: false, message: msg });
     };
 

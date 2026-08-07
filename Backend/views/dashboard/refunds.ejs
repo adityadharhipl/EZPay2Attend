@@ -105,11 +105,11 @@
                 <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                 <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
                 <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
+                <!-- <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendee/Registrations</a>
                 <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
                 <a href="/admin/refunds" class="nav-link active"><i class="fa-solid fa-arrow-rotate-left"></i>
                     Refunds</a>
-                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a> -->
 
             </nav>
         </aside>
@@ -172,13 +172,19 @@
                     </div>
                 </div>
 
-                <div class="entries-control" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                <div class="entries-control"
+                    style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
                     <span>Show</span>
-                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)" style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
-                        <option value="10" style="color: #000;" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
-                        <option value="20" style="color: #000;" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
-                        <option value="30" style="color: #000;" <%= pagination.limit === 30 ? 'selected' : '' %>>30</option>
-                        <option value="50" style="color: #000;" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+                    <select class="form-select form-select-sm" onchange="changeEntriesLimit(this.value)"
+                        style="width: 70px; display: inline-block; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--surface-light); color: var(--text-primary);">
+                        <option value="10" style="color: #000;" <%=pagination.limit===10 ? 'selected' : '' %>>10
+                        </option>
+                        <option value="20" style="color: #000;" <%=pagination.limit===20 ? 'selected' : '' %>>20
+                        </option>
+                        <option value="30" style="color: #000;" <%=pagination.limit===30 ? 'selected' : '' %>>30
+                        </option>
+                        <option value="50" style="color: #000;" <%=pagination.limit===50 ? 'selected' : '' %>>50
+                        </option>
                     </select>
                     <span>entries</span>
                 </div>
@@ -227,26 +233,27 @@
                                                     </span>
                                             </td>
                                             <td>
-                                                <% if (attendee.status !=='REFUNDED' && attendee.status !=='REPLACED' ) { %>
+                                                <% if (attendee.status !=='REFUNDED' && attendee.status !=='REPLACED' )
+                                                    { %>
                                                     <div style="display: flex; gap: 0.5rem;">
                                                         <button class="btn btn-sm"
                                                             onclick="openRefundModal('process', '<%= attendee.id %>')"
                                                             style="background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
                                                             Mark Refunded
                                                         </button>
-                                                        <% if (attendee.status === 'REFUND_REQUESTED') { %>
-                                                        <button class="btn btn-sm"
-                                                            onclick="openRefundModal('reject', '<%= attendee.id %>')"
-                                                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-                                                            Reject
-                                                        </button>
-                                                        <% } %>
+                                                        <% if (attendee.status==='REFUND_REQUESTED' ) { %>
+                                                            <button class="btn btn-sm"
+                                                                onclick="openRefundModal('reject', '<%= attendee.id %>')"
+                                                                style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                                                Reject
+                                                            </button>
+                                                            <% } %>
                                                     </div>
-                                                <% } else { %>
-                                                    <span style="color: var(--text-secondary); font-size: 0.85rem;">
-                                                        <i class="fa-solid fa-check"></i> Processed
-                                                    </span>
-                                                <% } %>
+                                                    <% } else { %>
+                                                        <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                                                            <i class="fa-solid fa-check"></i> Processed
+                                                        </span>
+                                                        <% } %>
                                             </td>
                                         </tr>
                                         <% }) %>
@@ -314,10 +321,10 @@
         function openRefundModal(action, attendeeId) {
             currentRefundAction = action;
             currentRefundAttendeeId = attendeeId;
-            
+
             const titleEl = document.getElementById('refundModalTitle');
             const textEl = document.getElementById('refundModalText');
-            
+
             if (action === 'process') {
                 titleEl.textContent = 'Process Refund';
                 textEl.textContent = 'Are you sure you want to mark this attendee as REFUNDED? This will free up a spot in the event capacity.';
@@ -325,7 +332,7 @@
                 titleEl.textContent = 'Reject Refund';
                 textEl.textContent = 'Are you sure you want to reject this refund request?';
             }
-            
+
             document.getElementById('refundConfirmModal').classList.add('show');
         }
 
@@ -335,7 +342,7 @@
             currentRefundAttendeeId = null;
         }
 
-        document.getElementById('refundModalConfirmBtn').addEventListener('click', function() {
+        document.getElementById('refundModalConfirmBtn').addEventListener('click', function () {
             if (currentRefundAction === 'process') {
                 executeProcessRefund(currentRefundAttendeeId);
             } else if (currentRefundAction === 'reject') {
@@ -373,7 +380,7 @@
                     body: JSON.stringify({ attendeeId })
                 });
                 const result = await res.json();
-                
+
                 if (result.success) {
                     showToast(result.message, 'success');
                     setTimeout(() => window.location.reload(), 1500);
