@@ -40,8 +40,8 @@ exports.getDashboardMetrics = async () => {
         where: { status: 'PENDING', type: { not: 'REFUND' } }
     });
 
-    const pendingRefunds = await prisma.payment.count({
-        where: { type: 'REFUND', status: 'PENDING' }
+    const pendingRefunds = await prisma.attendee.count({
+        where: { status: 'REFUND_REQUESTED' }
     });
 
     const capacityAgg = await prisma.event.aggregate({
