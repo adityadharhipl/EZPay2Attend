@@ -498,7 +498,7 @@
             if (!school) return;
 
             const eventNames = school.events && school.events.length > 0 
-                ? school.events.map(e => e.title).join(' • ') 
+                ? school.events.map((e, index) => `<div>${index + 1}. ${e.title}</div>`).join('') 
                 : 'No events assigned';
 
             const detailsHtml = `

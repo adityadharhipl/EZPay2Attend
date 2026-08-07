@@ -158,7 +158,7 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             width: 90%;
-            max-width: 400px;
+            max-width: 600px;
             padding: 1.5rem;
         }
 
@@ -400,7 +400,7 @@
                                                         <%= attendee.status.replace('_', ' ' ) %>
                                                     </span>
                                             </td>
-                                            <td class="text-end">
+                                            <td class="text-end" style="white-space: nowrap;">
                                                 <button class="action-btn" title="Update Status"
                                                     onclick="openStatusModal('<%= attendee.id %>', '<%= attendee.status %>', '<%= attendee.fullName %>')"><i
                                                         class="fa-solid fa-pen-to-square"></i></button>
@@ -418,6 +418,7 @@
                                                     data-id="<%= attendee.id %>" data-name="<%= attendee.fullName %>"
                                                     onclick="deleteAttendee(this.dataset.id, this.dataset.name)"><i
                                                         class="fa-solid fa-trash"></i></button>
+                                                <button class="action-btn text-info" title="View" onclick="viewAttendee('<%= attendee.id %>')"><i class="fa-solid fa-eye"></i></button>
                                             </td>
                                         </tr>
                                         <% }) %>
@@ -507,9 +508,51 @@
         </div>
     </div>
 
+    <!-- View Attendee Modal -->
+    <div class="custom-modal" id="viewAttendeeModal">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">Attendee Details</h3>
+                <button type="button" class="close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div id="viewAttendeeDetails" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script id="attendeesData" type="application/json">
+    <%- JSON.stringify(attendees || []) %>
+    </script>
+
     <script>
+        const allAttendees = JSON.parse(document.getElementById('attendeesData').textContent);
         let activeAttendeeId = null;
         let refundAttendeeId = null;
+
+        function viewAttendee(id) {
+            const attendee = allAttendees.find(a => a.id === id);
+            if (!attendee) return;
+
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${attendee.fullName}</h4>
+                        <span class="status-badge status-${attendee.status.toLowerCase()}">${attendee.status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Email:</strong> ${attendee.email}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Contact:</strong> ${attendee.contactNumber}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Event:</strong> ${attendee.event ? attendee.event.title : 'N/A'}</div>
+                    <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Reg. Date:</strong> ${new Date(attendee.createdAt).toLocaleDateString()}</div>
+                </div>
+            `;
+            document.getElementById('viewAttendeeDetails').innerHTML = detailsHtml;
+            document.getElementById('viewAttendeeModal').classList.add('show');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewAttendeeModal').classList.remove('show');
+        }
 
         function openStatusModal(id, currentStatus, name) {
             activeAttendeeId = id;
