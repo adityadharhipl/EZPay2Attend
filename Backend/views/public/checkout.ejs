@@ -135,7 +135,19 @@
         </div>
     </div>
 
-    <% if (total > 0 && attendee.status !== 'CONFIRMED') { %>
+    <% if (typeof reference !== 'undefined' && reference) { %>
+        <div style="text-align: center; color: var(--success); font-size: 1.2rem; margin-bottom: 2rem;">
+            <i class="fa-solid fa-circle-check" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+            Payment Successful!
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">A receipt has been sent to your email.<br>Redirecting to registration page in 3 seconds...</div>
+        </div>
+        <a href="/register" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return to Registration</a>
+        <script>
+            setTimeout(() => {
+                window.location.href = '/register';
+            }, 3000);
+        </script>
+    <% } else if (total > 0 && attendee.status !== 'CONFIRMED') { %>
         <div class="payment-options">
             <% if (depositPercentage > 0 && attendee.status === 'INCOMPLETE') { %>
                 <button class="pay-btn btn-deposit" onclick="initiatePayment('DEPOSIT', '<%= depositAmount %>')">
@@ -160,12 +172,12 @@
         <div style="text-align: center; color: var(--success); font-size: 1.2rem; margin-bottom: 2rem;">
             <i class="fa-solid fa-circle-check" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
             Registration Complete! No payment due.
-            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">Redirecting to home page in 2 seconds...</div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">Redirecting to registration page in 2 seconds...</div>
         </div>
-        <a href="/" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return Home</a>
+        <a href="/register" class="btn" style="width: 100%; text-align: center; background: var(--surface-light); color: #fff; border: 1px solid var(--border);">Return to Registration</a>
         <script>
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/register';
             }, 2000);
         </script>
     <% } %>

@@ -36,7 +36,8 @@ exports.renderCheckoutPage = async (req, res) => {
 
         if (!attendee) return res.status(404).send('Attendee not found');
         
-        res.render('public/checkout', { title: 'Checkout | EZPay2Attend', attendee });
+        const reference = req.query.reference;
+        res.render('public/checkout', { title: 'Checkout | EZPay2Attend', attendee, reference });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading checkout page');

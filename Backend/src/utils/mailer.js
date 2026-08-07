@@ -33,7 +33,8 @@ exports.sendRegistrationEmail = async (attendee, event) => {
         <h2>Hello ${attendee.fullName},</h2>
         <p>You have successfully registered for <strong>${event.title}</strong>.</p>
         <p>Your current status is: <strong>${attendee.status.replace('_', ' ')}</strong></p>
-        <p>If you have any pending balance, please log in to complete your payment.</p>
+        <p>If you have any pending balance, please click the link below to complete your payment.</p>
+        <p><a href="${env.API_BASE_URL}/checkout?attendeeId=${attendee.id}"><strong>Click here to pay now</strong></a></p>
         <br/>
         <p>Thank you,<br/>EZPay2Attend Team</p>
     `;
