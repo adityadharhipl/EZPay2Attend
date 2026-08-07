@@ -200,14 +200,24 @@
                                             <tbody>
                                                 <% event.attendees.forEach(a => { 
                                                     let totalPaid = 0;
+                                                    let totalPending = 0;
                                                     a.payments.forEach(p => {
                                                         if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                                        if (p.status === 'PENDING') totalPending += p.amount;
                                                     });
                                                 %>
                                                     <tr>
                                                         <td><%= a.fullName %></td>
                                                         <td><%= a.status.replace('_', ' ') %></td>
-                                                        <td style="color: #4ade80;">$<%= totalPaid.toFixed(2) %></td>
+                                                        <td style="color: #4ade80;">
+                                                            <% if (totalPaid > 0) { %>
+                                                                $<%= totalPaid.toFixed(2) %>
+                                                            <% } else if (totalPending > 0) { %>
+                                                                <span style="color: var(--warning);">$<%= totalPending.toFixed(2) %> (Pending)</span>
+                                                            <% } else { %>
+                                                                $0.00
+                                                            <% } %>
+                                                        </td>
                                                         <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
                                                     </tr>
                                                 <% }) %>

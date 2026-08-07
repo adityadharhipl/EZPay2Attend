@@ -396,13 +396,14 @@
                                         <button class="action-btn" title="Edit"
                                             onclick="editEvent('<%= event.id %>')"><i
                                                 class="fa-solid fa-pen"></i></button>
+                                        <button class="action-btn text-info" title="View"
+                                            onclick="viewEvent('<%= event.id %>')"><i
+                                                class="fa-solid fa-eye"></i></button>
                                         <button class="action-btn delete" title="Delete" data-id="<%= event.id %>"
                                             data-title="<%= event.title %>"
                                             onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i
                                                 class="fa-solid fa-trash"></i></button>
-                                        <button class="action-btn text-info" title="View"
-                                            onclick="viewEvent('<%= event.id %>')"><i
-                                                class="fa-solid fa-eye"></i></button>
+
                                     </td>
                                 </tr>
                                 <% }) %>

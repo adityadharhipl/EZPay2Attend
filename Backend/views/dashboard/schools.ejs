@@ -348,13 +348,13 @@
                                         <button class="action-btn" title="Edit"
                                             onclick="editSchool('<%= school.id %>')"><i
                                                 class="fa-solid fa-pen"></i></button>
+                                        <button class="action-btn text-info" title="View"
+                                            onclick="viewSchool('<%= school.id %>')"><i
+                                                class="fa-solid fa-eye"></i></button>
                                         <button class="action-btn delete" title="Delete" data-id="<%= school.id %>"
                                             data-name="<%= school.name %>"
                                             onclick="deleteSchool(this.dataset.id, this.dataset.name)"><i
                                                 class="fa-solid fa-trash"></i></button>
-                                        <button class="action-btn text-info" title="View"
-                                            onclick="viewSchool('<%= school.id %>')"><i
-                                                class="fa-solid fa-eye"></i></button>
                                     </td>
                                 </tr>
                                 <% }) %>

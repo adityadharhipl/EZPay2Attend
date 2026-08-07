@@ -55,6 +55,9 @@ exports.authenticate = async (req, res, next) => {
 
         next();
     } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return handleUnauthorized('Token has expired');
+        }
         return handleUnauthorized('Invalid token signature');
     }
 };
