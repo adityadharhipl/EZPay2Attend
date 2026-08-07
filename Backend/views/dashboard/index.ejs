@@ -140,7 +140,8 @@
                                     Total Events <i class="fa-solid fa-calendar-days"></i>
                                 </div>
                                 <div class="metric-card-value">
-                                    <%= metrics.totalEvents %>
+                                    <!-- <%= metrics.totalEvents %> -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -149,7 +150,8 @@
                                     Total Registrations <i class="fa-solid fa-users"></i>
                                 </div>
                                 <div class="metric-card-value">
-                                    <%= metrics.totalRegistrations %>
+                                    <!-- <%= metrics.totalRegistrations %> -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -158,7 +160,8 @@
                                     Confirmed Attendees <i class="fa-solid fa-user-check"></i>
                                 </div>
                                 <div class="metric-card-value">
-                                    <%= metrics.confirmedAttendees %>
+                                    <!-- <%= metrics.confirmedAttendees %> -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -167,7 +170,8 @@
                                     Capacity Utilization <i class="fa-solid fa-percent"></i>
                                 </div>
                                 <div class="metric-card-value">
-                                    <%= metrics.capacityUtilization %>%
+                                    <!-- <%= metrics.capacityUtilization %>% -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -175,7 +179,9 @@
                                 <div class="metric-card-header">
                                     Total Revenue <i class="fa-solid fa-money-bill-wave"></i>
                                 </div>
-                                <div class="metric-card-value">$<%= metrics.totalRevenue.toLocaleString() %>
+                                <div class="metric-card-value">
+                                    <!-- $<%= metrics.totalRevenue.toLocaleString() %> -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -183,8 +189,10 @@
                                 <div class="metric-card-header">
                                     Outstanding Balance <i class="fa-solid fa-file-invoice-dollar"></i>
                                 </div>
-                                <div class="metric-card-value" style="color: var(--warning);">$<%=
-                                        metrics.outstandingBalance.toLocaleString() %>
+                                <div class="metric-card-value" style="color: var(--warning);">
+                                    <!-- $<%=
+                                        metrics.outstandingBalance.toLocaleString() %> -->
+                                    <%= 0 %>
                                 </div>
                             </div>
 
@@ -192,8 +200,11 @@
                                 <div class="metric-card-header">
                                     Pending Payments <i class="fa-solid fa-clock"></i>
                                 </div>
-                                <div class="metric-card-value">
+                                <!-- <div class="metric-card-value">
                                     <%= metrics.outstandingPayments %>
+                                </div> -->
+                                <div class="metric-card-value">
+                                    <%= 0 %>
                                 </div>
                             </div>
 

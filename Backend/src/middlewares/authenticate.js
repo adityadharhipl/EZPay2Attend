@@ -55,9 +55,17 @@ exports.authenticate = async (req, res, next) => {
 
         next();
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            return handleUnauthorized('Token has expired');
+        const exactJwtErrors = [
+            'jwt expired', 
+            'invalid signature', 
+            'jwt malformed', 
+            'secret or public key must be provided'
+        ];
+        
+        if (exactJwtErrors.includes(err.message)) {
+            return handleUnauthorized(err.message);
         }
+        
         return handleUnauthorized('Invalid token signature');
     }
 };

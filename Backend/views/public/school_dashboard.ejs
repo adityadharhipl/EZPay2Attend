@@ -69,7 +69,7 @@
         transition: transform 0.3s;
     }
     .chevron.rotate {
-        transform: rotate(180deg);
+        transform: rotate(-90deg);
     }
     .inner-table {
         width: 100%;
@@ -191,6 +191,7 @@
                                         <table class="inner-table">
                                             <thead>
                                                 <tr>
+                                                    <th>S.NO.</th>
                                                     <th>Name</th>
                                                     <th>Status</th>
                                                     <th>Payment Amount</th>
@@ -198,7 +199,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <% event.attendees.forEach(a => { 
+                                                <% event.attendees.forEach((a, attIndex) => { 
                                                     let totalPaid = 0;
                                                     let totalPending = 0;
                                                     a.payments.forEach(p => {
@@ -207,6 +208,7 @@
                                                     });
                                                 %>
                                                     <tr>
+                                                        <td><%= attIndex + 1 %></td>
                                                         <td><%= a.fullName %></td>
                                                         <td><%= a.status.replace('_', ' ') %></td>
                                                         <td style="color: #4ade80;">
