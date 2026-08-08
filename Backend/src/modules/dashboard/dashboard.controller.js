@@ -246,8 +246,8 @@ exports.exportPaymentsCSV = async (req, res) => {
         const worksheet = workbook.addWorksheet('Payments');
 
         worksheet.columns = [
-            { header: 'Reference', key: 'referenceNumber', width: 25 },
-            { header: 'Gateway Ref', key: 'gatewayReference', width: 25 },
+            { header: 'S.No', key: 'sno', width: 10 },
+            { header: 'Ref Number', key: 'referenceNumber', width: 25 },
             { header: 'Attendee Name', key: 'fullName', width: 25 },
             { header: 'Event Title', key: 'eventTitle', width: 30 },
             { header: 'Amount', key: 'amount', width: 15 },
@@ -258,10 +258,11 @@ exports.exportPaymentsCSV = async (req, res) => {
 
         worksheet.getRow(1).font = { bold: true };
 
+        let count = 1;
         payments.forEach(p => {
             worksheet.addRow({
+                sno: count++,
                 referenceNumber: p.referenceNumber || '',
-                gatewayReference: p.gatewayReference || '',
                 fullName: p.attendee.fullName,
                 eventTitle: p.attendee.event.title,
                 amount: p.amount,
@@ -362,21 +363,22 @@ exports.exportCustomReport = async (req, res) => {
             const payments = await db.payment.findMany({ where: whereClause, include: { attendee: { include: { event: true } } } });
             
             worksheet.columns = [
-                { header: 'Reference', key: 'reference', width: 20 },
-                { header: 'Gateway Ref', key: 'gatewayRef', width: 20 },
-                { header: 'Name', key: 'name', width: 25 },
-                { header: 'Event', key: 'event', width: 30 },
+                { header: 'S.No', key: 'sno', width: 10 },
+                { header: 'Ref Number', key: 'reference', width: 20 },
+                { header: 'Attendee Name', key: 'name', width: 25 },
+                { header: 'Event Title', key: 'event', width: 30 },
                 { header: 'Amount', key: 'amount', width: 12 },
                 { header: 'Type', key: 'type', width: 12 },
                 { header: 'Status', key: 'status', width: 15 },
                 { header: 'Payment Date', key: 'paymentDate', width: 20 }
             ];
 
+            let count = 1;
             payments.forEach(p => {
                 const payDate = p.createdAt.toISOString();
                 worksheet.addRow({
+                    sno: count,
                     reference: p.referenceNumber || '-',
-                    gatewayRef: p.gatewayReference || '-',
                     name: p.attendee.fullName,
                     event: p.attendee.event.title,
                     amount: p.amount,
@@ -385,15 +387,16 @@ exports.exportCustomReport = async (req, res) => {
                     paymentDate: payDate.split('T')[0]
                 });
                 jsonData.push({
-                    reference: p.referenceNumber,
-                    gatewayRef: p.gatewayReference,
-                    name: p.attendee.fullName,
-                    event: p.attendee.event.title,
-                    amount: p.amount,
-                    type: p.type,
-                    status: p.status,
-                    paymentDate: payDate
+                    'S.No': count,
+                    'Ref Number': p.referenceNumber,
+                    'Attendee Name': p.attendee.fullName,
+                    'Event Title': p.attendee.event.title,
+                    'Amount': p.amount,
+                    'Type': p.type,
+                    'Status': p.status,
+                    'Payment Date': payDate
                 });
+                count++;
             });
             styleHeaders(worksheet);
             
