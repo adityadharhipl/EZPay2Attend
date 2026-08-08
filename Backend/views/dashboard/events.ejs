@@ -617,9 +617,11 @@
                                 <th>S.NO.</th>
                                 <th>Name</th>
                                 <th>Status</th>
+                                <th>Actual amount</th>
                                 <th>Paid</th>
                                 <th>Balance Due</th>
                                 <th>Date</th>
+                                <th>Due Date</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -650,6 +652,8 @@
                                                     </span>
                                                     <% } %>
                                         </td>
+                                        <td>$<%= event.costPerAttendee.toFixed(2) %>
+                                        </td>
                                         <td style="color: #4ade80;">$<%= totalPaid.toFixed(2) %>
                                         </td>
                                         <% if (balanceDue> 0) { %>
@@ -661,6 +665,10 @@
                                             </td>
                                             <td>
                                                 <%= new Date(a.createdAt).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <%= event.balanceDueDate ? new
+                                                    Date(event.balanceDueDate).toLocaleDateString() : '-' %>
                                             </td>
                                             <td>
                                                 <% if (balanceDue> 0 && a.status !== 'REFUNDED') { %>

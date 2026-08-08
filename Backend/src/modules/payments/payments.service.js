@@ -111,6 +111,51 @@ exports.processWebhook = async (reqBody, rawBody, signature) => {
     return { success: true };
 };
 
+exports.verifyPayment = async (referenceNumber) => {
+    try {
+        const response = await axios.get(`https://api.paystack.co/transaction/verify/${referenceNumber}`, {
+            headers: {
+                Authorization: `Bearer ${PAYSTACK_SECRET}`
+            }
+        });
+
+        if (response.data.status && response.data.data.status === 'success') {
+            const payment = await db.payment.findFirst({ where: { referenceNumber } });
+            if (!payment || payment.status === 'SUCCESS') return true;
+
+            // Update Payment Status
+            await db.payment.update({
+                where: { id: payment.id },
+                data: { status: 'SUCCESS', paymentDate: new Date() }
+            });
+
+            // Update Attendee status
+            const attendee = await db.attendee.findUnique({ where: { id: payment.attendeeId } });
+            
+            if (payment.type === 'DEPOSIT') {
+                await db.attendee.update({
+                    where: { id: payment.attendeeId },
+                    data: { status: 'BALANCE_PENDING' }
+                });
+            } else if (payment.type === 'BALANCE' || payment.type === 'FULL') {
+                await db.attendee.update({
+                    where: { id: payment.attendeeId },
+                    data: { status: 'CONFIRMED' }
+                });
+            }
+
+            const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
+            const mailer = require('../../utils/mailer');
+            mailer.sendPaymentReceipt(attendee, payment, eventData).catch(e => console.error("Email Error:", e));
+
+            return true;
+        }
+    } catch (error) {
+        console.error("Paystack Verify Error:", error.response?.data || error.message);
+    }
+    return false;
+};
+
 exports.processRefund = async (attendeeId) => {
     // 1. Get attendee and their successful payments
     const attendee = await db.attendee.findUnique({ 

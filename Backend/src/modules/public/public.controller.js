@@ -1,4 +1,5 @@
 const db = require('../../config/db');
+const paymentsService = require('../payments/payments.service');
 
 exports.renderRegisterPage = async (req, res) => {
     try {
@@ -61,7 +62,7 @@ exports.renderCheckoutPage = async (req, res) => {
         const attendeeId = req.query.attendeeId;
         if (!attendeeId) return res.status(400).send('Attendee ID required');
         
-        const attendee = await db.attendee.findUnique({
+        let attendee = await db.attendee.findUnique({
             where: { id: attendeeId },
             include: { event: true }
         });
@@ -69,6 +70,16 @@ exports.renderCheckoutPage = async (req, res) => {
         if (!attendee) return res.status(404).send('Attendee not found');
         
         const reference = req.query.reference;
+
+        if (reference) {
+            await paymentsService.verifyPayment(reference);
+            // Re-fetch attendee to get potentially updated status
+            attendee = await db.attendee.findUnique({
+                where: { id: attendeeId },
+                include: { event: true }
+            });
+        }
+
         res.render('public/checkout', { title: 'Checkout | EZPay2Attend', attendee, reference });
     } catch (err) {
         console.error(err);
