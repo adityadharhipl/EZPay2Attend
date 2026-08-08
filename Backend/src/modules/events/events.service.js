@@ -52,7 +52,19 @@ async function generateUniqueSlug(title, excludeId = null) {
     }
 }
 
+function validateDates(data, existingEvent = null) {
+    const eventDate = data.date !== undefined ? data.date : (existingEvent ? existingEvent.date : null);
+    const balanceDueDate = data.balanceDueDate !== undefined ? data.balanceDueDate : (existingEvent ? existingEvent.balanceDueDate : null);
+
+    if (eventDate && balanceDueDate) {
+        if (new Date(balanceDueDate) > new Date(eventDate)) {
+            throw new Error('Balance Due Date cannot be after the Event Date.');
+        }
+    }
+}
+
 exports.createEvent = async (data) => {
+    validateDates(data);
     data.slug = await generateUniqueSlug(data.title);
     return prisma.event.create({
         data
@@ -60,6 +72,11 @@ exports.createEvent = async (data) => {
 };
 
 exports.updateEvent = async (id, data) => {
+    if (data.date !== undefined || data.balanceDueDate !== undefined) {
+        const existingEvent = await prisma.event.findUnique({ where: { id } });
+        validateDates(data, existingEvent);
+    }
+    
     if (data.title) {
         data.slug = await generateUniqueSlug(data.title, id);
     }
@@ -70,7 +87,25 @@ exports.updateEvent = async (id, data) => {
 };
 
 exports.deleteEvent = async (id) => {
-    return prisma.event.delete({
-        where: { id }
+    // Fetch attendees to delete their related payments first
+    const attendees = await prisma.attendee.findMany({
+        where: { eventId: id },
+        select: { id: true }
     });
+    const attendeeIds = attendees.map(a => a.id);
+
+    return prisma.$transaction([
+        // 1. Delete all payments associated with attendees of this event
+        prisma.payment.deleteMany({
+            where: { attendeeId: { in: attendeeIds } }
+        }),
+        // 2. Delete all attendees for this event
+        prisma.attendee.deleteMany({
+            where: { eventId: id }
+        }),
+        // 3. Finally, delete the event
+        prisma.event.delete({
+            where: { id }
+        })
+    ]);
 };

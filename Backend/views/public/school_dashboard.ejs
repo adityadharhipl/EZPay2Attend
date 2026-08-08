@@ -164,7 +164,7 @@
                         <tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
                     <% } else { %>
                         <% paginatedEvents.forEach((event, index) => { %>
-                            <tr class="main-row" onclick="toggleAccordion('<%= index %>')">
+                            <tr class="main-row">
                                 <td><%= (page - 1) * 10 + index + 1 %></td>
                                 <td><strong><%= event.title %></strong></td>
                                 <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
@@ -180,75 +180,7 @@
                                         <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
                                             <%= event.status %>
                                         </span>
-                                        <i class="fa-solid fa-chevron-down chevron rotate" id="chevron-<%= index %>"></i>
                                     </div>
-                                </td>
-                            </tr>
-                            <tr class="accordion-row" id="accordion-<%= index %>">
-                                <td colspan="5" style="padding: 1.5rem; border-top: none;">
-                                    <div style="color: var(--text-secondary); margin-bottom: 0.5rem;"><strong>Registrations & Payments</strong></div>
-                                    <% if (event.attendees && event.attendees.length > 0) { %>
-                                        <table class="inner-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>S.NO.</th>
-                                                    <th>Name</th>
-                                                    <th>Status</th>
-                                                    <th>Paid</th>
-                                                    <th>Balance Due</th>
-                                                    <th>Date</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <% event.attendees.forEach((a, attIndex) => { 
-                                                    let totalPaid = 0;
-                                                    let totalPending = 0;
-                                                    a.payments.forEach(p => {
-                                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
-                                                        if (p.status === 'PENDING') totalPending += p.amount;
-                                                    });
-                                                    let balanceDue = event.costPerAttendee - totalPaid;
-                                                    if(balanceDue < 0) balanceDue = 0;
-                                                %>
-                                                    <tr>
-                                                        <td><%= attIndex + 1 %></td>
-                                                        <td><%= a.fullName %></td>
-                                                        <td>
-                                                            <%= a.status.replace('_', ' ') %>
-                                                            <% if (a.status === 'BALANCE_PENDING' || a.status === 'INCOMPLETE') { %>
-                                                                <span style="display:inline-block; margin-left: 5px; color: var(--warning);" title="Payment Incomplete">
-                                                                    <i class="fa-solid fa-circle-exclamation"></i>
-                                                                </span>
-                                                            <% } %>
-                                                        </td>
-                                                        <td style="color: #4ade80;">
-                                                            $<%= totalPaid.toFixed(2) %>
-                                                        </td>
-                                                        <% if (balanceDue > 0) { %>
-                                                            <td style="color: var(--warning);">
-                                                        <% } else { %>
-                                                            <td style="color: inherit;">
-                                                        <% } %>
-                                                            $<%= balanceDue.toFixed(2) %>
-                                                        </td>
-                                                        <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
-                                                        <td>
-                                                            <% if (balanceDue > 0 && a.status !== 'REFUNDED') { %>
-                                                                <button onclick="sendReminder('<%= a.id %>', this)" title="Send Reminder Email" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.1rem; padding: 5px;">
-                                                                    <i class="fa-solid fa-bell"></i>
-                                                                </button>
-                                                            <% } else { %>
-                                                                - 
-                                                            <% } %>
-                                                        </td>
-                                                    </tr>
-                                                <% }) %>
-                                            </tbody>
-                                        </table>
-                                    <% } else { %>
-                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees registered yet.</div>
-                                    <% } %>
                                 </td>
                             </tr>
                         <% }) %>

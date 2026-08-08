@@ -82,62 +82,80 @@
         <p>Event Registration</p>
     </div>
 
-    <form id="publicRegisterForm">
-        <% if (typeof isSingleEvent !== 'undefined' && isSingleEvent && events.length === 1) { %>
-            <input type="hidden" name="eventId" id="eventSelect" value="<%= events[0].id %>">
-            <div class="event-details" style="display: block; margin-bottom: 2rem;">
-                <h4 style="margin-bottom: 1rem; color: var(--primary);"><%= events[0].title %></h4>
-                <p><strong>School:</strong> <%= events[0].school.name %></p>
-                <p><strong>Date:</strong> <%= events[0].date ? new Date(events[0].date).toLocaleDateString() : 'TBD' %></p>
-                <p><strong>Cost:</strong> $<%= events[0].costPerAttendee.toFixed(2) %></p>
+    <% if (typeof closedMessage !== 'undefined' && closedMessage) { %>
+        <div style="text-align: center; padding: 2rem 0;">
+            <div style="font-size: 3rem; color: var(--warning); margin-bottom: 1rem;">
+                <i class="fa-solid fa-calendar-check"></i>
             </div>
-        <% } else { %>
+            <h2 style="color: #fff; margin-bottom: 0.5rem;">Event Completed</h2>
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 0.5rem;"><%= closedMessage %></p>
+            <p style="color: var(--primary); font-size: 1.2rem; font-weight: bold;">Stay tuned, coming soon when the next event opens!</p>
+            <% if (typeof isSingleEvent !== 'undefined' && isSingleEvent && events.length === 1) { %>
+                <div class="event-details" style="display: block; margin-top: 2rem; text-align: left;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary);"><%= events[0].title %></h4>
+                    <p><strong>School:</strong> <%= events[0].school.name %></p>
+                    <p><strong>Date:</strong> <%= events[0].date ? new Date(events[0].date).toLocaleDateString() : 'TBD' %></p>
+                </div>
+            <% } %>
+        </div>
+    <% } else { %>
+        <form id="publicRegisterForm">
+            <% if (typeof isSingleEvent !== 'undefined' && isSingleEvent && events.length === 1) { %>
+                <input type="hidden" name="eventId" id="eventSelect" value="<%= events[0].id %>">
+                <div class="event-details" style="display: block; margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary);"><%= events[0].title %></h4>
+                    <p><strong>School:</strong> <%= events[0].school.name %></p>
+                    <p><strong>Date:</strong> <%= events[0].date ? new Date(events[0].date).toLocaleDateString() : 'TBD' %></p>
+                    <p><strong>Cost:</strong> $<%= events[0].costPerAttendee.toFixed(2) %></p>
+                </div>
+            <% } else { %>
+                <div class="form-group">
+                    <label class="form-label">Select Event</label>
+                    <select class="form-select" name="eventId" id="eventSelect" required onchange="updateEventDetails()">
+                        <option value="">-- Choose an Event --</option>
+                        <% events.forEach(e => { %>
+                            <option value="<%= e.id %>" 
+                                    data-school="<%= e.school.name %>" 
+                                    data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
+                                    data-cost="<%= e.costPerAttendee %>"
+                                    <%= preSelectedEvent === e.id ? 'selected' : '' %>>
+                                <%= e.title %> (<%= e.school.name %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="event-details" id="eventDetailsBox">
+                    <h4 id="detailTitle"></h4>
+                    <p><strong>School:</strong> <span id="detailSchool"></span></p>
+                    <p><strong>Date:</strong> <span id="detailDate"></span></p>
+                    <p><strong>Cost:</strong> $<span id="detailCost"></span></p>
+                </div>
+            <% } %>
+
             <div class="form-group">
-                <label class="form-label">Select Event</label>
-                <select class="form-select" name="eventId" id="eventSelect" required onchange="updateEventDetails()">
-                    <option value="">-- Choose an Event --</option>
-                    <% events.forEach(e => { %>
-                        <option value="<%= e.id %>" 
-                                data-school="<%= e.school.name %>" 
-                                data-date="<%= e.date ? new Date(e.date).toLocaleDateString() : 'TBD' %>"
-                                data-cost="<%= e.costPerAttendee %>"
-                                <%= preSelectedEvent === e.id ? 'selected' : '' %>>
-                            <%= e.title %> (<%= e.school.name %>)
-                        </option>
-                    <% }) %>
-                </select>
+                <label class="form-label">Full Name of Attendee</label>
+                <input type="text" class="form-control" name="fullName" required placeholder="John Doe">
             </div>
 
-            <div class="event-details" id="eventDetailsBox">
-                <h4 id="detailTitle"></h4>
-                <p><strong>School:</strong> <span id="detailSchool"></span></p>
-                <p><strong>Date:</strong> <span id="detailDate"></span></p>
-                <p><strong>Cost:</strong> $<span id="detailCost"></span></p>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" required placeholder="john@example.com">
             </div>
-        <% } %>
 
-        <div class="form-group">
-            <label class="form-label">Full Name of Attendee</label>
-            <input type="text" class="form-control" name="fullName" required placeholder="John Doe">
-        </div>
+            <div class="form-group">
+                <label class="form-label">Contact Number</label>
+                <input type="text" class="form-control" name="contactNumber" required placeholder="+1 234 567 8900" maxlength="20" pattern="^[\+0-9\s\-\(\)]+$" title="Please enter a valid phone number (max 20 characters)">
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" class="form-control" name="email" required placeholder="john@example.com">
-        </div>
+            <div class="form-group">
+                <label class="form-label">Guardian Name (Optional)</label>
+                <input type="text" class="form-control" name="guardianName" placeholder="Jane Doe">
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Contact Number</label>
-            <input type="text" class="form-control" name="contactNumber" required placeholder="+1 234 567 8900" maxlength="20" pattern="^[\+0-9\s\-\(\)]+$" title="Please enter a valid phone number (max 20 characters)">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Guardian Name (Optional)</label>
-            <input type="text" class="form-control" name="guardianName" placeholder="Jane Doe">
-        </div>
-
-        <button type="button" class="btn submit-btn" id="submitBtn" onclick="submitRegistration()">Register Now</button>
-    </form>
+            <button type="button" class="btn submit-btn" id="submitBtn" onclick="submitRegistration()">Register Now</button>
+        </form>
+    <% } %>
 </div>
 
 <script>

@@ -33,14 +33,20 @@ exports.renderSingleEventRegisterPage = async (req, res) => {
         });
 
         if (!event) return res.status(404).send('Event not found');
-        if (event.status !== 'OPEN') return res.status(400).send('Event is closed for registration');
-        if (event._count.attendees >= event.capacity) return res.status(400).send('Event is fully booked');
+
+        let closedMessage = null;
+        if (event.status !== 'OPEN') {
+            closedMessage = 'This event is currently closed for registration.';
+        } else if (event._count.attendees >= event.capacity) {
+            closedMessage = 'This event is fully booked.';
+        }
 
         res.render('public/register', { 
             title: `Register for ${event.title}`, 
             events: [event], 
             preSelectedEvent: event.id,
-            isSingleEvent: true, // Used by the view to hide the dropdown
+            isSingleEvent: true,
+            closedMessage,
             error: null, 
             success: null 
         });
