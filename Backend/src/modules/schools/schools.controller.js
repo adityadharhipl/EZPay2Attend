@@ -96,6 +96,7 @@ exports.deleteSchool = async (req, res) => {
         res.json({ success: true, message: 'School deleted successfully' });
     } catch (error) {
         if (error.code === 'P2025') return res.status(404).json({ success: false, message: 'School not found' });
+        if (error.code === 'P2003') return res.status(400).json({ success: false, message: 'Cannot delete school because it has associated events. Please delete the events first.' });
         res.status(500).json({ success: false, message: error.message });
     }
 };

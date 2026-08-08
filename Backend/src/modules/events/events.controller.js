@@ -80,6 +80,7 @@ exports.deleteEvent = async (req, res) => {
         res.json({ success: true, message: 'Event deleted successfully' });
     } catch (error) {
         if (error.code === 'P2025') return res.status(404).json({ success: false, message: 'Event not found' });
+        if (error.code === 'P2003') return res.status(400).json({ success: false, message: 'Cannot delete event because it has registered attendees.' });
         res.status(500).json({ success: false, message: error.message });
     }
 };
