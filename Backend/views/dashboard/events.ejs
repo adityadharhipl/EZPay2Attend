@@ -125,23 +125,24 @@
         }
 
         .delete-modal-content {
-            background: #fff;
+            background: var(--bg-surface);
             border-radius: 12px;
             width: 90%;
             max-width: 400px;
             padding: 2.5rem 2rem;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
         }
 
         .delete-modal-content h3 {
-            color: #1E293B;
+            color: var(--text-primary);
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
 
         .delete-modal-content p {
-            color: #475569;
+            color: var(--text-secondary);
             margin-bottom: 2rem;
             font-size: 0.95rem;
         }
@@ -153,23 +154,34 @@
         }
 
         .delete-btn-cancel {
-            background: #fff;
-            color: #1E293B;
-            border: 1px solid #CBD5E1;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
             padding: 0.6rem 1.5rem;
             border-radius: 6px;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
         }
 
         .delete-btn-confirm {
-            background: #1E293B;
+            background: var(--danger);
             color: #fff;
             border: none;
             padding: 0.6rem 1.5rem;
             border-radius: 6px;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn-confirm:hover {
+            opacity: 0.9;
         }
 
         .close-btn {
@@ -584,8 +596,7 @@
     <div class="custom-modal" id="deleteEventModal">
         <div class="delete-modal-content">
             <h3>Confirm Delete</h3>
-            <p>Are you sure you want to delete <span id="deleteEventName"
-                    style="font-weight: 700; color: #1E293B;"></span>?</p>
+            <p>Are you sure you want to delete <span id="deleteEventName" style="font-weight: 700; color: var(--text-primary);"></span>?</p>
             <div class="delete-modal-actions">
                 <button type="button" class="delete-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
                 <button type="button" class="delete-btn-confirm" onclick="confirmDeleteEvent()">Delete</button>
@@ -657,7 +668,7 @@
                                         <td style="color: #4ade80;">$<%= totalPaid.toFixed(2) %>
                                         </td>
                                         <% if (balanceDue> 0) { %>
-                                            <td style="color: var(--warning);">
+                                            <td style="color: #f5210b;">
                                                 <% } else { %>
                                             <td style="color: inherit;">
                                                 <% } %>

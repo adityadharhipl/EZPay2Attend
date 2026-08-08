@@ -37,16 +37,17 @@
     }
     .global-modal.show { display: flex; }
     .global-modal-content {
-        background: #fff; border-radius: 12px; width: 90%; max-width: 400px;
+        background: var(--bg-surface); border-radius: 12px; width: 90%; max-width: 400px;
         padding: 2.5rem 2rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif;
+        border: 1px solid var(--border);
     }
-    .global-modal-content h3 { color: #1E293B; font-weight: 700; margin-top: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
-    .global-modal-content p { color: #475569; margin-bottom: 2rem; font-size: 0.95rem; }
+    .global-modal-content h3 { color: var(--text-primary); font-weight: 700; margin-top: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
+    .global-modal-content p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem; }
     .global-modal-actions { display: flex; justify-content: center; gap: 1rem; }
-    .global-btn-cancel { background: #fff; color: #1E293B; border: 1px solid #CBD5E1; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-    .global-btn-cancel:hover { background: #f1f5f9; }
-    .global-btn-confirm { background: #1E293B; color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-    .global-btn-confirm:hover { background: #0f172a; }
+    .global-btn-cancel { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+    .global-btn-cancel:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+    .global-btn-confirm { background: var(--primary); color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+    .global-btn-confirm:hover { opacity: 0.9; }
 </style>
 <div class="global-modal" id="globalLogoutModal">
     <div class="global-modal-content">
