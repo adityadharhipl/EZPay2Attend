@@ -53,6 +53,14 @@ exports.createAttendee = async (data) => {
         }
     });
 
+    // Auto-close event if capacity is reached
+    if (event._count.attendees + 1 >= event.capacity) {
+        await db.event.update({
+            where: { id: event.id },
+            data: { status: 'CLOSED' }
+        });
+    }
+
     const mailer = require('../../utils/mailer');
     mailer.sendRegistrationEmail(newAttendee, event).catch(e => console.error("Email Error:", e));
 

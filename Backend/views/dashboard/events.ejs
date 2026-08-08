@@ -393,6 +393,8 @@
                                 <th>Capacity</th>
                                 <th>Cost</th>
                                 <th>Date</th>
+                                <th>Balance Due Date</th>
+                                <th>Registrations</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -428,11 +430,15 @@
                                     <td>
                                         <%= event.date ? new Date(event.date).toLocaleDateString() : 'TBD' %>
                                     </td>
-                                    <td class="text-end" style="white-space: nowrap;">
-                                        <button class="action-btn" title="View Attendees"
-                                            onclick="toggleAccordion('<%= index %>')">
-                                            <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>"></i>
+                                    <td>
+                                        <%= event.balanceDueDate ? new Date(event.balanceDueDate).toLocaleDateString() : 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn text-primary" style="background: rgba(var(--primary-rgb), 0.1); padding: 0.4rem 0.8rem;" title="View Registrations & Payments" onclick="viewRegistrations('<%= index %>')">
+                                            <i class="fa-solid fa-users"></i> View
                                         </button>
+                                    </td>
+                                    <td class="text-end" style="white-space: nowrap;">
                                         <a href="/event/<%= event.slug %>/register" target="_blank"
                                             class="action-btn text-success" title="Public Registration Link"
                                             style="text-decoration: none;">
@@ -448,91 +454,6 @@
                                             data-title="<%= event.title %>"
                                             onclick="deleteEvent(this.dataset.id, this.dataset.title)"><i
                                                 class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr class="accordion-row" id="accordion-<%= index %>">
-                                    <td colspan="9" style="padding: 1.5rem; border-top: none;">
-                                        <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">
-                                            <strong>Registrations & Payments</strong>
-                                        </div>
-                                        <% if (event.attendees && event.attendees.length> 0) { %>
-                                            <table class="inner-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>S.NO.</th>
-                                                        <th>Name</th>
-                                                        <th>Status</th>
-                                                        <th>Paid</th>
-                                                        <th>Balance Due</th>
-                                                        <th>Date</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% event.attendees.forEach((a, attIndex)=> {
-                                                        let totalPaid = 0;
-                                                        let totalPending = 0;
-                                                        a.payments.forEach(p => {
-                                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid +=
-                                                        p.amount;
-                                                        if (p.status === 'PENDING') totalPending += p.amount;
-                                                        });
-                                                        let balanceDue = event.costPerAttendee - totalPaid;
-                                                        if(balanceDue < 0) balanceDue=0; %>
-                                                            <tr>
-                                                                <td>
-                                                                    <%= attIndex + 1 %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= a.fullName %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= a.status.replace('_', ' ' ) %>
-                                                                        <% if (a.status==='BALANCE_PENDING' ||
-                                                                            a.status==='INCOMPLETE' ) { %>
-                                                                            <span
-                                                                                style="display:inline-block; margin-left: 5px; color: var(--warning);"
-                                                                                title="Payment Incomplete">
-                                                                                <i
-                                                                                    class="fa-solid fa-circle-exclamation"></i>
-                                                                            </span>
-                                                                            <% } %>
-                                                                </td>
-                                                                <td style="color: #4ade80;">
-                                                                    $<%= totalPaid.toFixed(2) %>
-                                                                </td>
-                                                                <% if (balanceDue> 0) { %>
-                                                                    <td style="color: var(--warning);">
-                                                                        <% } else { %>
-                                                                    <td style="color: inherit;">
-                                                                        <% } %>
-                                                                            $<%= balanceDue.toFixed(2) %>
-                                                                    </td>
-                                                                    <td>
-                                                                        <%= new Date(a.createdAt).toLocaleDateString()
-                                                                            %>
-                                                                    </td>
-                                                                    <td>
-                                                                        <% if (balanceDue> 0 && a.status !== 'REFUNDED')
-                                                                            { %>
-                                                                            <button
-                                                                                onclick="sendReminder('<%= a.id %>', this)"
-                                                                                title="Send Reminder Email"
-                                                                                style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.1rem; padding: 5px;">
-                                                                                <i class="fa-solid fa-bell"></i>
-                                                                            </button>
-                                                                            <% } else { %>
-                                                                                -
-                                                                                <% } %>
-                                                                    </td>
-                                                            </tr>
-                                                            <% }) %>
-                                                </tbody>
-                                            </table>
-                                            <% } else { %>
-                                                <div style="color: var(--text-secondary); font-size: 0.9rem;">No
-                                                    attendees registered yet.</div>
-                                                <% } %>
                                     </td>
                                 </tr>
                                 <% }) %>
@@ -677,6 +598,98 @@
             </div>
             <div id="viewEventDetails" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">
                 <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Attendees Data for Modals -->
+    <div id="hiddenAttendeesContainer" style="display: none;">
+        <% events.forEach((event, index)=> { %>
+            <div id="attendees-content-<%= index %>">
+                <% if (event.attendees && event.attendees.length > 0) { %>
+                    <table class="inner-table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>S.NO.</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Paid</th>
+                                <th>Balance Due</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% event.attendees.forEach((a, attIndex)=> {
+                                let totalPaid = 0;
+                                let totalPending = 0;
+                                a.payments.forEach(p => {
+                                if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                if (p.status === 'PENDING') totalPending += p.amount;
+                                });
+                                let balanceDue = event.costPerAttendee - totalPaid;
+                                if(balanceDue < 0) balanceDue=0; %>
+                                    <tr>
+                                        <td><%= attIndex + 1 %></td>
+                                        <td><%= a.fullName %></td>
+                                        <td>
+                                            <%= a.status.replace('_', ' ' ) %>
+                                                <% if (a.status==='BALANCE_PENDING' || a.status==='INCOMPLETE' ) { %>
+                                                    <span style="display:inline-block; margin-left: 5px; color: var(--warning);" title="Payment Incomplete">
+                                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                                    </span>
+                                                <% } %>
+                                        </td>
+                                        <td style="color: #4ade80;">$<%= totalPaid.toFixed(2) %></td>
+                                        <% if (balanceDue > 0) { %>
+                                            <td style="color: var(--warning);">
+                                        <% } else { %>
+                                            <td style="color: inherit;">
+                                        <% } %>
+                                            $<%= balanceDue.toFixed(2) %>
+                                        </td>
+                                        <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
+                                        <td>
+                                            <% if (balanceDue > 0 && a.status !== 'REFUNDED') { %>
+                                                <button onclick="sendReminder('<%= a.id %>', this)" title="Send Reminder Email" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.1rem; padding: 5px;">
+                                                    <i class="fa-solid fa-bell"></i>
+                                                </button>
+                                            <% } else { %>
+                                                -
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; padding: 1rem 0;">No attendees registered yet.</div>
+                <% } %>
+            </div>
+        <% }) %>
+    </div>
+
+    <!-- Registrations Modal -->
+    <div class="custom-modal" id="registrationsModal">
+        <div class="custom-modal-content" style="max-width: 900px;">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">Registrations & Payments</h3>
+                <button type="button" class="close-btn" onclick="closeRegistrationsModal()">&times;</button>
+            </div>
+            <div id="registrationsModalBody" style="margin-top: 1rem; overflow-x: auto;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reminder Confirmation Modal -->
+    <div class="custom-modal" id="reminderModal" style="z-index: 10005;">
+        <div class="delete-modal-content">
+            <h3>Send Reminder</h3>
+            <p>Send a payment reminder email to this attendee?</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-btn-cancel" onclick="closeReminderModal()">Cancel</button>
+                <button type="button" class="delete-btn-confirm" style="background: var(--primary);" onclick="confirmSendReminder()">Send</button>
             </div>
         </div>
     </div>
@@ -862,34 +875,46 @@
             }
         }
 
-        function toggleAccordion(index) {
-            const row = document.getElementById('accordion-' + index);
-            const chevron = document.getElementById('chevron-' + index);
-            if (row.classList.contains('show')) {
-                row.classList.remove('show');
-                chevron.classList.remove('fa-chevron-up');
-                chevron.classList.add('fa-chevron-down');
-            } else {
-                row.classList.add('show');
-                chevron.classList.remove('fa-chevron-down');
-                chevron.classList.add('fa-chevron-up');
-            }
+        function viewRegistrations(index) {
+            const content = document.getElementById('attendees-content-' + index).innerHTML;
+            document.getElementById('registrationsModalBody').innerHTML = content;
+            document.getElementById('registrationsModal').classList.add('show');
         }
 
-        async function sendReminder(attendeeId, btnElement) {
-            if (!confirm('Send a payment reminder email to this attendee?')) return;
+        function closeRegistrationsModal() {
+            document.getElementById('registrationsModal').classList.remove('show');
+        }
+
+        let reminderAttendeeId = null;
+        let reminderBtnElement = null;
+
+        function sendReminder(attendeeId, btnElement) {
+            reminderAttendeeId = attendeeId;
+            reminderBtnElement = btnElement;
+            document.getElementById('reminderModal').classList.add('show');
+        }
+
+        function closeReminderModal() {
+            reminderAttendeeId = null;
+            reminderBtnElement = null;
+            document.getElementById('reminderModal').classList.remove('show');
+        }
+
+        async function confirmSendReminder() {
+            if (!reminderAttendeeId || !reminderBtnElement) return;
+
+            const attendeeId = reminderAttendeeId;
+            const btnElement = reminderBtnElement;
+            
+            closeReminderModal();
 
             const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             btnElement.disabled = true;
 
             try {
-                const token = localStorage.getItem('ezpay_token');
                 const res = await fetch(`/api/attendees/${attendeeId}/reminders/balance`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    method: 'POST'
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -907,6 +932,6 @@
             }
         }
     </script>
-    </body>
+</body>
 
     </html>

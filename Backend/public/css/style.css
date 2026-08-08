@@ -188,7 +188,8 @@ a:hover {
 /* Dashboard Layout */
 .dashboard-layout {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -198,6 +199,7 @@ a:hover {
     padding: 2.5rem 1.5rem;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .sidebar-logo {
