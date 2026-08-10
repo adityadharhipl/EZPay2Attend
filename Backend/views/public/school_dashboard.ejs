@@ -1,276 +1,327 @@
 <%- include('../layout/head', { title: school.name + ' Dashboard' }) %>
-<style>
-    body {
-        background-color: var(--bg-base);
-    }
-    .school-dashboard-container {
-        width: 100%;
-        max-width: 100%;
-        padding: 4rem 5%;
-    }
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 1.5rem;
-    }
-    @media (max-width: 768px) {
-        .metrics-grid {
-            grid-template-columns: 1fr !important;
+    <style>
+        body {
+            background-color: var(--bg-base);
         }
+
         .school-dashboard-container {
-            padding: 2rem 1rem;
+            width: 100%;
+            max-width: 100%;
+            padding: 4rem 5%;
         }
-    }
-    .school-header {
-        margin-bottom: 3rem;
-        text-align: center;
-    }
-    .school-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #fff;
-        margin-bottom: 0.5rem;
-    }
-    .school-header p {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-    }
-    .event-progress {
-        width: 100%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
-        margin-top: 0.5rem;
-        overflow: hidden;
-    }
-    .event-progress-fill {
-        height: 100%;
-        background: var(--primary);
-        border-radius: 3px;
-    }
-    .event-progress-full {
-        background: var(--danger) !important;
-    }
-    .accordion-row {
-        display: none;
-        background: rgba(255, 255, 255, 0.02);
-    }
-    .accordion-row.show {
-        display: table-row;
-    }
-    .main-row {
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .main-row:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    .chevron {
-        transition: transform 0.3s;
-    }
-    .chevron.rotate {
-        transform: rotate(-90deg);
-    }
-    .inner-table {
-        width: 100%;
-        margin-top: 1rem;
-        background: var(--bg-base);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .inner-table th {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-    }
-    .inner-table td {
-        padding: 0.5rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 0.9rem;
-    }
-</style>
 
-<div style="background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-    <div>
-        <h2 style="margin: 0; color: #fff;">EZPay2Attend</h2>
-        <div style="font-size: 0.85rem; color: var(--text-secondary);">School Committee Shared View</div>
-    </div>
-    <div style="text-align: right;">
-        <div style="font-weight: 600; color: #fff;"><%= school.name %></div>
-        <div style="font-size: 0.85rem; color: var(--text-secondary);">Read-Only Access</div>
-    </div>
-</div>
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1.5rem;
+        }
 
-<div class="school-dashboard-container" style="padding-top: 2rem;">
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr !important;
+            }
 
-    <% 
-        let totalEvents = events.length;
-        let totalAttendees = events.reduce((sum, e) => sum + e._count.attendees, 0);
-        let totalCapacity = events.reduce((sum, e) => sum + e.capacity, 0);
-        let utilization = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
-    %>
+            .school-dashboard-container {
+                padding: 2rem 1rem;
+            }
+        }
 
-    <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr) !important;">
-        <div class="metric-card">
-            <div class="metric-card-header">
-                Total Events <i class="fa-solid fa-calendar-days"></i>
-            </div>
-            <div class="metric-card-value"><%= totalEvents %></div>
+        .school-header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .school-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .school-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .event-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .event-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .event-progress-full {
+            background: var(--danger) !important;
+        }
+
+        .accordion-row {
+            display: none;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .accordion-row.show {
+            display: table-row;
+        }
+
+        .main-row {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .main-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chevron {
+            transition: transform 0.3s;
+        }
+
+        .chevron.rotate {
+            transform: rotate(-90deg);
+        }
+
+        .inner-table {
+            width: 100%;
+            margin-top: 1rem;
+            background: var(--bg-base);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .inner-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .inner-table td {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+    </style>
+
+    <div
+        style="background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+            <h2 style="margin: 0; color: #fff;">EZPay2Attend</h2>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">School Committee Shared View</div>
         </div>
-        
-        <div class="metric-card">
-            <div class="metric-card-header">
-                Total Attendees <i class="fa-solid fa-users"></i>
+        <div style="text-align: right;">
+            <div style="font-weight: 600; color: #fff;">
+                <%= school.name %>
             </div>
-            <div class="metric-card-value"><%= totalAttendees %></div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-card-header">
-                Capacity Utilization <i class="fa-solid fa-percent"></i>
-            </div>
-            <div class="metric-card-value"><%= utilization %>%</div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-card-header">
-                Total Revenue <i class="fa-solid fa-money-bill-wave"></i>
-            </div>
-            <div class="metric-card-value">$<%= totalSchoolRevenue.toFixed(2) %></div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Read-Only Access</div>
         </div>
     </div>
 
-    <div class="dashboard-section" style="margin-top: 2rem;">
-        <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-            <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
-            <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
-        </div>
-        
-        <div class="accordion-content show" id="liveReportsContent" style="display: block; margin-top: 1rem;">
-            <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>S.No.</th>
-                        <th>Event Title</th>
-                        <th>Date</th>
-                        <th>Capacity Filled</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (paginatedEvents.length === 0) { %>
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">No active events found for your school.</td></tr>
-                    <% } else { %>
-                        <% paginatedEvents.forEach((event, index) => { %>
-                            <tr class="main-row">
-                                <td><%= (page - 1) * 10 + index + 1 %></td>
-                                <td><strong><%= event.title %></strong></td>
-                                <td><%= event.date ? new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %></td>
-                                <td>
-                                    <div style="font-weight: 500;"><%= event._count.attendees %> / <%= event.capacity %></div>
-                                    <% const pct = Math.min(100, (event._count.attendees / event.capacity) * 100); %>
-                                    <div class="event-progress">
-                                        <div class="event-progress-fill <%= pct >= 100 ? 'event-progress-full' : '' %>" data-width="<%= pct %>"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
-                                            <%= event.status %>
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } %>
-                </tbody>
-            </table>
-        </div>
-        
-        <% if (totalPages > 1) { %>
-            <div style="display: flex; justify-content: flex-end; align-items: center; padding: 1.5rem 0 0 0; gap: 0.5rem;">
-                <% if (page > 1) { %>
-                    <a href="?page=<%= page - 1 %>" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Previous</a>
-                <% } %>
-                
-                <% for(let i=1; i<=totalPages; i++) { %>
-                    <a href="?page=<%= i %>" class="btn <%= i == page ? 'btn-primary' : '' %>" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-                        <%= i %>
-                    </a>
-                <% } %>
-                
-                <% if (page < totalPages) { %>
-                    <a href="?page=<%= page + 1 %>" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Next</a>
-                <% } %>
-            </div>
-        <% } %>
-        </div> <!-- End of accordion-content -->
-    </div>
-</div>
-<script>
-    async function sendReminder(attendeeId, btnElement) {
-        if (!confirm('Send a payment reminder email to this attendee?')) return;
-        
-        const originalHtml = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        btnElement.disabled = true;
+    <div class="school-dashboard-container" style="padding-top: 2rem;">
 
-        try {
-            const token = localStorage.getItem('ezpay_token');
-            const res = await fetch(`/api/attendees/${attendeeId}/reminders/balance`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
+        <% let totalEvents=events.length; let totalAttendees=events.reduce((sum, e)=> sum + e._count.attendees, 0);
+            let totalCapacity = events.reduce((sum, e) => sum + e.capacity, 0);
+            let utilization = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
+            %>
+
+            <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr) !important;">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        Total Events <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div class="metric-card-value">
+                        <%= totalEvents %>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        Total Attendees <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="metric-card-value">
+                        <%= totalAttendees %>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        Capacity Utilization <i class="fa-solid fa-percent"></i>
+                    </div>
+                    <div class="metric-card-value">
+                        <%= utilization %>%
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        Total Revenue <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                    <div class="metric-card-value">$<%= totalSchoolRevenue.toFixed(2) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section" style="margin-top: 2rem;">
+                <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')"
+                    style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+                    <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
+                </div>
+
+                <div class="accordion-content show" id="liveReportsContent" style="display: block; margin-top: 1rem;">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>S.No.</th>
+                                    <th>Event Title</th>
+                                    <th>Date</th>
+                                    <th>Capacity Filled</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (paginatedEvents.length===0) { %>
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align: center; color: var(--text-secondary); padding: 3rem;">No
+                                            active events found for your school.</td>
+                                    </tr>
+                                    <% } else { %>
+                                        <% paginatedEvents.forEach((event, index)=> { %>
+                                            <tr class="main-row">
+                                                <td>
+                                                    <%= (page - 1) * 10 + index + 1 %>
+                                                </td>
+                                                <td><strong>
+                                                        <%= event.title %>
+                                                    </strong></td>
+                                                <td>
+                                                    <%= event.date ? new Date(event.date).toLocaleDateString(undefined,
+                                                        { weekday: 'short' , year: 'numeric' , month: 'short' ,
+                                                        day: 'numeric' }) : 'TBD' %>
+                                                </td>
+                                                <td>
+                                                    <div style="font-weight: 500;">
+                                                        <%= event._count.attendees %> / <%= event.capacity %>
+                                                    </div>
+                                                    <% const pct=Math.min(100, (event._count.attendees / event.capacity)
+                                                        * 100); %>
+                                                        <div class="event-progress">
+                                                            <div class="event-progress-fill <%= pct >= 100 ? 'event-progress-full' : '' %>"
+                                                                data-width="<%= pct %>"></div>
+                                                        </div>
+                                                </td>
+                                                <td>
+                                                    <div
+                                                        style="display: flex; align-items: center; justify-content: space-between;">
+                                                        <span
+                                                            class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                                            <%= event.status %>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <% if (totalPages> 1) { %>
+                        <div
+                            style="display: flex; justify-content: flex-end; align-items: center; padding: 1.5rem 0 0 0; gap: 0.5rem;">
+                            <% if (page> 1) { %>
+                                <a href="?page=<%= page - 1 %>" class="btn"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Previous</a>
+                                <% } %>
+
+                                    <% for(let i=1; i<=totalPages; i++) { %>
+                                        <a href="?page=<%= i %>" class="btn <%= i == page ? 'btn-primary' : '' %>"
+                                            style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                                            <%= i %>
+                                        </a>
+                                        <% } %>
+
+                                            <% if (page < totalPages) { %>
+                                                <a href="?page=<%= page + 1 %>" class="btn"
+                                                    style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Next</a>
+                                                <% } %>
+                        </div>
+                        <% } %>
+                </div> <!-- End of accordion-content -->
+            </div>
+    </div>
+    <script>
+        async function sendReminder(attendeeId, btnElement) {
+            if (!confirm('Send a payment reminder email to this attendee?')) return;
+
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
+
+            try {
+                const token = localStorage.getItem('ezpay_token');
+                const res = await fetch(`/api/attendees/${attendeeId}/reminders/balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Reminder sent successfully!');
+                    btnElement.innerHTML = '<i class="fa-solid fa-check" style="color: var(--success);"></i>';
+                } else {
+                    alert('Failed: ' + data.message);
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.disabled = false;
                 }
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Reminder sent successfully!');
-                btnElement.innerHTML = '<i class="fa-solid fa-check" style="color: var(--success);"></i>';
-            } else {
-                alert('Failed: ' + data.message);
+            } catch (err) {
+                alert('Error sending reminder');
                 btnElement.innerHTML = originalHtml;
                 btnElement.disabled = false;
             }
-        } catch(err) {
-            alert('Error sending reminder');
-            btnElement.innerHTML = originalHtml;
-            btnElement.disabled = false;
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const fills = document.querySelectorAll('.event-progress-fill');
-        fills.forEach(fill => {
-            const width = fill.getAttribute('data-width');
-            setTimeout(() => {
-                fill.style.width = width + '%';
-            }, 100);
+        document.addEventListener('DOMContentLoaded', () => {
+            const fills = document.querySelectorAll('.event-progress-fill');
+            fills.forEach(fill => {
+                const width = fill.getAttribute('data-width');
+                setTimeout(() => {
+                    fill.style.width = width + '%';
+                }, 100);
+            });
         });
-    });
 
-    function toggleAccordion(index) {
-        const row = document.getElementById('accordion-' + index);
-        const chevron = document.getElementById('chevron-' + index);
-        
-        row.classList.toggle('show');
-        chevron.classList.toggle('rotate');
-    }
+        function toggleAccordion(index) {
+            const row = document.getElementById('accordion-' + index);
+            const chevron = document.getElementById('chevron-' + index);
 
-    function toggleSectionAccordion(id) {
-        const content = document.getElementById(id + 'Content');
-        const icon = document.getElementById(id + 'Icon');
-        
-        if (content.style.display === 'none' || !content.style.display) {
-            content.style.display = 'block';
-            icon.classList.remove('rotate');
-        } else {
-            content.style.display = 'none';
-            icon.classList.add('rotate');
+            row.classList.toggle('show');
+            chevron.classList.toggle('rotate');
         }
-    }
-</script>
-</body>
-</html>
+
+        function toggleSectionAccordion(id) {
+            const content = document.getElementById(id + 'Content');
+            const icon = document.getElementById(id + 'Icon');
+
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                icon.classList.remove('rotate');
+            } else {
+                content.style.display = 'none';
+                icon.classList.add('rotate');
+            }
+        }
+    </script>
+    </body>
+
+    </html>

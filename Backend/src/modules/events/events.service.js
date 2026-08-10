@@ -72,14 +72,28 @@ exports.createEvent = async (data) => {
 };
 
 exports.updateEvent = async (id, data) => {
+    const existingEvent = await prisma.event.findUnique({ 
+        where: { id },
+        include: { _count: { select: { attendees: true } } }
+    });
+
     if (data.date !== undefined || data.balanceDueDate !== undefined) {
-        const existingEvent = await prisma.event.findUnique({ where: { id } });
         validateDates(data, existingEvent);
     }
     
     if (data.title) {
         data.slug = await generateUniqueSlug(data.title, id);
     }
+    
+    if (data.capacity !== undefined) {
+        const attendeeCount = existingEvent._count.attendees;
+        if (data.capacity > attendeeCount && existingEvent.status === 'CLOSED') {
+            data.status = 'OPEN';
+        } else if (data.capacity <= attendeeCount && existingEvent.status === 'OPEN') {
+            data.status = 'CLOSED';
+        }
+    }
+
     return prisma.event.update({
         where: { id },
         data

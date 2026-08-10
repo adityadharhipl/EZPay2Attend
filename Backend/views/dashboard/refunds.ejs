@@ -101,14 +101,15 @@
     <div class="dashboard-layout">
         <aside class="sidebar">
             <div class="sidebar-logo">EZPay2Attend</div>
-                                    <nav>
+            <nav>
                 <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                 <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
                 <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
                 <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
-                <!-- <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-                <a href="/admin/refunds" class="nav-link active"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a> -->
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
+                <a href="/admin/refunds" class="nav-link active"><i class="fa-solid fa-arrow-rotate-left"></i>
+                    Refunds</a>
+                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
             </nav>
         </aside>
 
@@ -351,19 +352,18 @@
 
         async function executeProcessRefund(attendeeId) {
             try {
-                // In a full system, you would call the Payment Gateway API to actually refund the money here.
-                // For this phase, we simply update the status.
-                const res = await fetch(`/api/attendees/${attendeeId}/status`, {
-                    method: 'PATCH',
+                const res = await fetch(`/api/payments/refund`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'REFUNDED' })
+                    body: JSON.stringify({ attendeeId })
                 });
+                const result = await res.json();
 
-                if (res.ok) {
-                    showToast('Refund processed successfully', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
+                if (result.success) {
+                    showToast(result.message || 'Refund processed successfully', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    showToast('Failed to process refund', 'error');
+                    showToast(result.message || 'Failed to process refund', 'error');
                 }
             } catch (err) {
                 showToast('Network error', 'error');
@@ -393,4 +393,3 @@
     </body>
 
     </html>
-

@@ -5,7 +5,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const env = require('../../config/env');
 
-// Note: Email transport mock. In real app, use nodemailer here.
 exports.loginUser = async (email, password) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -32,10 +31,10 @@ exports.generateResetToken = async (email, req) => {
         data: { resetToken, resetTokenExpiry }
     });
 
-    // Also pointing it to the frontend view for password reset
+
     const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${resetToken}`;
     console.log('RESET URL: ', resetUrl);
-    
+
     // Send email using Nodemailer
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -53,7 +52,7 @@ exports.generateResetToken = async (email, req) => {
         text: `You requested a password reset. Click this link to reset it: ${resetUrl}`,
         html: `<p>You requested a password reset.</p><p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`
     });
-    
+
     return resetUrl;
 };
 

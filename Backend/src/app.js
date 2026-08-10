@@ -14,6 +14,15 @@ app.use(express.json({
         req.rawBody = buf;
     }
 }));
+
+// Catch body-parser SyntaxErrors for invalid JSON (like empty body)
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({ success: false, message: 'Invalid JSON payload received' });
+    }
+    next(err);
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

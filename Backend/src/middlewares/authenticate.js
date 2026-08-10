@@ -4,7 +4,7 @@ const db = require('../config/db');
 
 exports.authenticate = async (req, res, next) => {
     let token;
-    
+
     // 1. Check Authorization header first (useful for Swagger/Postman testing)
     if (req.headers.authorization) {
         if (req.headers.authorization.startsWith('Bearer ')) {
@@ -13,7 +13,7 @@ exports.authenticate = async (req, res, next) => {
             token = req.headers.authorization;
         }
     }
-    
+
     // 2. Fallback to cookies (for browser sessions)
     // Ignore cookies if the request is from Swagger UI so we can test 401s properly
     const isSwagger = req.headers.referer && req.headers.referer.includes('/api-docs');
@@ -45,6 +45,7 @@ exports.authenticate = async (req, res, next) => {
         const user = await db.user.findUnique({ where: { id: decoded.id } });
         if (!user) return handleUnauthorized('Invalid or expired token');
 
+
         req.user = user;
         res.locals.user = user; // for EJS
 
@@ -56,16 +57,16 @@ exports.authenticate = async (req, res, next) => {
         next();
     } catch (err) {
         const exactJwtErrors = [
-            'jwt expired', 
-            'invalid signature', 
-            'jwt malformed', 
+            'jwt expired',
+            'invalid signature',
+            'jwt malformed',
             'secret or public key must be provided'
         ];
-        
+
         if (exactJwtErrors.includes(err.message)) {
             return handleUnauthorized(err.message);
         }
-        
+
         return handleUnauthorized('Invalid token signature');
     }
 };
