@@ -64,6 +64,63 @@
         .accordion-scroll::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-modal-content {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
     </style>
 
     <div class="dashboard-layout">
@@ -228,6 +285,7 @@
                                                 <th>Attendees</th>
                                                 <th>Capacity</th>
                                                 <th>Status</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -261,6 +319,9 @@
                                                                     class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
                                                                     <%= event.status %>
                                                                 </span>
+                                                            </td>
+                                                            <td>
+                                                                <button class="action-btn text-info" title="View Attendees" onclick="openAttendeesModal('<%= index %>')"><i class="fa-solid fa-eye"></i></button>
                                                             </td>
                                                         </tr>
                                                         <% }) %>
@@ -331,6 +392,86 @@
                         <% } %>
         </main>
     </div>
+
+    <!-- View Attendees Modal -->
+    <div class="custom-modal" id="attendeesModal">
+        <div class="custom-modal-content" style="max-width: 900px;">
+            <div class="custom-modal-header">
+                <h3 style="margin: 0; color: var(--text-primary);">Attendee List</h3>
+                <button type="button" class="close-btn" onclick="closeAttendeesModal()">&times;</button>
+            </div>
+            <div id="attendeesModalBody" style="margin-top: 1rem;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Attendees Data for Modals -->
+    <div id="hiddenAttendeesContainer" style="display: none;">
+        <% metrics.recentEvents.forEach((event, index)=> { %>
+            <div id="attendees-content-<%= index %>">
+                <% if(event.attendees && event.attendees.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>S.No.</th>
+                                    <th>Name</th>
+                                    <th>Registration Date</th>
+                                    <th>Deposit Status</th>
+                                    <th>Balance Status</th>
+                                    <th>Payment Summary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% event.attendees.forEach((a, attIndex) => { 
+                                    let totalPaid = 0;
+                                    a.payments.forEach(p => {
+                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                    });
+                                    let balanceDue = event.costPerAttendee - totalPaid;
+                                    if(balanceDue < 0) balanceDue = 0;
+                                    let pageNum = Math.floor(attIndex / 10) + 1;
+                                %>
+                                <tr class="modal-attendee-row" data-page="<%= pageNum %>" <%- pageNum === 1 ? '' : 'style="display: none;"' %>>
+                                    <td><%= attIndex + 1 %></td>
+                                    <td><%= a.fullName %></td>
+                                    <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
+                                    <td>
+                                        <span class="badge status-<%= a.status === 'REFUND_REQUESTED' ? 'refunded' : a.status.toLowerCase() %>" style="font-size: 0.75rem;"><%= a.status === 'REFUND_REQUESTED' ? 'REFUND' : a.status.replace('_', ' ') %></span>
+                                    </td>
+                                    <td>
+                                        <% if(balanceDue > 0) { %>
+                                            <span style="color: var(--danger); font-weight: 500;">Due: $<%= balanceDue.toFixed(2) %></span>
+                                        <% } else { %>
+                                            <span style="color: var(--success); font-weight: 500;">Paid</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.85rem;">
+                                            <strong>Total Cost:</strong> $<%= event.costPerAttendee.toFixed(2) %><br>
+                                            <strong style="color: var(--success);">Paid:</strong> $<%= totalPaid.toFixed(2) %>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% let totalPages = Math.ceil(event.attendees.length / 10); %>
+                    <% if (totalPages > 1) { %>
+                        <div class="modal-pagination-controls" style="display: flex; justify-content: flex-end; align-items: center; padding-top: 1rem; gap: 0.5rem;">
+                            <button type="button" class="action-btn" style="font-size: 1.1rem;" onclick="changeModalPage(-1, Number('<%= totalPages %>'))"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem; margin: 0 0.5rem;">Page <span id="currentModalPageDisplay">1</span> of <%= totalPages %></span>
+                            <button type="button" class="action-btn" style="font-size: 1.1rem;" onclick="changeModalPage(1, Number('<%= totalPages %>'))"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees registered yet.</div>
+                <% } %>
+            </div>
+        <% }) %>
+    </div>
     <script>
         function toggleDropdown() {
             document.getElementById("profileDropdown").classList.toggle("show");
@@ -341,6 +482,41 @@
             const content = document.getElementById(`${id}Content`);
             header.classList.toggle('collapsed');
             content.classList.toggle('collapsed');
+        }
+
+        let currentModalPage = 1;
+
+        function openAttendeesModal(index) {
+            currentModalPage = 1;
+            const content = document.getElementById('attendees-content-' + index).innerHTML;
+            document.getElementById('attendeesModalBody').innerHTML = content;
+            document.getElementById('attendeesModal').style.display = 'flex';
+            renderModalPage();
+        }
+
+        function closeAttendeesModal() {
+            document.getElementById('attendeesModal').style.display = 'none';
+        }
+
+        function changeModalPage(delta, totalPages) {
+            currentModalPage += delta;
+            if (currentModalPage < 1) currentModalPage = 1;
+            if (currentModalPage > totalPages) currentModalPage = totalPages;
+            renderModalPage();
+        }
+
+        function renderModalPage() {
+            const rows = document.getElementById('attendeesModalBody').querySelectorAll('.modal-attendee-row');
+            if (rows.length === 0) return;
+            rows.forEach(row => {
+                if (parseInt(row.getAttribute('data-page')) === currentModalPage) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            const display = document.getElementById('attendeesModalBody').querySelector('#currentModalPageDisplay');
+            if (display) display.textContent = currentModalPage;
         }
 
         // Close the dropdown if the user clicks outside of it

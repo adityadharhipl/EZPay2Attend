@@ -56,7 +56,10 @@ exports.getDashboardMetrics = async () => {
         orderBy: { createdAt: 'desc' },
         include: {
             _count: {
-                select: { attendees: true }
+                select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } }
+            },
+            attendees: {
+                include: { payments: true }
             }
         }
     });
