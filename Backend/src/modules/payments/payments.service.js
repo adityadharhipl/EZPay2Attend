@@ -106,6 +106,19 @@ exports.processWebhook = async (reqBody, rawBody, signature) => {
         const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
         const mailer = require('../../utils/mailer');
         mailer.sendPaymentReceipt(attendee, payment, eventData).catch(e => console.error("Email Error:", e));
+    } else if (event.event === 'charge.failed') {
+        const referenceNumber = event.data.reference;
+
+        const payment = await db.payment.findFirst({ where: { referenceNumber } });
+        if (!payment) throw new Error("Payment not found");
+
+        if (payment.status !== 'SUCCESS') {
+            // Update Payment Status to FAILED
+            await db.payment.update({
+                where: { id: payment.id },
+                data: { status: 'FAILED' }
+            });
+        }
     }
 
     return { success: true };

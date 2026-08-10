@@ -411,10 +411,13 @@
                                                     statusClass='status-balance_pending' ;
                                                     if(attendee.status==='BALANCE_OVERDUE' )
                                                     statusClass='status-balance_overdue' ;
-                                                    if(attendee.status==='REFUNDED' ) statusClass='status-refunded' ;
-                                                    if(attendee.status==='REPLACED' ) statusClass='status-replaced' ; %>
+                                                    if(attendee.status==='REFUNDED' ||
+                                                    attendee.status==='REFUND_REQUESTED' ) statusClass='status-refunded'
+                                                    ; if(attendee.status==='REPLACED' ) statusClass='status-replaced' ;
+                                                    %>
                                                     <span class="status-badge <%= statusClass %>">
-                                                        <%= attendee.status.replace('_', ' ' ) %>
+                                                        <%= attendee.status==='REFUND_REQUESTED' ? 'REFUND' :
+                                                            attendee.status.replace('_', ' ' ) %>
                                                     </span>
                                             </td>
                                             <td class="text-end" style="white-space: nowrap;">
@@ -519,19 +522,6 @@
         </div>
     </div>
 
-    <!-- Refund Confirmation Modal -->
-    <div class="custom-modal" id="refundAttendeeModal">
-        <div class="delete-modal-content">
-            <h3>Simulate Refund</h3>
-            <p>Are you sure you want to simulate a refund request for this attendee?</p>
-            <div class="delete-modal-actions">
-                <button type="button" class="delete-btn-cancel" onclick="closeRefundModal()">Cancel</button>
-                <button type="button" class="delete-btn-confirm" style="background: #eab308;"
-                    onclick="confirmRefundAttendee()">Simulate</button>
-            </div>
-        </div>
-    </div>
-
     <!-- View Attendee Modal -->
     <div class="custom-modal" id="viewAttendeeModal">
         <div class="custom-modal-content">
@@ -544,6 +534,19 @@
             </div>
         </div>
     </div>
+    <!-- Refund Confirmation Modal -->
+    <div class="custom-modal" id="refundAttendeeModal">
+        <div class="delete-modal-content">
+            <h3>Simulate Refund</h3>
+            <p>Are you sure you want to simulate a refund request for this attendee?</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-btn-cancel" onclick="closeRefundModal()">Cancel</button>
+                <button type="button" class="delete-btn-confirm" style="background: #4f46e5;"
+                    onclick="confirmRefundAttendee()">Simulate</button>
+            </div>
+        </div>
+    </div>
+
 
     <script id="attendeesData" type="application/json">
     <%- JSON.stringify(attendees || []) %>
@@ -558,16 +561,42 @@
             const attendee = allAttendees.find(a => a.id === id);
             if (!attendee) return;
 
+            let paymentDetailsHtml = '';
+            if (attendee.payments && attendee.payments.length > 0) {
+                paymentDetailsHtml = `
+                    <div class="col-md-12" style="margin-top: 1rem;">
+                        <h5 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Payment Details</h5>
+                        <ul style="list-style-type: none; padding-left: 0;">
+                            ${attendee.payments.map(p => `
+                                <li style="margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 6px;">
+                                    <strong>Type:</strong> ${p.type} | 
+                                    <strong>Amount:</strong> $${p.amount} | 
+                                    <strong>Status:</strong> ${p.status}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                paymentDetailsHtml = `
+                    <div class="col-md-12" style="margin-top: 1rem;">
+                        <h5 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Payment Details</h5>
+                        <p>No payments recorded yet.</p>
+                    </div>
+                 `;
+            }
+
             const detailsHtml = `
                 <div class="row">
                     <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
                         <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${attendee.fullName}</h4>
-                        <span class="status-badge status-${attendee.status.toLowerCase()}">${attendee.status.replace('_', ' ')}</span>
+                        <span class="status-badge status-${attendee.status === 'REFUND_REQUESTED' ? 'refunded' : attendee.status.toLowerCase()}">${attendee.status === 'REFUND_REQUESTED' ? 'REFUND' : attendee.status.replace('_', ' ')}</span>
                     </div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Email:</strong> ${attendee.email}</div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Contact:</strong> ${attendee.contactNumber}</div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Event:</strong> ${attendee.event ? attendee.event.title : 'N/A'}</div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Reg. Date:</strong> ${new Date(attendee.createdAt).toLocaleDateString()}</div>
+                    ${paymentDetailsHtml}
                 </div>
             `;
             document.getElementById('viewAttendeeDetails').innerHTML = detailsHtml;

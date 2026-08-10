@@ -88,7 +88,7 @@ exports.getAllAttendees = async (page = 1, limit = 10, search = '') => {
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
-            include: { event: true }
+            include: { event: true, payments: true }
         }),
         db.attendee.count({ where: whereClause })
     ]);
@@ -118,6 +118,9 @@ exports.updateAttendeeStatus = async (id, status) => {
 
 exports.deleteAttendee = async (id) => {
     try {
+        // Delete associated payments to avoid foreign key constraint violations
+        await db.payment.deleteMany({ where: { attendeeId: id } });
+        
         return await db.attendee.delete({
             where: { id }
         });
