@@ -3,6 +3,7 @@ const attendeesService = require('./attendees.service');
 exports.createAttendee = async (req, res) => {
     try {
         const attendee = await attendeesService.createAttendee(req.body);
+        console.log(attendee, "00000000000----------------->")
         res.status(201).json({ success: true, message: 'Successfully registered', data: attendee });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
@@ -14,10 +15,10 @@ exports.getAllAttendees = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || '';
-        
+
         const result = await attendeesService.getAllAttendees(page, limit, search);
-        res.status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             data: result.data,
             pagination: {
                 total: result.total,

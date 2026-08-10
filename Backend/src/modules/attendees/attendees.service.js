@@ -104,6 +104,25 @@ exports.updateAttendeeStatus = async (id, status) => {
             include: { event: true }
         });
 
+        // Automatically Reopen Vacant Seat if event was closed and status frees up a seat
+        if (['REFUNDED', 'REPLACED'].includes(status)) {
+            const eventCheck = await db.event.findUnique({
+                where: { id: attendee.eventId },
+                include: { 
+                    _count: { 
+                        select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } 
+                    } 
+                }
+            });
+
+            if (eventCheck && eventCheck.status === 'CLOSED' && eventCheck._count.attendees < eventCheck.capacity) {
+                await db.event.update({
+                    where: { id: eventCheck.id },
+                    data: { status: 'OPEN' }
+                });
+            }
+        }
+
         if (status === 'REFUNDED') {
             const mailer = require('../../utils/mailer');
             mailer.sendRefundUpdate(attendee, attendee.event).catch(e => console.error("Email Error:", e));

@@ -214,6 +214,23 @@ exports.processRefund = async (attendeeId) => {
         data: { status: 'REFUNDED' }
     });
 
+    // Automatically Reopen Vacant Seat if event was closed
+    const eventCheck = await db.event.findUnique({
+        where: { id: attendee.eventId },
+        include: { 
+            _count: { 
+                select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } 
+            } 
+        }
+    });
+
+    if (eventCheck && eventCheck.status === 'CLOSED' && eventCheck._count.attendees < eventCheck.capacity) {
+        await db.event.update({
+            where: { id: eventCheck.id },
+            data: { status: 'OPEN' }
+        });
+    }
+
     // 4. Send Email
     const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
     const mailer = require('../../utils/mailer');
