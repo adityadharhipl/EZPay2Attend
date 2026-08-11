@@ -1,5 +1,6 @@
 const db = require('../../config/db');
 const paymentsService = require('../payments/payments.service');
+const ExcelJS = require('exceljs');
 
 exports.renderRegisterPage = async (req, res) => {
     try {
@@ -169,7 +170,20 @@ exports.exportSchoolReport = async (req, res) => {
 
         if (!school) return res.status(404).send('School not found');
 
-        let csv = 'Event,Attendee Name,Attendee Email,Registration Status,Total Cost,Total Paid,Balance Due\\n';
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Live Event Report');
+
+        worksheet.columns = [
+            { header: 'Event', key: 'event', width: 25 },
+            { header: 'Attendee Name', key: 'name', width: 25 },
+            { header: 'Attendee Email', key: 'email', width: 30 },
+            { header: 'Registration Status', key: 'status', width: 20 },
+            { header: 'Total Cost', key: 'cost', width: 15 },
+            { header: 'Total Paid', key: 'paid', width: 15 },
+            { header: 'Balance Due', key: 'balance', width: 15 }
+        ];
+
+        worksheet.getRow(1).font = { bold: true };
         
         school.events.forEach(event => {
             event.attendees.forEach(a => {
@@ -179,13 +193,23 @@ exports.exportSchoolReport = async (req, res) => {
                 });
                 let balanceDue = event.costPerAttendee - totalPaid;
                 if (balanceDue < 0) balanceDue = 0;
-                csv += `"${event.title}","${a.fullName}","${a.email}","${a.status}",${event.costPerAttendee},${totalPaid},${balanceDue}\\n`;
+                
+                worksheet.addRow({
+                    event: event.title,
+                    name: a.fullName,
+                    email: a.email,
+                    status: a.status,
+                    cost: event.costPerAttendee,
+                    paid: totalPaid,
+                    balance: balanceDue
+                });
             });
         });
 
-        res.header('Content-Type', 'text/csv');
-        res.attachment(`School_Report_${school.name.replace(/\\s+/g, '_')}.csv`);
-        res.send(csv);
+        res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.attachment(`School_Report_${school.name.replace(/\s+/g, '_')}.xlsx`);
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         console.error(err);
         res.status(500).send('Error generating report');

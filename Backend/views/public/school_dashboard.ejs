@@ -170,14 +170,17 @@
 
             <div class="dashboard-section" style="margin-top: 2rem;">
                 <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')"
-                    style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-wrap: wrap; gap: 1rem;">
+                    <h3 style="margin: 0; white-space: nowrap;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+                    
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
-                        <a href="/school/<%= school.id %>/export" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick="event.stopPropagation()">
-                            <i class="fa-solid fa-download"></i> Download CSV
+                        <a href="/school/<%= school.id %>/export" class="btn" 
+                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; font-size: 0.85rem;" 
+                            onclick="event.stopPropagation()">
+                            <i class="fa-solid fa-file-excel" style="color: #4ade80;"></i> Export Excel
                         </a>
+                        <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
                     </div>
-                    <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
                 </div>
 
                 <div class="accordion-content show" id="liveReportsContent" style="display: block; margin-top: 1rem;">
@@ -226,12 +229,11 @@
                                                 </td>
                                                 <td>
                                                     <div
-                                                        style="display: flex; align-items: center; justify-content: space-between;">
+                                                        style="display: flex; align-items: center;">
                                                         <span
                                                             class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
                                                             <%= event.status %>
                                                         </span>
-                                                        <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>" style="color: var(--text-secondary); transition: transform 0.3s;"></i>
                                                     </div>
                                                 </td>
                                             </tr>

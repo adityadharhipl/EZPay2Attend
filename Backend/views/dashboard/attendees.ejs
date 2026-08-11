@@ -586,11 +586,27 @@
                  `;
             }
 
+            let totalPaid = 0;
+            if (attendee.payments && attendee.payments.length > 0) {
+                attendee.payments.forEach(p => {
+                    if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += parseFloat(p.amount) || 0;
+                });
+            }
+            let cost = attendee.event ? parseFloat(attendee.event.costPerAttendee) || 0 : 0;
+            let balanceDue = cost - totalPaid;
+            if (balanceDue < 0) balanceDue = 0;
+
             const detailsHtml = `
                 <div class="row">
-                    <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                        <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${attendee.fullName}</h4>
-                        <span class="status-badge status-${attendee.status === 'REFUND_REQUESTED' ? 'refunded' : attendee.status.toLowerCase()}">${attendee.status === 'REFUND_REQUESTED' ? 'REFUND' : attendee.status.replace('_', ' ')}</span>
+                    <div class="col-md-12" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.3rem;">${attendee.fullName}</h4>
+                            <span class="status-badge status-${attendee.status === 'REFUND_REQUESTED' ? 'refunded' : attendee.status.toLowerCase()}">${attendee.status === 'REFUND_REQUESTED' ? 'REFUND' : attendee.status.replace('_', ' ')}</span>
+                        </div>
+                        <div style="text-align: right; background: rgba(255,255,255,0.05); padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.3rem;">Total Amount: <strong style="color: #fff; font-size: 1rem;">$${cost.toFixed(2)}</strong></div>
+                            ${balanceDue > 0 ? `<div style="color: #f59e0b; font-size: 0.9rem;">Pending: <strong style="font-size: 1rem;">$${balanceDue.toFixed(2)}</strong></div>` : `<div style="color: #10b981; font-size: 0.9rem;"><i class="fa-solid fa-check-circle"></i> Fully Paid</div>`}
+                        </div>
                     </div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Email:</strong> ${attendee.email}</div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Contact:</strong> ${attendee.contactNumber}</div>
