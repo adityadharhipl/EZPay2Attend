@@ -42,7 +42,7 @@ exports.sendRegistrationEmail = async (attendee, event) => {
 };
 
 exports.sendPaymentReceipt = async (attendee, payment, event) => {
-    const subject = `Payment Receipt - ${event.title}`;
+    const subject = payment.type === 'DEPOSIT' ? `Deposit Payment Confirmation - ${event.title}` : `Payment Receipt - ${event.title}`;
     const html = `
         <h2>Hello ${attendee.fullName},</h2>
         <p>We have successfully received your payment of <strong>$${payment.amount.toFixed(2)}</strong> for <strong>${event.title}</strong>.</p>
@@ -56,7 +56,7 @@ exports.sendPaymentReceipt = async (attendee, payment, event) => {
 };
 
 exports.sendRefundUpdate = async (attendee, event) => {
-    const subject = `Update on your Registration - ${event.title}`;
+    const subject = `Refund Approval - ${event.title}`;
     const html = `
         <h2>Hello ${attendee.fullName},</h2>
         <p>Your registration status for <strong>${event.title}</strong> has been updated to: <strong>REFUNDED</strong>.</p>
@@ -82,7 +82,7 @@ exports.sendBalanceReminder = async (attendee, event) => {
 };
 
 exports.sendRefundRejection = async (attendee, event) => {
-    const subject = `Update on your Refund Request - ${event.title}`;
+    const subject = `Refund Rejection - ${event.title}`;
     const html = `
         <h2>Hello ${attendee.fullName},</h2>
         <p>We are writing to inform you that your recent refund request for <strong>${event.title}</strong> has been reviewed and unfortunately declined.</p>

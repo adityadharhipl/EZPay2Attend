@@ -64,9 +64,17 @@ exports.getDashboardMetrics = async () => {
         }
     });
 
-    // Get recent payments for Financial Dashboard
-    const recentPayments = await prisma.payment.findMany({
-        take: 5,
+    // Get all events for Financial Dashboard pagination
+    const allEvents = await prisma.event.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+            attendees: {
+                include: { payments: true }
+            }
+        }
+    });
+
+    const allPayments = await prisma.payment.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
             attendee: {
@@ -74,6 +82,9 @@ exports.getDashboardMetrics = async () => {
             }
         }
     });
+
+    // Keep recent variants for backward compatibility just in case
+    const recentPayments = allPayments.slice(0, 5);
 
     return {
         totalEvents,
@@ -85,6 +96,8 @@ exports.getDashboardMetrics = async () => {
         pendingRefunds,
         capacityUtilization,
         recentEvents,
-        recentPayments
+        recentPayments,
+        allEvents,
+        allPayments
     };
 };

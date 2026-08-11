@@ -11,7 +11,7 @@ exports.renderDashboard = async (req, res) => {
         if (wantsJson) {
             return res.status(200).json({ success: true, data: metrics });
         }
-        res.render('dashboard/index', { user: req.user, metrics });
+        res.render('dashboard/index', { user: req.user, metrics, query: req.query });
     } catch (error) {
         console.error(error);
         const wantsJson = req.originalUrl.startsWith('/api/') || (req.headers.accept && !req.headers.accept.includes('text/html'));
