@@ -33,11 +33,21 @@ exports.createAttendee = async (data) => {
 
     if (existing) throw new Error("This email is already registered for this event");
 
+    // Strict backend email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        throw new Error("Invalid email address format");
+    }
+
     // Basic validation for contact number
     if (data.contactNumber) {
         const contactStr = String(data.contactNumber).trim();
         if (contactStr.length > 20) {
             throw new Error("Contact number cannot exceed 20 characters");
+        }
+        const phoneRegex = /^[\+0-9\s\-\(\)]+$/;
+        if (!phoneRegex.test(contactStr)) {
+            throw new Error("Invalid contact number format");
         }
     }
 
