@@ -6,7 +6,7 @@ exports.renderRegisterPage = async (req, res) => {
         // Fetch all open events that have capacity
         const events = await db.event.findMany({
             where: { status: 'OPEN' },
-            include: { school: true, _count: { select: { attendees: true } } }
+            include: { school: true, _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } }
         });
         
         // Filter out events that are full
@@ -30,7 +30,7 @@ exports.renderSingleEventRegisterPage = async (req, res) => {
         const slug = req.params.slug;
         const event = await db.event.findUnique({
             where: { slug },
-            include: { school: true, _count: { select: { attendees: true } } }
+            include: { school: true, _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } } }
         });
 
         if (!event) return res.status(404).send('Event not found');

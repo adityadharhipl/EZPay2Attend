@@ -37,7 +37,7 @@ exports.downloadReport = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999);
-            
+
             eventWhere.createdAt = { gte: start, lte: end };
             attendeeWhere.createdAt = { gte: start, lte: end };
             paymentWhere.createdAt = { gte: start, lte: end };
@@ -126,7 +126,7 @@ exports.downloadReport = async (req, res) => {
             case 'event': {
                 const events = await prisma.event.findMany({
                     where: eventWhere,
-                    include: { 
+                    include: {
                         _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } },
                         attendees: { include: { payments: true } }
                     },
@@ -168,7 +168,7 @@ exports.downloadReport = async (req, res) => {
             case 'financial': {
                 const events = await prisma.event.findMany({
                     where: eventWhere,
-                    include: { 
+                    include: {
                         attendees: { include: { payments: true } }
                     },
                     orderBy: { createdAt: 'desc' }
@@ -187,7 +187,7 @@ exports.downloadReport = async (req, res) => {
                     let collected = 0;
                     let outstanding = 0;
                     let refunded = 0;
-                    
+
                     e.attendees.forEach(a => {
                         a.payments.forEach(p => {
                             if (p.status === 'SUCCESS' && p.type !== 'REFUND') collected += p.amount;
@@ -195,7 +195,7 @@ exports.downloadReport = async (req, res) => {
                             if (p.status === 'SUCCESS' && p.type === 'REFUND') refunded += Math.abs(p.amount);
                         });
                     });
-                    
+
                     return {
                         title: e.title,
                         collected: collected,
@@ -204,27 +204,27 @@ exports.downloadReport = async (req, res) => {
                     };
                 });
 
-        if (req.query.format === 'json') {
-            return res.status(200).json({ success: true, data: records });
+                if (req.query.format === 'json') {
+                    return res.status(200).json({ success: true, data: records });
+                }
+
+                if (req.query.format === 'json') return res.status(200).json({ success: true, data: records });
+                csvString = csvWriter.getHeaderString() + csvWriter.stringifyRecords(records);
+                filename = `financial_report_${new Date().getTime()}.csv`;
+                break;
+            }
+
+            default:
+                return res.status(400).send("Invalid report type");
         }
 
-        if (req.query.format === 'json') return res.status(200).json({ success: true, data: records });
-                csvString = csvWriter.getHeaderString() + csvWriter.stringifyRecords(records);
-        filename = `financial_report_${new Date().getTime()}.csv`;
-        break;
-    }
+        if (req.query.format === 'json') {
+            return res.status(200).json({ success: true, data: [{}] });
+        }
 
-    default:
-        return res.status(400).send("Invalid report type");
-}
-
-if (req.query.format === 'json') {
-    return res.status(200).json({ success: true, data: [{}] }); // For other types if not captured inside switch
-}
-
-res.setHeader('Content-Type', 'text/csv');
-res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-res.status(200).send(csvString);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.status(200).send(csvString);
 
     } catch (error) {
         console.error("Error generating report:", error);
