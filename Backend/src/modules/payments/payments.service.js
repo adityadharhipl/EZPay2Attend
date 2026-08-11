@@ -150,11 +150,13 @@ exports.verifyPayment = async (referenceNumber) => {
                     where: { id: payment.attendeeId },
                     data: { status: 'BALANCE_PENDING' }
                 });
+                attendee.status = 'BALANCE_PENDING';
             } else if (payment.type === 'BALANCE' || payment.type === 'FULL') {
                 await db.attendee.update({
                     where: { id: payment.attendeeId },
                     data: { status: 'CONFIRMED' }
                 });
+                attendee.status = 'CONFIRMED';
             }
 
             const eventData = await db.event.findUnique({ where: { id: attendee.eventId } });
