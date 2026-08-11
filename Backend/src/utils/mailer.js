@@ -42,8 +42,9 @@ exports.sendRegistrationEmail = async (attendee, event) => {
 };
 
 exports.sendPaymentReceipt = async (attendee, payment, event) => {
-    const subject = payment.type === 'DEPOSIT' ? `Deposit Payment Confirmation - ${event.title}` : `Payment Receipt - ${event.title}`;
+    const subject = `Payment Successful! - ${event.title}`;
     const html = `
+        <h1 style="color: #4ade80;">Payment Successful! 🎉</h1>
         <h2>Hello ${attendee.fullName},</h2>
         <p>We have successfully received your payment of <strong>$${payment.amount.toFixed(2)}</strong> for <strong>${event.title}</strong>.</p>
         <p>Transaction Reference: ${payment.referenceNumber}</p>
