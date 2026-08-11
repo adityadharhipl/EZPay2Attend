@@ -228,6 +228,15 @@
 
                                 </div>
                             </div>
+                            <div class="metric-card">
+                                <div class="metric-card-header">
+                                    Outstanding Payments <i class="fa-solid fa-file-invoice-dollar"></i>
+                                </div>
+                                <div class="metric-card-value" style="color: var(--warning);">
+                                    $<%= metrics.outstandingBalance.toLocaleString() %>
+
+                                </div>
+                            </div>
 
                             <div class="metric-card">
                                 <div class="metric-card-header">
@@ -239,15 +248,7 @@
                                 </div>
                             </div>
 
-                            <div class="metric-card">
-                                <div class="metric-card-header">
-                                    Outstanding Balance <i class="fa-solid fa-file-invoice-dollar"></i>
-                                </div>
-                                <div class="metric-card-value" style="color: var(--warning);">
-                                    $<%= metrics.outstandingBalance.toLocaleString() %>
 
-                                </div>
-                            </div>
 
                             <div class="metric-card">
                                 <div class="metric-card-header">
@@ -260,7 +261,7 @@
 
                             <div class="metric-card">
                                 <div class="metric-card-header">
-                                    Pending Refunds <i class="fa-solid fa-arrow-rotate-left"></i>
+                                    Pending Refund Requests <i class="fa-solid fa-arrow-rotate-left"></i>
                                 </div>
                                 <div class="metric-card-value">
                                     <%= metrics.pendingRefunds %>
@@ -271,7 +272,7 @@
                         <!-- Event Dashboard Summary -->
                         <div class="dashboard-section">
                             <div class="accordion-header" onclick="toggleAccordion('eventSummary')">
-                                <h3><i class="fa-solid fa-list-check"></i> Event Summary</h3>
+                                <h3><i class="fa-solid fa-list-check"></i> Event Dashboard </h3>
                                 <i class="fa-solid fa-chevron-down toggle-icon" id="eventSummaryIcon"></i>
                             </div>
                             <div class="accordion-content" id="eventSummaryContent">
@@ -321,7 +322,10 @@
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <button class="action-btn text-info" title="View Attendees" onclick="openAttendeesModal('<%= index %>')"><i class="fa-solid fa-eye"></i></button>
+                                                                <button class="action-btn text-info"
+                                                                    title="View Attendees"
+                                                                    onclick="openAttendeesModal('<%= index %>')"><i
+                                                                        class="fa-solid fa-eye"></i></button>
                                                             </td>
                                                         </tr>
                                                         <% }) %>
@@ -339,123 +343,140 @@
                                 <i class="fa-solid fa-chevron-down toggle-icon" id="financialDashboardIcon"></i>
                             </div>
                             <div class="accordion-content" id="financialDashboardContent">
-                                
-                                <% 
-                                    let safeEvents = metrics.allEvents ? metrics.allEvents : metrics.recentEvents;
-                                    let revLimit = 5;
-                                    let revTotalPages = Math.ceil(safeEvents.length / revLimit);
-                                %>
-                                
-                                <h4 style="margin-top: 1rem; color: #fff; margin-bottom: 0.5rem;">Revenue per Event</h4>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>S.No.</th>
-                                                <th>Event Title</th>
-                                                <th>Total Revenue</th>
-                                                <th>Outstanding Balance</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% if (safeEvents.length===0) { %>
+
+                                <% let safeEvents=metrics.allEvents ? metrics.allEvents : metrics.recentEvents; let
+                                    revLimit=5; let revTotalPages=Math.ceil(safeEvents.length / revLimit); %>
+
+                                    <h4 style="margin-top: 1rem; color: #fff; margin-bottom: 0.5rem;">Revenue per Event
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="4" style="text-align: center; color: var(--text-secondary);">No events found.</td>
+                                                    <th>S.No.</th>
+                                                    <th>Event Title</th>
+                                                    <th>Total Revenue</th>
+                                                    <th>Outstanding Balance</th>
                                                 </tr>
-                                            <% } else { %>
-                                                <% safeEvents.forEach((event, index)=> { 
-                                                    let collected = 0;
-                                                    let outstanding = 0;
-                                                    if(event.attendees) {
-                                                        event.attendees.forEach(a => {
+                                            </thead>
+                                            <tbody>
+                                                <% if (safeEvents.length===0) { %>
+                                                    <tr>
+                                                        <td colspan="4"
+                                                            style="text-align: center; color: var(--text-secondary);">No
+                                                            events found.</td>
+                                                    </tr>
+                                                    <% } else { %>
+                                                        <% safeEvents.forEach((event, index)=> {
+                                                            let collected = 0;
+                                                            let outstanding = 0;
+                                                            if(event.attendees) {
+                                                            event.attendees.forEach(a => {
                                                             a.payments.forEach(p => {
-                                                                if(p.status === 'SUCCESS' && p.type !== 'REFUND') collected += p.amount;
-                                                                if(p.status === 'PENDING' && p.type !== 'REFUND') outstanding += p.amount;
+                                                            if(p.status === 'SUCCESS' && p.type !== 'REFUND') collected
+                                                            += p.amount;
+                                                            if(p.status === 'PENDING' && p.type !== 'REFUND')
+                                                            outstanding += p.amount;
                                                             });
-                                                        });
-                                                    }
-                                                    let pageNum = Math.floor(index / revLimit) + 1;
-                                                %>
-                                                    <tr class="rev-row" data-page="<%= pageNum %>" <%- pageNum === 1 ? '' : 'style="display: none;"' %>>
-                                                        <td><%= index + 1 %></td>
-                                                        <td><strong><%= event.title %></strong></td>
-                                                        <td style="color: var(--success); font-weight: 500;">$<%= collected.toLocaleString() %></td>
-                                                        <td style="color: var(--warning); font-weight: 500;">$<%= outstanding.toLocaleString() %></td>
-                                                    </tr>
-                                                <% }) %>
-                                            <% } %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <!-- Pagination for Revenue -->
-                                <% if(revTotalPages > 1) { %>
-                                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; margin-bottom: 1rem; gap: 1rem;">
-                                        <button type="button" id="revPrevBtn" onclick="changeRevPage(-1)" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: none; cursor: not-allowed; transition: background 0.2s;"><i class="fa-solid fa-chevron-left"></i></button>
-                                        
-                                        <span id="revPageText" style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;" data-total="<%= revTotalPages %>">Page 1 of <%= revTotalPages %></span>
-                                        
-                                        <button type="button" id="revNextBtn" onclick="changeRevPage(1)" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; transition: background 0.2s;"><i class="fa-solid fa-chevron-right"></i></button>
+                                                            });
+                                                            }
+                                                            let pageNum = Math.floor(index / revLimit) + 1;
+                                                            %>
+                                                            <tr class="rev-row" data-page="<%= pageNum %>" <%-
+                                                                pageNum===1 ? '' : 'style="display: none;"' %>>
+                                                                <td>
+                                                                    <%= index + 1 %>
+                                                                </td>
+                                                                <td><strong>
+                                                                        <%= event.title %>
+                                                                    </strong></td>
+                                                                <td style="color: var(--success); font-weight: 500;">$
+                                                                    <%= collected.toLocaleString() %>
+                                                                </td>
+                                                                <td style="color: var(--warning); font-weight: 500;">$
+                                                                    <%= outstanding.toLocaleString() %>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>
+                                                                <% } %>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                <% } %>
+                                    <!-- Pagination for Revenue -->
+                                    <% if(revTotalPages> 1) { %>
+                                        <div
+                                            style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; margin-bottom: 1rem; gap: 1rem;">
+                                            <button type="button" id="revPrevBtn" onclick="changeRevPage(-1)"
+                                                style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: none; cursor: not-allowed; transition: background 0.2s;"><i
+                                                    class="fa-solid fa-chevron-left"></i></button>
 
-                                <% 
-                                    let safePayments = metrics.allPayments ? metrics.allPayments : metrics.recentPayments;
-                                    let payLimit = 5;
-                                    let payTotalPages = Math.ceil(safePayments.length / payLimit);
-                                %>
+                                            <span id="revPageText"
+                                                style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;"
+                                                data-total="<%= revTotalPages %>">Page 1 of <%= revTotalPages %></span>
 
-                                <h4 style="margin-top: 2rem; color: #fff; margin-bottom: 0.5rem;">Payment Reports (Recent)</h4>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>S.No.</th>
-                                                <th>Attendee</th>
-                                                <th>Event</th>
-                                                <th>Type</th>
-                                                <th>Amount</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% if (safePayments.length===0) { %>
-                                                <tr>
-                                                    <td colspan="6" style="text-align: center; color: var(--text-secondary);">No payments found.</td>
-                                                </tr>
-                                            <% } else { %>
-                                                <% safePayments.forEach((payment, index)=> { 
-                                                    let pageNum = Math.floor(index / payLimit) + 1;
-                                                %>
-                                                    <tr class="pay-row" data-page="<%= pageNum %>" <%- pageNum === 1 ? '' : 'style="display: none;"' %>>
-                                                        <td><%= index + 1 %></td>
-                                                        <td><%= payment.attendee.fullName %></td>
-                                                        <td><%= payment.attendee.event.title %></td>
-                                                        <td><span class="badge info"><%= payment.type %></span></td>
-                                                        <td>$<%= payment.amount.toLocaleString() %></td>
-                                                        <td>
-                                                            <span class="badge <%= payment.status === 'SUCCESS' ? 'success' : (payment.status === 'PENDING' ? 'warning' : 'danger') %>">
-                                                                <%= payment.status %>
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                <% }) %>
-                                            <% } %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <!-- Pagination for Payments -->
-                                <% if(payTotalPages > 1) { %>
-                                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; margin-bottom: 1rem; gap: 1rem;">
-                                        <button type="button" id="payPrevBtn" onclick="changePayPage(-1)" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: none; cursor: not-allowed; transition: background 0.2s;"><i class="fa-solid fa-chevron-left"></i></button>
-                                        
-                                        <span id="payPageText" style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;" data-total="<%= payTotalPages %>">Page 1 of <%= payTotalPages %></span>
-                                        
-                                        <button type="button" id="payNextBtn" onclick="changePayPage(1)" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; transition: background 0.2s;"><i class="fa-solid fa-chevron-right"></i></button>
-                                    </div>
-                                <% } %>
+                                            <button type="button" id="revNextBtn" onclick="changeRevPage(1)"
+                                                style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; transition: background 0.2s;"><i
+                                                    class="fa-solid fa-chevron-right"></i></button>
+                                        </div>
+                                        <% } %>
+
+                                            <% let safePayments=metrics.recentPayments || []; %>
+
+                                                <h4 style="margin-top: 2rem; color: #fff; margin-bottom: 0.5rem;">
+                                                    Payment Reports (Recent)</h4>
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>S.No.</th>
+                                                                <th>Attendee</th>
+                                                                <th>Event</th>
+                                                                <th>Type</th>
+                                                                <th>Amount</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% if (safePayments.length===0) { %>
+                                                                <tr>
+                                                                    <td colspan="6"
+                                                                        style="text-align: center; color: var(--text-secondary);">
+                                                                        No payments found.</td>
+                                                                </tr>
+                                                                <% } else { %>
+                                                                    <% safePayments.forEach((payment, index)=> {
+                                                                        %>
+                                                                        <tr class="pay-row">
+                                                                            <td>
+                                                                                <%= index + 1 %>
+                                                                            </td>
+                                                                            <td>
+                                                                                <%= payment.attendee.fullName %>
+                                                                            </td>
+                                                                            <td>
+                                                                                <%= payment.attendee.event.title %>
+                                                                            </td>
+                                                                            <td><span class="badge info">
+                                                                                    <%= payment.type %>
+                                                                                </span></td>
+                                                                            <td>$<%= payment.amount.toLocaleString() %>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span
+                                                                                    class="badge <%= payment.status === 'SUCCESS' ? 'success' : (payment.status === 'PENDING' ? 'warning' : 'danger') %>">
+                                                                                    <%= payment.status %>
+                                                                                </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <% }) %>
+                                                                            <% } %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
 
                             </div>
-                        </div>\n                        <% } %>
+                        </div>
+                        <% } %>
 
         </main>
     </div>
@@ -477,7 +498,7 @@
     <div id="hiddenAttendeesContainer" style="display: none;">
         <% metrics.recentEvents.forEach((event, index)=> { %>
             <div id="attendees-content-<%= index %>">
-                <% if(event.attendees && event.attendees.length > 0) { %>
+                <% if(event.attendees && event.attendees.length> 0) { %>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
@@ -491,53 +512,74 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% event.attendees.forEach((a, attIndex) => { 
+                                <% event.attendees.forEach((a, attIndex)=> {
                                     let totalPaid = 0;
                                     a.payments.forEach(p => {
-                                        if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                    if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
                                     });
                                     let balanceDue = event.costPerAttendee - totalPaid;
-                                    if(balanceDue < 0) balanceDue = 0;
-                                    let pageNum = Math.floor(attIndex / 10) + 1;
-                                %>
-                                <tr class="modal-attendee-row" data-page="<%= pageNum %>" <%- pageNum === 1 ? '' : 'style="display: none;"' %>>
-                                    <td><%= attIndex + 1 %></td>
-                                    <td><%= a.fullName %></td>
-                                    <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
-                                    <td>
-                                        <span class="badge status-<%= a.status === 'REFUND_REQUESTED' ? 'refunded' : a.status.toLowerCase() %>" style="font-size: 0.75rem;"><%= a.status === 'REFUND_REQUESTED' ? 'REFUND' : a.status.replace('_', ' ') %></span>
-                                    </td>
-                                    <td>
-                                        <% if(balanceDue > 0) { %>
-                                            <span style="color: var(--danger); font-weight: 500;">Due: $<%= balanceDue.toFixed(2) %></span>
-                                        <% } else { %>
-                                            <span style="color: var(--success); font-weight: 500;">Paid</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <div style="font-size: 0.85rem;">
-                                            <strong>Total Cost:</strong> $<%= event.costPerAttendee.toFixed(2) %><br>
-                                            <strong style="color: var(--success);">Paid:</strong> $<%= totalPaid.toFixed(2) %>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <% }) %>
+                                    if(balanceDue < 0) balanceDue=0; let pageNum=Math.floor(attIndex / 10) + 1; %>
+                                        <tr class="modal-attendee-row" data-page="<%= pageNum %>" <%- pageNum===1 ? ''
+                                            : 'style="display: none;"' %>>
+                                            <td>
+                                                <%= attIndex + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= a.fullName %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(a.createdAt).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge status-<%= a.status === 'REFUND_REQUESTED' ? 'refunded' : a.status.toLowerCase() %>"
+                                                    style="font-size: 0.75rem;">
+                                                    <%= a.status==='REFUND_REQUESTED' ? 'REFUND' :
+                                                        a.status.replace('_', ' ' ) %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% if(balanceDue> 0) { %>
+                                                    <span style="color: var(--danger); font-weight: 500;">Due: $<%=
+                                                            balanceDue.toFixed(2) %></span>
+                                                    <% } else { %>
+                                                        <span
+                                                            style="color: var(--success); font-weight: 500;">Paid</span>
+                                                        <% } %>
+                                            </td>
+                                            <td>
+                                                <div style="font-size: 0.85rem;">
+                                                    <strong>Total Cost:</strong> $<%= event.costPerAttendee.toFixed(2)
+                                                        %><br>
+                                                        <strong style="color: var(--success);">Paid:</strong> $<%=
+                                                            totalPaid.toFixed(2) %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
                             </tbody>
                         </table>
                     </div>
-                    <% let totalPages = Math.ceil(event.attendees.length / 10); %>
-                    <% if (totalPages > 1) { %>
-                        <div class="modal-pagination-controls" style="display: flex; justify-content: flex-end; align-items: center; padding-top: 1rem; gap: 0.5rem;">
-                            <button type="button" class="action-btn" style="font-size: 1.1rem;" onclick="changeModalPage(-1, Number('<%= totalPages %>'))"><i class="fa-solid fa-chevron-left"></i></button>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem; margin: 0 0.5rem;">Page <span id="currentModalPageDisplay">1</span> of <%= totalPages %></span>
-                            <button type="button" class="action-btn" style="font-size: 1.1rem;" onclick="changeModalPage(1, Number('<%= totalPages %>'))"><i class="fa-solid fa-chevron-right"></i></button>
-                        </div>
-                    <% } %>
-                <% } else { %>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees registered yet.</div>
-                <% } %>
+                    <% let totalPages=Math.ceil(event.attendees.length / 10); %>
+                        <% if (totalPages> 1) { %>
+                            <div class="modal-pagination-controls"
+                                style="display: flex; justify-content: flex-end; align-items: center; padding-top: 1rem; gap: 0.5rem;">
+                                <button type="button" class="action-btn" style="font-size: 1.1rem;"
+                                    onclick="changeModalPage(-1, Number('<%= totalPages %>'))"><i
+                                        class="fa-solid fa-chevron-left"></i></button>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem; margin: 0 0.5rem;">Page
+                                    <span id="currentModalPageDisplay">1</span> of <%= totalPages %></span>
+                                <button type="button" class="action-btn" style="font-size: 1.1rem;"
+                                    onclick="changeModalPage(1, Number('<%= totalPages %>'))"><i
+                                        class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <% } %>
+                                <% } else { %>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees
+                                        registered yet.</div>
+                                    <% } %>
             </div>
-        <% }) %>
+            <% }) %>
     </div>
     <script>
         function toggleDropdown() {
@@ -592,7 +634,7 @@
             currentRevPage += delta;
             if (currentRevPage < 1) currentRevPage = 1;
             if (currentRevPage > totalPages) currentRevPage = totalPages;
-            
+
             document.querySelectorAll('.rev-row').forEach(row => {
                 if (parseInt(row.getAttribute('data-page')) === currentRevPage) {
                     row.style.display = 'table-row';
@@ -601,12 +643,12 @@
                 }
             });
             document.getElementById('revPageText').textContent = 'Page ' + currentRevPage + ' of ' + totalPages;
-            
+
             // Update buttons state
             const prevBtn = document.getElementById('revPrevBtn');
             const nextBtn = document.getElementById('revNextBtn');
-            if(prevBtn) {
-                if(currentRevPage === 1) {
+            if (prevBtn) {
+                if (currentRevPage === 1) {
                     prevBtn.style.background = 'rgba(255,255,255,0.05)';
                     prevBtn.style.color = 'rgba(255,255,255,0.3)';
                     prevBtn.style.cursor = 'not-allowed';
@@ -616,8 +658,8 @@
                     prevBtn.style.cursor = 'pointer';
                 }
             }
-            if(nextBtn) {
-                if(currentRevPage === totalPages) {
+            if (nextBtn) {
+                if (currentRevPage === totalPages) {
                     nextBtn.style.background = 'rgba(255,255,255,0.05)';
                     nextBtn.style.color = 'rgba(255,255,255,0.3)';
                     nextBtn.style.cursor = 'not-allowed';
@@ -629,48 +671,7 @@
             }
         }
 
-        let currentPayPage = 1;
-        function changePayPage(delta) {
-            const totalPages = parseInt(document.getElementById('payPageText').getAttribute('data-total')) || 1;
-            currentPayPage += delta;
-            if (currentPayPage < 1) currentPayPage = 1;
-            if (currentPayPage > totalPages) currentPayPage = totalPages;
-            
-            document.querySelectorAll('.pay-row').forEach(row => {
-                if (parseInt(row.getAttribute('data-page')) === currentPayPage) {
-                    row.style.display = 'table-row';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            document.getElementById('payPageText').textContent = 'Page ' + currentPayPage + ' of ' + totalPages;
-            
-            // Update buttons state
-            const prevBtn = document.getElementById('payPrevBtn');
-            const nextBtn = document.getElementById('payNextBtn');
-            if(prevBtn) {
-                if(currentPayPage === 1) {
-                    prevBtn.style.background = 'rgba(255,255,255,0.05)';
-                    prevBtn.style.color = 'rgba(255,255,255,0.3)';
-                    prevBtn.style.cursor = 'not-allowed';
-                } else {
-                    prevBtn.style.background = 'rgba(255,255,255,0.1)';
-                    prevBtn.style.color = '#fff';
-                    prevBtn.style.cursor = 'pointer';
-                }
-            }
-            if(nextBtn) {
-                if(currentPayPage === totalPages) {
-                    nextBtn.style.background = 'rgba(255,255,255,0.05)';
-                    nextBtn.style.color = 'rgba(255,255,255,0.3)';
-                    nextBtn.style.cursor = 'not-allowed';
-                } else {
-                    nextBtn.style.background = 'rgba(255,255,255,0.1)';
-                    nextBtn.style.color = '#fff';
-                    nextBtn.style.cursor = 'pointer';
-                }
-            }
-        }
+
 
         // Close the dropdown if the user clicks outside of it
         window.onclick = function (event) {

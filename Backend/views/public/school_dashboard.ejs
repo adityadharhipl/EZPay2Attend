@@ -171,7 +171,12 @@
             <div class="dashboard-section" style="margin-top: 2rem;">
                 <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')"
                     style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                    <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <h3 style="margin: 0;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
+                        <a href="/school/<%= school.id %>/export" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick="event.stopPropagation()">
+                            <i class="fa-solid fa-download"></i> Download CSV
+                        </a>
+                    </div>
                     <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
                 </div>
 
@@ -196,7 +201,7 @@
                                     </tr>
                                     <% } else { %>
                                         <% paginatedEvents.forEach((event, index)=> { %>
-                                            <tr class="main-row">
+                                            <tr class="main-row" onclick="toggleAccordion('<%= index %>')" style="cursor: pointer;">
                                                 <td>
                                                     <%= (page - 1) * 10 + index + 1 %>
                                                 </td>
@@ -226,6 +231,61 @@
                                                             class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
                                                             <%= event.status %>
                                                         </span>
+                                                        <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>" style="color: var(--text-secondary); transition: transform 0.3s;"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Accordion content for Attendees -->
+                                            <tr class="accordion-row" id="accordion-<%= index %>">
+                                                <td colspan="5" style="padding: 0; border: none; background: rgba(0,0,0,0.15);">
+                                                    <div style="padding: 1.5rem;">
+                                                        <h4 style="margin-top: 0; color: #fff; margin-bottom: 1rem;"><i class="fa-solid fa-users"></i> Registered Attendees & Payments</h4>
+                                                        <% if(event.attendees && event.attendees.length > 0) { %>
+                                                            <div class="table-responsive" style="background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                                                <table class="table inner-table" style="margin: 0; background: transparent;">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="background: rgba(255,255,255,0.05);">Name</th>
+                                                                            <th style="background: rgba(255,255,255,0.05);">Date</th>
+                                                                            <th style="background: rgba(255,255,255,0.05);">Reg Status</th>
+                                                                            <th style="background: rgba(255,255,255,0.05);">Payment Status</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <% event.attendees.forEach(a => { 
+                                                                            let totalPaid = 0;
+                                                                            a.payments.forEach(p => {
+                                                                                if(p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                                                                            });
+                                                                            let balanceDue = event.costPerAttendee - totalPaid;
+                                                                            if(balanceDue < 0) balanceDue = 0;
+                                                                        %>
+                                                                        <tr>
+                                                                            <td><%= a.fullName %></td>
+                                                                            <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
+                                                                            <td>
+                                                                                <span class="badge status-<%= a.status === 'REFUND_REQUESTED' ? 'refunded' : a.status.toLowerCase() %>" style="font-size: 0.75rem;">
+                                                                                    <%= a.status === 'REFUND_REQUESTED' ? 'REFUND' : a.status.replace('_', ' ') %>
+                                                                                </span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <% if(balanceDue > 0) { %>
+                                                                                    <span style="color: var(--danger); font-weight: 500;">Due: $<%= balanceDue.toFixed(2) %></span>
+                                                                                <% } else { %>
+                                                                                    <span style="color: var(--success); font-weight: 500;">Paid in Full</span>
+                                                                                <% } %>
+                                                                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                                                                                    Total Cost: $<%= event.costPerAttendee.toFixed(2) %>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <% }) %>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        <% } else { %>
+                                                            <div style="color: var(--text-secondary); font-size: 0.9rem;">No attendees registered yet.</div>
+                                                        <% } %>
                                                     </div>
                                                 </td>
                                             </tr>

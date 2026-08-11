@@ -150,3 +150,44 @@ exports.renderSchoolDashboard = async (req, res) => {
         res.status(500).send('Error loading school dashboard');
     }
 };
+
+exports.exportSchoolReport = async (req, res) => {
+    try {
+        const schoolId = req.params.id;
+        const school = await db.school.findUnique({
+            where: { id: schoolId },
+            include: {
+                events: {
+                    include: {
+                        attendees: {
+                            include: { payments: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!school) return res.status(404).send('School not found');
+
+        let csv = 'Event,Attendee Name,Attendee Email,Registration Status,Total Cost,Total Paid,Balance Due\\n';
+        
+        school.events.forEach(event => {
+            event.attendees.forEach(a => {
+                let totalPaid = 0;
+                a.payments.forEach(p => {
+                    if (p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
+                });
+                let balanceDue = event.costPerAttendee - totalPaid;
+                if (balanceDue < 0) balanceDue = 0;
+                csv += `"${event.title}","${a.fullName}","${a.email}","${a.status}",${event.costPerAttendee},${totalPaid},${balanceDue}\\n`;
+            });
+        });
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment(`School_Report_${school.name.replace(/\\s+/g, '_')}.csv`);
+        res.send(csv);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error generating report');
+    }
+};
