@@ -39,6 +39,7 @@ model Event {
   title             String
   slug              String?   @unique
   description       String?   @db.Text
+  requireUniquePhone Boolean  @default(false)
   status            String   @default("OPEN") // OPEN, CLOSED, COMPLETED, CANCELLED
   capacity          Int
   depositPercentage Float    @default(0)

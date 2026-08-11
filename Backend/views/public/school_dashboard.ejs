@@ -85,7 +85,7 @@
         }
 
         .chevron.rotate {
-            transform: rotate(-90deg);
+            transform: rotate(180deg);
         }
 
         .inner-table {
@@ -169,17 +169,15 @@
             </div>
 
             <div class="dashboard-section" style="margin-top: 2rem;">
-                <div class="accordion-header" onclick="toggleSectionAccordion('liveReports')"
-                    style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-wrap: wrap; gap: 1rem;">
+                <div class="accordion-header"
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <h3 style="margin: 0; white-space: nowrap;"><i class="fa-solid fa-list-check"></i> Live Event Reports</h3>
                     
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <a href="/school/<%= school.id %>/export" class="btn" 
-                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; font-size: 0.85rem;" 
-                            onclick="event.stopPropagation()">
+                            style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; font-size: 0.85rem;">
                             <i class="fa-solid fa-file-excel" style="color: #4ade80;"></i> Export Excel
                         </a>
-                        <i class="fa-solid fa-chevron-down toggle-icon chevron" id="liveReportsIcon"></i>
                     </div>
                 </div>
 
@@ -229,11 +227,12 @@
                                                 </td>
                                                 <td>
                                                     <div
-                                                        style="display: flex; align-items: center;">
+                                                        style="display: flex; align-items: center; justify-content: space-between;">
                                                         <span
                                                             class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
                                                             <%= event.status %>
                                                         </span>
+                                                        <i class="fa-solid fa-chevron-down chevron" id="chevron-<%= index %>" style="color: var(--text-secondary); transition: transform 0.3s;"></i>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -247,6 +246,7 @@
                                                                 <table class="table inner-table" style="margin: 0; background: transparent;">
                                                                     <thead>
                                                                         <tr>
+                                                                            <th style="background: rgba(255,255,255,0.05); width: 60px;">S.No.</th>
                                                                             <th style="background: rgba(255,255,255,0.05);">Name</th>
                                                                             <th style="background: rgba(255,255,255,0.05);">Date</th>
                                                                             <th style="background: rgba(255,255,255,0.05);">Reg Status</th>
@@ -254,7 +254,7 @@
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                        <% event.attendees.forEach(a => { 
+                                                                        <% event.attendees.forEach((a, attendeeIndex) => { 
                                                                             let totalPaid = 0;
                                                                             a.payments.forEach(p => {
                                                                                 if(p.status === 'SUCCESS' && p.type !== 'REFUND') totalPaid += p.amount;
@@ -263,6 +263,7 @@
                                                                             if(balanceDue < 0) balanceDue = 0;
                                                                         %>
                                                                         <tr>
+                                                                            <td><%= attendeeIndex + 1 %></td>
                                                                             <td><%= a.fullName %></td>
                                                                             <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
                                                                             <td>

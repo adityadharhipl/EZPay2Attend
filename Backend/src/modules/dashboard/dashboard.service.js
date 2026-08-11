@@ -52,7 +52,7 @@ exports.getDashboardMetrics = async () => {
 
     // Get recent events for Event Dashboard
     const recentEvents = await prisma.event.findMany({
-        take: 5,
+        take: 10,
         orderBy: { createdAt: 'desc' },
         include: {
             _count: {
@@ -84,7 +84,7 @@ exports.getDashboardMetrics = async () => {
     });
 
     // Keep recent variants for backward compatibility just in case
-    const recentPayments = allPayments.slice(0, 5);
+    const recentPayments = allPayments.slice(0, 10);
 
     return {
         totalEvents,

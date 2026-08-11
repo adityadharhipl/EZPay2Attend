@@ -127,6 +127,8 @@ exports.renderSchoolDashboard = async (req, res) => {
             include: { 
                 _count: { select: { attendees: { where: { status: { notIn: ['REFUNDED', 'REPLACED'] } } } } },
                 attendees: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 10,
                     include: { payments: true }
                 }
             },
