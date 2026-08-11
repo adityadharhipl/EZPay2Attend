@@ -50,6 +50,7 @@ exports.sendPaymentReceipt = async (attendee, payment, event) => {
         <p>Transaction Reference: ${payment.referenceNumber}</p>
         <p>Payment Type: ${payment.type}</p>
         <p>Your current status is: <strong>${attendee.status.replace('_', ' ')}</strong></p>
+        ${attendee.status === 'BALANCE_PENDING' ? `<br/><p>To complete your remaining balance, please click the link below:</p><p><a href="${env.API_BASE_URL}/checkout?attendeeId=${attendee.id}"><strong>Click here to pay your balance</strong></a></p>` : ''}
         <br/>
         <p>Thank you,<br/>EZPay2Attend Team</p>
     `;
