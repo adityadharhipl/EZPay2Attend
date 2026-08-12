@@ -77,6 +77,12 @@ exports.updateEvent = async (id, data) => {
         include: { _count: { select: { attendees: true } } }
     });
 
+    if (!existingEvent) {
+        const error = new Error('Event not found');
+        error.code = 'P2025';
+        throw error;
+    }
+
     if (data.date !== undefined || data.balanceDueDate !== undefined) {
         validateDates(data, existingEvent);
     }

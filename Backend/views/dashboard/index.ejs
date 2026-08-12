@@ -282,58 +282,80 @@
                                         <thead>
                                             <tr>
                                                 <th>S.No.</th>
-                                                <th>Event Title</th>
-                                                <th>Date</th>
-                                                <th>Attendees</th>
+                                                <th>Event Summary</th>
+                                                <!-- <th> Date </th> -->
+                                                <th>Attendee </th>
                                                 <th>Capacity</th>
-                                                <th>Status</th>
+                                                <th>Deposit Status </th>
                                                 <th>Attendee List</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <% if (metrics.recentEvents.length===0) { %>
-                                                <tr>
-                                                    <td colspan="6"
-                                                        style="text-align: center; color: var(--text-secondary);">No
-                                                        events found.</td>
-                                                </tr>
-                                                <% } else { %>
-                                                    <% metrics.recentEvents.forEach((event, index)=> { %>
-                                                        <tr>
-                                                            <td>
-                                                                <%= index + 1 %>
-                                                            </td>
-                                                            <td><strong>
-                                                                    <%= event.title %>
-                                                                </strong></td>
-                                                            <td>
-                                                                <%= event.date ? new
-                                                                    Date(event.date).toLocaleDateString() : 'TBD' %>
-                                                            </td>
-                                                            <td>
-                                                                <%= event._count.attendees %>
-                                                            </td>
-                                                            <td>
-                                                                <%= event.capacity %>
-                                                            </td>
-                                                            <td>
-                                                                <span
-                                                                    class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
-                                                                    <%= event.status %>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <button class="action-btn text-info"
-                                                                    title="View Attendees"
-                                                                    onclick="openAttendeesModal('<%= index %>')"><i
-                                                                        class="fa-solid fa-eye"></i></button>
-                                                            </td>
-                                                        </tr>
-                                                        <% }) %>
-                                                            <% } %>
+                                            <% let dashEvents=metrics.recentEvents || []; let dashLimit=10; let
+                                                dashTotalPages=Math.ceil(dashEvents.length / dashLimit); %>
+                                                <% if (dashEvents.length===0) { %>
+                                                    <tr>
+                                                        <td colspan="6"
+                                                            style="text-align: center; color: var(--text-secondary);">No
+                                                            events found.</td>
+                                                    </tr>
+                                                    <% } else { %>
+                                                        <% dashEvents.forEach((event, index)=> {
+                                                            let pageNum = Math.floor(index / dashLimit) + 1;
+                                                            %>
+                                                            <tr class="event-dash-row" data-page="<%= pageNum %>" <%-
+                                                                pageNum===1 ? '' : 'style="display: none;"' %>>
+                                                                <td>
+                                                                    <%= index + 1 %>
+                                                                </td>
+                                                                <td><strong>
+                                                                        <%= event.title %>
+                                                                    </strong></td>
+                                                                <!-- <td>
+                                                                    <%= event.date ? new
+                                                                        Date(event.date).toLocaleDateString() : 'TBD' %>
+                                                                </td> -->
+                                                                <td>
+                                                                    <%= event._count.attendees %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= event.capacity %>
+                                                                </td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge <%= event.status === 'OPEN' ? 'success' : (event.status === 'CLOSED' ? 'warning' : 'info') %>">
+                                                                        <%= event.status %>
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    <button class="action-btn text-info"
+                                                                        title="View Attendees"
+                                                                        onclick="openAttendeesModal('<%= index %>')"><i
+                                                                            class="fa-solid fa-eye"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>
+                                                                <% } %>
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- Pagination for Event Dashboard -->
+                                <% if(dashTotalPages> 1) { %>
+                                    <div
+                                        style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; margin-bottom: 1rem; gap: 1rem;">
+                                        <button type="button" id="dashPrevBtn" onclick="changeDashPage(-1)"
+                                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: none; cursor: not-allowed; transition: background 0.2s;"><i
+                                                class="fa-solid fa-chevron-left"></i></button>
+
+                                        <span id="dashPageText"
+                                            style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;"
+                                            data-total="<%= dashTotalPages %>">Page 1 of <%= dashTotalPages %></span>
+
+                                        <button type="button" id="dashNextBtn" onclick="changeDashPage(1)"
+                                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; transition: background 0.2s;"><i
+                                                class="fa-solid fa-chevron-right"></i></button>
+                                    </div>
+                                    <% } %>
                             </div>
                         </div>
 
@@ -672,9 +694,49 @@
             }
         }
 
+        let currentDashPage = 1;
+        function changeDashPage(delta) {
+            const totalPages = parseInt(document.getElementById('dashPageText').getAttribute('data-total')) || 1;
+            currentDashPage += delta;
+            if (currentDashPage < 1) currentDashPage = 1;
+            if (currentDashPage > totalPages) currentDashPage = totalPages;
 
+            document.querySelectorAll('.event-dash-row').forEach(row => {
+                if (parseInt(row.getAttribute('data-page')) === currentDashPage) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            document.getElementById('dashPageText').textContent = 'Page ' + currentDashPage + ' of ' + totalPages;
 
-        // Close the dropdown if the user clicks outside of it
+            // Update buttons state
+            const prevBtn = document.getElementById('dashPrevBtn');
+            const nextBtn = document.getElementById('dashNextBtn');
+            if (prevBtn) {
+                if (currentDashPage === 1) {
+                    prevBtn.style.background = 'rgba(255,255,255,0.05)';
+                    prevBtn.style.color = 'rgba(255,255,255,0.3)';
+                    prevBtn.style.cursor = 'not-allowed';
+                } else {
+                    prevBtn.style.background = 'rgba(255,255,255,0.1)';
+                    prevBtn.style.color = '#fff';
+                    prevBtn.style.cursor = 'pointer';
+                }
+            }
+            if (nextBtn) {
+                if (currentDashPage === totalPages) {
+                    nextBtn.style.background = 'rgba(255,255,255,0.05)';
+                    nextBtn.style.color = 'rgba(255,255,255,0.3)';
+                    nextBtn.style.cursor = 'not-allowed';
+                } else {
+                    nextBtn.style.background = 'rgba(255,255,255,0.1)';
+                    nextBtn.style.color = '#fff';
+                    nextBtn.style.cursor = 'pointer';
+                }
+            }
+        }
+        // Close the dropdown if the user clicks outside of it.
         window.onclick = function (event) {
             if (!event.target.closest('.profile-menu')) {
                 var dropdowns = document.getElementsByClassName("profile-dropdown");

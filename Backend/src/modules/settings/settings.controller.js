@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 const getSettings = async (req, res) => {
     try {
         const settings = await prisma.globalSetting.findMany();
-        
+
         // Convert array to key-value object
         const config = settings.reduce((acc, curr) => {
             acc[curr.key] = curr.value;
@@ -30,7 +30,7 @@ const getSettings = async (req, res) => {
 const updateSettings = async (req, res) => {
     try {
         const updates = req.body;
-        
+
         // Ensure requireUniquePhone is properly handled if unchecked
         if (updates.requireUniquePhone === undefined) {
             updates.requireUniquePhone = 'false';
