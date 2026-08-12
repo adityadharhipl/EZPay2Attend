@@ -11,7 +11,8 @@ exports.createEventSchema = Joi.object({
     costPerAttendee: Joi.number().min(0).required(),
     venue: Joi.string().optional().allow('', null),
     type: Joi.string().optional().allow('', null),
-    date: Joi.date().iso().optional().allow(null)
+    date: Joi.date().iso().optional().allow(null),
+    requireUniquePhone: Joi.boolean().default(false)
 });
 
 exports.updateEventSchema = Joi.object({
@@ -25,5 +26,6 @@ exports.updateEventSchema = Joi.object({
     costPerAttendee: Joi.number().min(0).optional(),
     venue: Joi.string().optional().allow('', null),
     type: Joi.string().optional().allow('', null),
-    date: Joi.date().iso().optional().allow(null)
+    date: Joi.date().iso().optional().allow(null),
+    requireUniquePhone: Joi.boolean().optional()
 }).min(1); // Require at least one field to be updated

@@ -33,6 +33,22 @@ exports.createAttendee = async (data) => {
 
     if (existing) throw new Error("This email is already registered for this event");
 
+    // Fetch Global Setting for Phone Uniqueness
+    const globalPhoneSetting = await db.globalSetting.findUnique({ where: { key: 'requireUniquePhone' } });
+    const isGlobalUniquePhone = globalPhoneSetting ? globalPhoneSetting.value === 'true' : false;
+
+    if ((event.requireUniquePhone || isGlobalUniquePhone) && data.contactNumber) {
+        const existingPhone = await db.attendee.findFirst({
+            where: {
+                eventId: data.eventId,
+                contactNumber: data.contactNumber
+            }
+        });
+        if (existingPhone) {
+            throw new Error("This contact number is already registered for this event");
+        }
+    }
+
     // Strict backend email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {

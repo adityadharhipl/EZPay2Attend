@@ -46,6 +46,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, uiOptions));
 // Import Routes
 app.use('/', require('./modules/public/public.routes'));
 app.use('/api/auth', require('./modules/auth/auth.routes'));
+app.use('/admin/settings', require('./modules/settings/settings.routes'));
 app.use('/admin', require('./modules/dashboard/dashboard.routes'));
 app.use('/api/dashboard', require('./modules/dashboard/dashboard.routes'));
 app.use('/api/schools', require('./modules/schools/schools.routes'));

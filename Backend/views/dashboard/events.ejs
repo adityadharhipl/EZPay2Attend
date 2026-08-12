@@ -309,6 +309,7 @@
                 <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
                 <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
                 <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                <a href="/admin/settings" class="nav-link"><i class="fa-solid fa-cog"></i> Settings</a>
             </nav>
         </aside>
 
@@ -772,6 +773,7 @@
             form.depositPercentage.value = event.depositPercentage || 0;
             form.venue.value = event.venue || '';
             form.description.value = event.description || '';
+            form.requireUniquePhone.checked = event.requireUniquePhone === true;
 
             if (event.date) {
                 form.date.value = new Date(event.date).toISOString().split('T')[0];
@@ -807,6 +809,9 @@
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Event Date:</strong> ${event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</div>
                     <div class="col-md-6" style="margin-bottom: 0.8rem;"><strong>Balance Due Date:</strong> ${event.balanceDueDate ? new Date(event.balanceDueDate).toLocaleDateString() : 'N/A'}</div>
                     <div class="col-md-12" style="margin-bottom: 0.8rem;"><strong>Venue:</strong> ${event.venue || 'N/A'}</div>
+                    <div class="col-md-12" style="margin-bottom: 0.8rem;">
+                        <strong>Require Unique Phone:</strong> ${event.requireUniquePhone ? '<span style="color: #4ade80;">Yes</span>' : '<span style="color: #f5210b;">No</span>'}
+                    </div>
                     <div class="col-md-12" style="margin-top: 0.5rem; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
                         <strong>Description:</strong><br/> 
                         <div style="margin-top: 0.5rem; white-space: pre-wrap;">${event.description || 'No description provided.'}</div>
@@ -837,10 +842,12 @@
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
-            // Convert numbers
+            // Convert numbers and booleans
             data.capacity = parseInt(data.capacity);
             data.costPerAttendee = parseFloat(data.costPerAttendee);
             data.depositPercentage = parseFloat(data.depositPercentage);
+            data.requireUniquePhone = form.requireUniquePhone.checked;
+            
             if (!data.date) delete data.date;
             if (!data.balanceDueDate) delete data.balanceDueDate;
 

@@ -1,0 +1,260 @@
+<%- include('../layout/head', { title: title || 'Settings | EZPay2Attend' }) %>
+    <style>
+        .settings-container {
+            padding: 2rem;
+            max-width: 1000px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .tab-pane {
+            display: none;
+            background: var(--bg-surface);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-modal.show {
+            display: flex;
+        }
+
+        .custom-modal-content {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">EZPay2Attend</div>
+            <nav>
+                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
+                <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                <a href="/admin/settings" class="nav-link active"><i class="fa-solid fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header" style="margin-bottom: 2rem;">
+                <div class="header-left">
+                    <h3 style="margin: 0; color: #fff;">Global Settings</h3>
+                </div>
+
+                <div class="header-right">
+                    <!-- Profile Dropdown -->
+                    <div class="profile-menu">
+                        <div class="profile-icon" onclick="toggleDropdown()"
+                            style="border: none; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center;">
+                            <div style="text-align: right; margin-right: 0.5rem;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                    <%= user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    <%= user.role || 'Admin' %>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <strong><%= user.name %></strong>
+                                <p><%= user.email %></p>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                            <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-container">
+                <script>
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('success')) {
+                        document.write(`
+                            <div class="alert-success">
+                                <i class="fa-solid fa-check-circle"></i> Settings saved successfully!
+                            </div>
+                        `);
+                    }
+                </script>
+
+                <div class="tabs-container">
+                    <button class="tab-btn active" onclick="switchTab('general')"><i class="fa-solid fa-sliders"></i> General</button>
+                    <button class="tab-btn" onclick="switchTab('registration')"><i class="fa-solid fa-user-plus"></i> Registration Settings</button>
+                </div>
+
+                <form method="POST" action="/admin/settings">
+                    <!-- General Tab -->
+                    <div id="tab-general" class="tab-pane active">
+                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">General Options</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Configure basic system settings.</p>
+                        
+                        <!-- Add more general settings here later -->
+                        <div style="color: var(--text-secondary); font-style: italic;">
+                            More general settings can be added here in the future.
+                        </div>
+                    </div>
+
+                    <!-- Registration Tab -->
+                    <div id="tab-registration" class="tab-pane">
+                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Registration Features</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Manage how attendees register for events globally.</p>
+
+                        <div class="form-check">
+                            <input type="hidden" name="requireUniquePhone" value="false">
+                            <input class="form-check-input" type="checkbox" id="requireUniquePhoneGlobal" name="requireUniquePhone" value="true" <%= config.requireUniquePhone === 'true' ? 'checked' : '' %>>
+                            <label class="form-check-label" for="requireUniquePhoneGlobal">
+                                <strong>Require Unique Contact Number Globally</strong><br>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">If checked, the system will check for duplicate phone numbers across registrations by default.</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="save-btn"><i class="fa-solid fa-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.profile-menu')) {
+                const dropdowns = document.getElementsByClassName("profile-dropdown");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
