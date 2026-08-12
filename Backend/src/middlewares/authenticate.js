@@ -64,7 +64,11 @@ exports.authenticate = async (req, res, next) => {
         ];
 
         if (exactJwtErrors.includes(err.message)) {
-            return handleUnauthorized(err.message);
+            let msg = err.message;
+            if (msg === 'jwt expired') {
+                msg = 'Token expired';
+            }
+            return handleUnauthorized(msg);
         }
 
         return handleUnauthorized('Invalid token signature');

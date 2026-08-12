@@ -53,9 +53,16 @@ const updateSettings = async (req, res) => {
             });
         }
 
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+            return res.status(200).json({ success: true, message: 'Settings updated successfully' });
+        }
+
         res.redirect('/admin/settings?success=1');
     } catch (error) {
         console.error('Error updating settings:', error);
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+            return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
         res.status(500).send('Internal Server Error');
     }
 };
