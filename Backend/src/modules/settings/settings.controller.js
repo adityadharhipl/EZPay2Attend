@@ -11,11 +11,6 @@ const getSettings = async (req, res) => {
             return acc;
         }, {});
 
-        // Defaults
-        if (config.requireUniquePhone === undefined) {
-            config.requireUniquePhone = 'false';
-        }
-
         res.render('dashboard/settings', {
             title: 'Settings',
             user: req.user,
@@ -31,10 +26,6 @@ const updateSettings = async (req, res) => {
     try {
         const updates = req.body;
 
-        // Ensure requireUniquePhone is properly handled if unchecked
-        if (updates.requireUniquePhone === undefined) {
-            updates.requireUniquePhone = 'false';
-        }
         // Handle arrays from hidden checkboxes
         for (const key of Object.keys(updates)) {
             if (Array.isArray(updates[key])) {

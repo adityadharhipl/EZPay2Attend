@@ -44,6 +44,7 @@ const { specs, uiOptions } = require('./config/swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, uiOptions));
 
 // Import Routes
+app.use(require('./middlewares/maintenance'));
 app.use('/', require('./modules/public/public.routes'));
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/admin/settings', require('./modules/settings/settings.routes'));

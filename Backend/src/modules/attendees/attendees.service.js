@@ -21,6 +21,12 @@ exports.createAttendee = async (data) => {
     if (event.status !== 'OPEN') throw new Error("Event is not open for registration");
     if (event._count.attendees >= event.capacity) throw new Error("Event is fully booked");
 
+    // Check Global Registration Setting
+    const globalRegSetting = await db.globalSetting.findUnique({ where: { key: 'globalRegistration' } });
+    if (globalRegSetting && globalRegSetting.value === 'true') {
+        throw new Error("Registration is currently disabled globally by the administrator.");
+    }
+
     // Check if already registered
     const existing = await db.attendee.findUnique({
         where: {

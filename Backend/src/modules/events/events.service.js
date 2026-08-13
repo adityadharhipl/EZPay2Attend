@@ -66,6 +66,13 @@ function validateDates(data, existingEvent = null) {
 exports.createEvent = async (data) => {
     validateDates(data);
     data.slug = await generateUniqueSlug(data.title);
+    
+    // Apply Default Event Capacity if not provided
+    if (data.capacity === undefined || data.capacity === null) {
+        const defaultCapSetting = await prisma.globalSetting.findUnique({ where: { key: 'defaultCapacity' } });
+        data.capacity = defaultCapSetting && defaultCapSetting.value ? parseInt(defaultCapSetting.value, 10) : 100;
+    }
+
     return prisma.event.create({
         data
     });
