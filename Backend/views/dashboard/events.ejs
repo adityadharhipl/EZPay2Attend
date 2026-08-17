@@ -369,6 +369,16 @@
                             style="background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                             <i class="fa-solid fa-external-link-alt"></i> Public Registration
                         </a> -->
+                        <form class="search-container" method="GET" action="/admin/events" style="margin: 0; display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="text" class="form-control" name="search" placeholder="Search events..."
+                                value="<%= typeof search !== 'undefined' ? search : '' %>" style="margin-bottom: 0; min-width: 200px; padding: 0.5rem 1rem;">
+                            <button type="submit" class="btn"
+                                style="width: auto; padding: 0.5rem 1.5rem; background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-primary);">Search</button>
+                            <% if(typeof search !== 'undefined' && search) { %>
+                                <a href="/admin/events" class="btn"
+                                    style="background: transparent; border: 1px solid var(--border-color); width: auto; color: var(--text-secondary);">Clear</a>
+                            <% } %>
+                        </form>
                         <button class="btn"
                             style="background: var(--primary); color: #fff; width: auto; padding: 0.5rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; border: none;"
                             onclick="openModal()">
@@ -480,18 +490,18 @@
                 <% if (pagination && pagination.totalPages> 1) { %>
                     <div class="pagination-container">
                         <% if (pagination.page> 1) { %>
-                            <a href="?page=<%= pagination.page - 1 %>" class="page-link-btn">Previous</a>
+                            <a href="?page=<%= pagination.page - 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" class="page-link-btn">Previous</a>
                             <% } %>
 
                                 <% for(let i=1; i<=pagination.totalPages; i++) { %>
-                                    <a href="?page=<%= i %>"
+                                    <a href="?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>"
                                         class="page-link-btn <%= i === pagination.page ? 'active' : '' %>">
                                         <%= i %>
                                     </a>
                                     <% } %>
 
                                         <% if (pagination.page < pagination.totalPages) { %>
-                                            <a href="?page=<%= pagination.page + 1 %>" class="page-link-btn">Next</a>
+                                            <a href="?page=<%= pagination.page + 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" class="page-link-btn">Next</a>
                                             <% } %>
                     </div>
                     <% } %>

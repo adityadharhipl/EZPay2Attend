@@ -30,7 +30,9 @@ exports.getEvents = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const { data: events, total } = await eventsService.getAllEvents(page, limit);
+        const search = req.query.search || '';
+        
+        const { data: events, total } = await eventsService.getAllEvents(page, limit, search);
         const totalPages = Math.ceil(total / limit);
         const schools = await db.school.findMany();
         res.render('dashboard/events', {
@@ -38,6 +40,7 @@ exports.getEvents = async (req, res) => {
             title: 'Event Management',
             events,
             schools,
+            search,
             pagination: { page, limit, total, totalPages }
         });
     } catch (err) {
@@ -49,14 +52,17 @@ exports.getSchools = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        
         const schoolsService = require('../schools/schools.service');
-        const { data: schools, total } = await schoolsService.getAllSchools(page, limit);
+        const { data: schools, total } = await schoolsService.getAllSchools(page, limit, search);
         const totalPages = Math.ceil(total / limit);
 
         res.render('dashboard/schools', {
             user: req.user,
             title: 'School Management',
             schools,
+            search,
             pagination: { page, limit, total, totalPages }
         });
     } catch (err) {

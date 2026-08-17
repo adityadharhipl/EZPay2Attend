@@ -154,7 +154,7 @@
                         <label class="form-label" style="color: var(--text-secondary); font-weight: 500;">Select
                             Event</label>
                         <select class="form-control" name="eventId">
-                            <option value="">-- All Events --</option>
+                            <option value="">--- All Events ---</option>
                             <% events.forEach(e=> { %>
                                 <option value="<%= e.id %>">
                                     <%= e.title %> (<%= e.school.name %>)
@@ -204,7 +204,7 @@
                     </div>
 
                     <button type="submit" class="generate-btn">
-                        <i class="fa-solid fa-file-excel" style="color: #4ade80;"></i> Generate & Download Report
+                        <i class="fa-solid fa-file-excel" style="color: #25d867;"></i> Generate & Download Report
                     </button>
                 </form>
             </div>
@@ -254,6 +254,7 @@
 
 
         async function handleReportSubmit(e) {
+            console.log(e, "eioiiiiiiiiiiiiiiiiiiiiiii")
             e.preventDefault();
             const form = document.getElementById('reportForm');
             const formData = new FormData(form);

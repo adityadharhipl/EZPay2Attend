@@ -65,7 +65,7 @@
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
-        
+
         .form-check-input {
             width: 18px;
             height: 18px;
@@ -92,7 +92,7 @@
         .save-btn:hover {
             opacity: 0.9;
         }
-        
+
         .alert-success {
             background: rgba(40, 167, 69, 0.15);
             color: #28a745;
@@ -104,7 +104,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .custom-modal {
             display: none;
             position: fixed;
@@ -129,115 +129,139 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
     </style>
-</head>
-<body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <div class="sidebar-logo">EZPay2Attend</div>
-            <nav>
-                <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
-                <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
-                <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
-                <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
-                <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
-                <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
-                <a href="/admin/settings" class="nav-link active"><i class="fa-solid fa-cog"></i> Settings</a>
-            </nav>
-        </aside>
+    </head>
 
-        <main class="main-content">
-            <div class="page-header" style="margin-bottom: 2rem;">
-                <div class="header-left">
-                    <h3 style="margin: 0; color: #fff;">Global Settings</h3>
-                </div>
+    <body>
+        <div class="dashboard-layout">
+            <aside class="sidebar">
+                <div class="sidebar-logo">EZPay2Attend</div>
+                <nav>
+                    <a href="/admin" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                    <a href="/admin/events" class="nav-link"><i class="fa-solid fa-calendar-alt"></i> Events</a>
+                    <a href="/admin/schools" class="nav-link"><i class="fa-solid fa-school"></i> Schools</a>
+                    <a href="/admin/payments" class="nav-link"><i class="fa-solid fa-credit-card"></i> Payments</a>
+                    <a href="/admin/attendees" class="nav-link"><i class="fa-solid fa-users"></i> Attendees</a>
+                    <a href="/admin/refunds" class="nav-link"><i class="fa-solid fa-arrow-rotate-left"></i> Refunds</a>
+                    <a href="/admin/reports" class="nav-link"><i class="fa-solid fa-file-csv"></i> Reports</a>
+                    <a href="/admin/settings" class="nav-link active"><i class="fa-solid fa-cog"></i> Settings</a>
+                </nav>
+            </aside>
 
-                <div class="header-right">
-                    <!-- Profile Dropdown -->
-                    <div class="profile-menu">
-                        <div class="profile-icon" onclick="toggleDropdown()"
-                            style="border: none; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center;">
-                            <div style="text-align: right; margin-right: 0.5rem;">
-                                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
-                                    <%= user.name %>
+            <main class="main-content">
+                <div class="page-header" style="margin-bottom: 2rem;">
+                    <div class="header-left">
+                        <h3 style="margin: 0; color: #fff;">Global Settings</h3>
+                    </div>
+
+                    <div class="header-right">
+                        <!-- Profile Dropdown -->
+                        <div class="profile-menu">
+                            <div class="profile-icon" onclick="toggleDropdown()"
+                                style="border: none; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center;">
+                                <div style="text-align: right; margin-right: 0.5rem;">
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                                        <%= user.name %>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                        <%= user.role || 'Admin' %>
+                                    </div>
                                 </div>
-                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
-                                    <%= user.role || 'Admin' %>
+                                <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+                                <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
+                            </div>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <div class="dropdown-header">
+                                    <strong>
+                                        <%= user.name %>
+                                    </strong>
+                                    <p>
+                                        <%= user.email %>
+                                    </p>
                                 </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit
+                                    Profile</a>
+                                <a href="javascript:void(0)" onclick="openLogoutModal()"
+                                    class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                                    Logout</a>
                             </div>
-                            <i class="fa-solid fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
-                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem;"></i>
-                        </div>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <div class="dropdown-header">
-                                <strong><%= user.name %></strong>
-                                <p><%= user.email %></p>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a href="/admin/profile" class="dropdown-item"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
-                            <a href="javascript:void(0)" onclick="openLogoutModal()" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="settings-container">
-                <script>
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.has('success')) {
-                        document.write(`
+                <div class="settings-container">
+                    <script>
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.has('success')) {
+                            document.write(`
                             <div class="alert-success">
                                 <i class="fa-solid fa-check-circle"></i> Settings saved successfully!
                             </div>
                         `);
-                    }
-                </script>
+                        }
+                    </script>
 
-                <div class="tabs-container" style="flex-wrap: wrap;">
-                    <button type="button" class="tab-btn active" onclick="switchTab('general')"><i class="fa-solid fa-sliders"></i> General</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('email')"><i class="fa-solid fa-envelope"></i> Email & Notifications</button>
-                    <!-- <button type="button" class="tab-btn" onclick="switchTab('payment')"><i class="fa-solid fa-credit-card"></i> Payment & Currency</button> -->
-                    <button type="button" class="tab-btn" onclick="switchTab('application')"><i class="fa-solid fa-server"></i> Application</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('branding')"><i class="fa-solid fa-palette"></i> Branding</button>
-                </div>
-
-                <form method="POST" action="/admin/settings">
-                    <!-- General Tab -->
-                    <div id="tab-general" class="tab-pane active">
-                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">General Options</h4>
-                        <div class="form-check">
-                            <input type="hidden" name="requireUniquePhone" value="false">
-                            <input class="form-check-input" type="checkbox" id="requireUniquePhoneGlobal" name="requireUniquePhone" value="true" <%= config.requireUniquePhone === 'true' ? 'checked' : '' %>>
-                            <label class="form-check-label" for="requireUniquePhoneGlobal">
-                                <strong>Require Unique Contact Number Globally</strong><br>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">If checked, the system will check for duplicate phone numbers across registrations by default.</span>
-                            </label>
-                        </div>
+                    <div class="tabs-container" style="flex-wrap: wrap;">
+                        <button type="button" class="tab-btn active" onclick="switchTab('general')"><i
+                                class="fa-solid fa-sliders"></i> General</button>
+                        <button type="button" class="tab-btn" onclick="switchTab('email')"><i
+                                class="fa-solid fa-envelope"></i> Email & Notifications</button>
+                        <!-- <button type="button" class="tab-btn" onclick="switchTab('payment')"><i class="fa-solid fa-credit-card"></i> Payment & Currency</button> -->
+                        <button type="button" class="tab-btn" onclick="switchTab('application')"><i
+                                class="fa-solid fa-server"></i> Application</button>
+                        <button type="button" class="tab-btn" onclick="switchTab('branding')"><i
+                                class="fa-solid fa-palette"></i> Branding</button>
                     </div>
 
-                    <!-- Email & Notifications Tab -->
-                    <div id="tab-email" class="tab-pane">
-                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Email & Notifications</h4>
-                        <div class="form-check">
-                            <input type="hidden" name="adminNotifications" value="false">
-                            <input class="form-check-input" type="checkbox" id="adminNotifications" name="adminNotifications" value="true" <%= config.adminNotifications === 'true' ? 'checked' : '' %>>
-                            <label class="form-check-label" for="adminNotifications">
-                                <strong>Admin Notifications</strong><br>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">Receive email notifications for new registrations and refund requests.</span>
-                            </label>
+                    <form method="POST" action="/admin/settings">
+                        <!-- General Tab -->
+                        <div id="tab-general" class="tab-pane active">
+                            <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">General Options</h4>
+                            <div class="form-check">
+                                <input type="hidden" name="requireUniquePhone" value="false">
+                                <input class="form-check-input" type="checkbox" id="requireUniquePhoneGlobal"
+                                    name="requireUniquePhone" value="true" <%=config.requireUniquePhone==='true'
+                                    ? 'checked' : '' %>>
+                                <label class="form-check-label" for="requireUniquePhoneGlobal">
+                                    <strong>Require Unique Contact Number Globally</strong><br>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">If checked, the
+                                        system will check for duplicate phone numbers across registrations by
+                                        default.</span>
+                                </label>
+                            </div>
                         </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="reminderDays">Balance Reminder Timings (Days before event)</label>
-                            <input type="number" id="reminderDays" name="reminderDays" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.reminderDays || '7' %>" min="1" max="30">
-                        </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="regEmailSubject">Registration Email Subject</label>
-                            <input type="text" id="regEmailSubject" name="regEmailSubject" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.regEmailSubject || 'Registration Successful - EZPay2Attend' %>">
-                        </div>
-                    </div>
 
-                    <!-- Payment & Currency Tab (Commented Out) -->
-                    <!-- 
+                        <!-- Email & Notifications Tab -->
+                        <div id="tab-email" class="tab-pane">
+                            <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Email & Notifications</h4>
+                            <div class="form-check">
+                                <input type="hidden" name="adminNotifications" value="false">
+                                <input class="form-check-input" type="checkbox" id="adminNotifications"
+                                    name="adminNotifications" value="true" <%=config.adminNotifications==='true'
+                                    ? 'checked' : '' %>>
+                                <label class="form-check-label" for="adminNotifications">
+                                    <strong>Admin Notifications</strong><br>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Receive email
+                                        notifications for new registrations and refund requests.</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="reminderDays">Balance Reminder Timings (Days before
+                                    event)</label>
+                                <input type="number" id="reminderDays" name="reminderDays" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.reminderDays || '7' %>" min="1" max="30">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="regEmailSubject">Registration Email Subject</label>
+                                <input type="text" id="regEmailSubject" name="regEmailSubject" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.regEmailSubject || 'Registration Successful - EZPay2Attend' %>">
+                            </div>
+                        </div>
+
+                        <!-- Payment & Currency Tab (Commented Out) -->
+                        <!-- 
                     <div id="tab-payment" class="tab-pane">
                         <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Payment & Currency</h4>
                         <div style="margin-bottom: 1.5rem;">
@@ -262,96 +286,112 @@
                     </div>
                     -->
 
-                    <!-- Application Tab -->
-                    <div id="tab-application" class="tab-pane">
-                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Application Settings</h4>
-                        <div class="form-check">
-                            <input type="hidden" name="maintenanceMode" value="false">
-                            <input class="form-check-input" type="checkbox" id="maintenanceMode" name="maintenanceMode" value="true" <%= config.maintenanceMode === 'true' ? 'checked' : '' %>>
-                            <label class="form-check-label" for="maintenanceMode">
-                                <strong>Maintenance Mode</strong><br>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">Disable public access and display a maintenance message.</span>
-                            </label>
+                        <!-- Application Tab -->
+                        <div id="tab-application" class="tab-pane">
+                            <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Application Settings</h4>
+                            <div class="form-check">
+                                <input type="hidden" name="maintenanceMode" value="false">
+                                <input class="form-check-input" type="checkbox" id="maintenanceMode"
+                                    name="maintenanceMode" value="true" <%=config.maintenanceMode==='true' ? 'checked'
+                                    : '' %>>
+                                <label class="form-check-label" for="maintenanceMode">
+                                    <strong>Maintenance Mode</strong><br>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Disable public
+                                        access and display a maintenance message.</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="hidden" name="globalRegistration" value="false">
+                                <input class="form-check-input" type="checkbox" id="globalRegistration"
+                                    name="globalRegistration" value="true" <%=config.globalRegistration==='true'
+                                    ? 'checked' : '' %>>
+                                <label class="form-check-label" for="globalRegistration">
+                                    <strong>Disable Global Registration</strong><br>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Temporarily halt new
+                                        registrations for all events.</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="defaultCapacity">Default Event Capacity</label>
+                                <input type="number" id="defaultCapacity" name="defaultCapacity" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.defaultCapacity || '100' %>" min="1">
+                            </div>
                         </div>
-                        <div class="form-check">
-                            <input type="hidden" name="globalRegistration" value="false">
-                            <input class="form-check-input" type="checkbox" id="globalRegistration" name="globalRegistration" value="true" <%= config.globalRegistration === 'true' ? 'checked' : '' %>>
-                            <label class="form-check-label" for="globalRegistration">
-                                <strong>Disable Global Registration</strong><br>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">Temporarily halt new registrations for all events.</span>
-                            </label>
-                        </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="defaultCapacity">Default Event Capacity</label>
-                            <input type="number" id="defaultCapacity" name="defaultCapacity" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.defaultCapacity || '100' %>" min="1">
-                        </div>
-                    </div>
 
-                    <!-- Branding Tab -->
-                    <div id="tab-branding" class="tab-pane">
-                        <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Company Branding</h4>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="companyLogoUrl">Company Logo URL</label>
-                            <input type="url" id="companyLogoUrl" name="companyLogoUrl" class="form-control" placeholder="https://example.com/logo.png" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.companyLogoUrl || '' %>">
+                        <!-- Branding Tab -->
+                        <div id="tab-branding" class="tab-pane">
+                            <h4 style="margin-bottom: 1.5rem; color: var(--text-primary);">Company Branding</h4>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="companyLogoUrl">Company Logo URL</label>
+                                <input type="url" id="companyLogoUrl" name="companyLogoUrl" class="form-control"
+                                    placeholder="https://example.com/logo.png"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.companyLogoUrl || '' %>">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="supportEmail">Support Email</label>
+                                <input type="email" id="supportEmail" name="supportEmail" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.supportEmail || '' %>">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="supportPhone">Support Phone</label>
+                                <input type="text" id="supportPhone" name="supportPhone" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.supportPhone || '' %>">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <label class="form-label" for="termsUrl">Terms & Conditions URL</label>
+                                <input type="url" id="termsUrl" name="termsUrl" class="form-control"
+                                    style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);"
+                                    value="<%= config.termsUrl || '' %>">
+                            </div>
                         </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="supportEmail">Support Email</label>
-                            <input type="email" id="supportEmail" name="supportEmail" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.supportEmail || '' %>">
-                        </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="supportPhone">Support Phone</label>
-                            <input type="text" id="supportPhone" name="supportPhone" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.supportPhone || '' %>">
-                        </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label class="form-label" for="termsUrl">Terms & Conditions URL</label>
-                            <input type="url" id="termsUrl" name="termsUrl" class="form-control" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-body); color: var(--text-primary);" value="<%= config.termsUrl || '' %>">
-                        </div>
-                    </div>
 
+                        <button type="submit" class="save-btn"><i class="fa-solid fa-save"></i> Save Changes</button>
+                    </form>
+                </div>
+            </main>
+        </div>
 
+        <script>
+            function toggleDropdown() {
+                document.getElementById('profileDropdown').classList.toggle('show');
+            }
 
-                    <button type="submit" class="save-btn"><i class="fa-solid fa-save"></i> Save Changes</button>
-                </form>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        function toggleDropdown() {
-            document.getElementById('profileDropdown').classList.toggle('show');
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.closest('.profile-menu')) {
-                const dropdowns = document.getElementsByClassName("profile-dropdown");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
+            window.onclick = function (event) {
+                if (!event.target.closest('.profile-menu')) {
+                    const dropdowns = document.getElementsByClassName("profile-dropdown");
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        const openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
                     }
                 }
             }
-        }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            const pane = document.getElementById('tab-' + tabId);
-            if (pane) pane.classList.add('active');
-            
-            const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
-            if (btn) btn.classList.add('active');
-            
-            localStorage.setItem('activeSettingsTab', tabId);
-        }
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTab = localStorage.getItem('activeSettingsTab');
-            if (savedTab && document.getElementById('tab-' + savedTab)) {
-                switchTab(savedTab);
+                const pane = document.getElementById('tab-' + tabId);
+                if (pane) pane.classList.add('active');
+
+                const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+                if (btn) btn.classList.add('active');
+
+                localStorage.setItem('activeSettingsTab', tabId);
             }
-        });
-    </script>
-</body>
-</html>
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedTab = localStorage.getItem('activeSettingsTab');
+                if (savedTab && document.getElementById('tab-' + savedTab)) {
+                    switchTab(savedTab);
+                }
+            });
+        </script>
+    </body>
+
+    </html>

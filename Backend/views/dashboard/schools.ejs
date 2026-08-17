@@ -293,9 +293,21 @@
             <div class="dashboard-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 style="margin: 0;"><i class="fa-solid fa-school"></i> All Schools</h3>
-                    <button class="btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="openModal()">
-                        <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Create School
-                    </button>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <form class="search-container" method="GET" action="/admin/schools" style="margin: 0; display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="text" class="form-control" name="search" placeholder="Search schools..."
+                                value="<%= typeof search !== 'undefined' ? search : '' %>" style="margin-bottom: 0; min-width: 200px; padding: 0.5rem 1rem;">
+                            <button type="submit" class="btn"
+                                style="width: auto; padding: 0.5rem 1.5rem; background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-primary);">Search</button>
+                            <% if(typeof search !== 'undefined' && search) { %>
+                                <a href="/admin/schools" class="btn"
+                                    style="background: transparent; border: 1px solid var(--border-color); width: auto; color: var(--text-secondary);">Clear</a>
+                            <% } %>
+                        </form>
+                        <button class="btn" style="width: auto; padding: 0.5rem 1.5rem;" onclick="openModal()">
+                            <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Create School
+                        </button>
+                    </div>
                 </div>
 
                 <div class="entries-control"
@@ -377,18 +389,18 @@
                 <% if (pagination && pagination.totalPages> 1) { %>
                     <div class="pagination-container">
                         <% if (pagination.page> 1) { %>
-                            <a href="?page=<%= pagination.page - 1 %>" class="page-link-btn">Previous</a>
+                            <a href="?page=<%= pagination.page - 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" class="page-link-btn">Previous</a>
                             <% } %>
 
                                 <% for(let i=1; i<=pagination.totalPages; i++) { %>
-                                    <a href="?page=<%= i %>"
+                                    <a href="?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>"
                                         class="page-link-btn <%= i === pagination.page ? 'active' : '' %>">
                                         <%= i %>
                                     </a>
                                     <% } %>
 
                                         <% if (pagination.page < pagination.totalPages) { %>
-                                            <a href="?page=<%= pagination.page + 1 %>" class="page-link-btn">Next</a>
+                                            <a href="?page=<%= pagination.page + 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" class="page-link-btn">Next</a>
                                             <% } %>
                     </div>
                     <% } %>
@@ -475,6 +487,7 @@
 
     <script>
         const allSchools = JSON.parse(document.getElementById('schoolsData').textContent);
+        console.log(allSchools, "all schools data");
         let editingSchoolId = null;
 
         function openModal() {
@@ -568,6 +581,7 @@
                     body: JSON.stringify(data)
                 });
                 const result = await res.json();
+                console.log(result, "result");
 
                 if (result.success) {
                     showToast(result.message, 'success');
@@ -610,6 +624,7 @@
             try {
                 const res = await fetch('/api/schools/' + schoolToDelete, { method: 'DELETE' });
                 const result = await res.json();
+                console.log(result, "result")
                 if (result.success) {
                     showToast(result.message, 'success');
                     setTimeout(() => window.location.reload(), 1500);

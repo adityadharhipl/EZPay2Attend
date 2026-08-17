@@ -1,11 +1,24 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.getAllEvents = async (page = 1, limit = 10) => {
+exports.getAllEvents = async (page = 1, limit = 10, search = '') => {
     const skip = (page - 1) * limit;
+    
+    let whereClause = {};
+    if (search) {
+        whereClause = {
+            OR: [
+                { title: { contains: search } },
+                { type: { contains: search } },
+                { status: { contains: search } },
+                { school: { name: { contains: search } } }
+            ]
+        };
+    }
     
     const [data, total] = await Promise.all([
         prisma.event.findMany({
+            where: whereClause,
             skip,
             take: limit,
             include: {
@@ -19,7 +32,7 @@ exports.getAllEvents = async (page = 1, limit = 10) => {
             },
             orderBy: { createdAt: 'desc' }
         }),
-        prisma.event.count()
+        prisma.event.count({ where: whereClause })
     ]);
     
     return { data, total };

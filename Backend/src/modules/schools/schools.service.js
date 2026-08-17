@@ -1,10 +1,24 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.getAllSchools = async (page = 1, limit = 10) => {
+exports.getAllSchools = async (page = 1, limit = 10, search = '') => {
     const skip = (page - 1) * limit;
+    
+    let whereClause = {};
+    if (search) {
+        whereClause = {
+            OR: [
+                { name: { contains: search } },
+                { email: { contains: search } },
+                { contactPerson: { contains: search } },
+                { events: { some: { title: { contains: search } } } }
+            ]
+        };
+    }
+    
     const [data, total] = await Promise.all([
         prisma.school.findMany({
+            where: whereClause,
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
@@ -17,7 +31,7 @@ exports.getAllSchools = async (page = 1, limit = 10) => {
                 }
             }
         }),
-        prisma.school.count()
+        prisma.school.count({ where: whereClause })
     ]);
     
     return { data, total };

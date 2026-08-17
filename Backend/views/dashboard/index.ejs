@@ -394,14 +394,22 @@
                                                             let collected = 0;
                                                             let outstanding = 0;
                                                             if(event.attendees) {
-                                                            event.attendees.forEach(a => {
-                                                            a.payments.forEach(p => {
-                                                            if(p.status === 'SUCCESS' && p.type !== 'REFUND') collected
-                                                            += p.amount;
-                                                            if(p.status === 'PENDING' && p.type !== 'REFUND')
-                                                            outstanding += p.amount;
-                                                            });
-                                                            });
+                                                                event.attendees.forEach(a => {
+                                                                    let totalPaid = 0;
+                                                                    a.payments.forEach(p => {
+                                                                        if(p.status === 'SUCCESS' && p.type !== 'REFUND') {
+                                                                            collected += p.amount;
+                                                                            totalPaid += p.amount;
+                                                                        }
+                                                                    });
+                                                                    
+                                                                    // Calculate actual outstanding balance for this attendee
+                                                                    // Only for attendees that are not refunded or replaced
+                                                                    if (a.status !== 'REFUNDED' && a.status !== 'REPLACED') {
+                                                                        let balanceDue = (event.costPerAttendee || 0) - totalPaid;
+                                                                        if (balanceDue > 0) outstanding += balanceDue;
+                                                                    }
+                                                                });
                                                             }
                                                             let pageNum = Math.floor(index / revLimit) + 1;
                                                             %>
